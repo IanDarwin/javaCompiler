@@ -444,7 +444,7 @@ public class JavaCompiler
 
 		File fTmp = File.createTempFile("icon", ".rc", outDir);
 		FileWriter fw = new FileWriter(fTmp);
-		fw.write("1 ICON \"" + escape(iconFile.toString()) + "\"\n");
+		fw.write("1 ICON \"" + iconFile.toString().replaceAll("\\\\", "/") + "\"\n");
 		fw.flush();
 		fw.close();
 
@@ -455,17 +455,12 @@ public class JavaCompiler
 		return true;
 	}
 
-	private String escape(String in)
-	{
-		return in.replaceAll("\\\\", "\\\\\\\\");
-	}
-
 	private boolean runCmd(String[] cmd, String logLine, boolean logInput) throws Exception
 	{
 		logger.log("- " + logLine, false);
 
-		for(int i=0; i<cmd.length; i++) System.out.print(cmd[i] + " ");
-		System.out.println();
+		//for(int i=0; i<cmd.length; i++) System.out.print(cmd[i] + " ");
+		//System.out.println();
 
 		Process p = Runtime.getRuntime().exec(cmd);
 		if(logInput) log(p.getInputStream());
