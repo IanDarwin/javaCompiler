@@ -1,0 +1,1 @@
+java -Djava.library.path=lib -cp bin;lib/swt.jar;lib/bcel-5.2.jar ch.mtSystems.javaCompiler.view.JavaCompilerGui
