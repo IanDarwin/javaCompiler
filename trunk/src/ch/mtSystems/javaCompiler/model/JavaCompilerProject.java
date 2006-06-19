@@ -243,7 +243,15 @@ public abstract class JavaCompilerProject
 	{
 		saveFile = f;
 		FileWriter fw = new FileWriter(f);
-		fw.write("projectType=" + getClass().getName() + "\n");
+
+		String projectType;
+			 if(this instanceof UnmanagedProject)       projectType = "UnmanagedProject";
+		else if(this instanceof ManagedSwtProject)      projectType = "ManagedSwtProject";
+		else if(this instanceof ManagedJFaceProject)    projectType = "ManagedJFaceProject";
+		else if(this instanceof ManagedAwtSwingProject) projectType = "ManagedAwtSwingProject";
+		else                                            throw new IOException("Unknown projectType!");
+		fw.write("projectType=" + projectType + "\n");
+
 
 		// the source
 		for(Iterator it=lFiles.iterator();       it.hasNext();) fw.write("file=" + it.next() + "\n");
@@ -285,12 +293,12 @@ public abstract class JavaCompilerProject
 
 			if(sa[0].equals("projectType"))
 			{
-					 if(sa[1].equals("null") || project != null)              throw new IOException("Not a JavaCompilerProject file!");
-				else if(sa[1].equals(UnmanagedProject.class.getName()))       project = new UnmanagedProject();
-				else if(sa[1].equals(ManagedSwtProject.class.getName()))      project = new ManagedSwtProject();
-				else if(sa[1].equals(ManagedJFaceProject.class.getName()))    project = new ManagedJFaceProject();
-				else if(sa[1].equals(ManagedAwtSwingProject.class.getName())) project = new ManagedAwtSwingProject();
-				else                                                          throw new IOException("Not a JavaCompilerProject file!");
+					 if(sa[1].equals("null") || project != null) throw new IOException("Not a JavaCompilerProject file!");
+				else if(sa[1].equals("UnmanagedProject"))        project = new UnmanagedProject();
+				else if(sa[1].equals("ManagedSwtProject"))       project = new ManagedSwtProject();
+				else if(sa[1].equals("ManagedJFaceProject"))     project = new ManagedJFaceProject();
+				else if(sa[1].equals("ManagedAwtSwingProject"))  project = new ManagedAwtSwingProject();
+				else                                             throw new IOException("Not a JavaCompilerProject file!");
 
 				project.saveFile = f;
 			} else
