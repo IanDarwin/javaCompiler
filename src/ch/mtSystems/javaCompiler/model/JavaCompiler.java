@@ -11,9 +11,9 @@ import java.util.HashSet;
 import java.util.Iterator;
 
 import ch.mtSystems.javaCompiler.model.exceptions.NoJavaException;
-import ch.mtSystems.javaCompiler.model.projects.AwtSwingProject;
-import ch.mtSystems.javaCompiler.model.projects.JFaceProject;
-import ch.mtSystems.javaCompiler.model.projects.SwtProject;
+import ch.mtSystems.javaCompiler.model.projects.ManagedAwtSwingProject;
+import ch.mtSystems.javaCompiler.model.projects.ManagedJFaceProject;
+import ch.mtSystems.javaCompiler.model.projects.ManagedSwtProject;
 import ch.mtSystems.javaCompiler.model.utilities.ClassUtilities;
 import ch.mtSystems.javaCompiler.model.utilities.FileUtilities;
 import ch.mtSystems.javaCompiler.model.utilities.SettingsMemory;
@@ -110,7 +110,7 @@ public class JavaCompiler
 	 */
 	private void swingWT(String os) throws IOException
 	{
-		if(!(project instanceof AwtSwingProject)) return;
+		if(!(project instanceof ManagedAwtSwingProject)) return;
 		File[] fa = outDir.listFiles();
 
 		// replace "javax.swing" with "swingwtx.swing" and
@@ -135,7 +135,7 @@ public class JavaCompiler
 	 */
 	private void jFace(String os) throws IOException
 	{
-		if(!(project instanceof JFaceProject)) return;
+		if(!(project instanceof ManagedJFaceProject)) return;
 
 		copyJars(new File("ressources/jface-3.1.1"), os);
 	}
@@ -147,7 +147,7 @@ public class JavaCompiler
 	 */
 	private void swt(String os) throws Exception
 	{
-		if(!(project instanceof SwtProject)) return;
+		if(!(project instanceof ManagedSwtProject)) return;
 
 		// copy the needed library to the executable output dir
 		if(os.equals("win"))
@@ -202,7 +202,7 @@ public class JavaCompiler
 
 
 			// compile all .java files
-			ArrayList alCmd = new ArrayList();
+			ArrayList<String> alCmd = new ArrayList<String>();
 			alCmd.add(javac);
 
 			StringBuffer sbJars = new StringBuffer();
@@ -220,7 +220,7 @@ public class JavaCompiler
 
 			alCmd.add(new File(outDir, "*.java").toString());
 
-			if(!runCmd((String[])alCmd.toArray(new String[0]),
+			if(!runCmd(alCmd.toArray(new String[0]),
 					"compiling sources for Java 1.5 preprocessing", true)) return false;
 
 
@@ -307,7 +307,7 @@ public class JavaCompiler
 
 	private boolean finalCompile(String os) throws Exception
 	{
-		ArrayList alCmd = new ArrayList();
+		ArrayList<String> alCmd = new ArrayList<String>();
 
 		String gcj, fileName;
 		if(os.equals("win"))
@@ -331,7 +331,7 @@ public class JavaCompiler
 		File fExecutable = new File(project.getOutputDir(), fileName);
 		alCmd.add(fExecutable.toString());
 
-		if(project instanceof SwtProject) alCmd.add("-Djava.library.path=.");
+		if(project instanceof ManagedSwtProject) alCmd.add("-Djava.library.path=.");
 		if(project.getSuppressDeprecationWarnings()) alCmd.add("-Wno-deprecated");
 
 		if(os.equals("win"))
@@ -354,7 +354,7 @@ public class JavaCompiler
 			if(fa[i].getName().endsWith(".o")) alCmd.add(fa[i].toString());
 		}
 
-		String[] saCmd = (String[])alCmd.toArray(new String[0]);
+		String[] saCmd = alCmd.toArray(new String[0]);
 		if(!runCmd(saCmd, "main compilation step", true)) return false;
 
 		if(!project.getOmitPacking())
@@ -368,7 +368,7 @@ public class JavaCompiler
 
 	private HashSet getAllFiles()
 	{
-		HashSet hsFiles = new HashSet();
+		HashSet<File> hsFiles = new HashSet<File>();
 
 		// files
 		File[] fa = project.getFiles();
@@ -381,7 +381,7 @@ public class JavaCompiler
 		return hsFiles;
 	}
 
-	private void getFiles(File dir, HashSet hs)
+	private void getFiles(File dir, HashSet<File> hs)
 	{
 		File[] fa = dir.listFiles();
 

@@ -1,6 +1,7 @@
 package ch.mtSystems.javaCompiler.view;
 
 import java.io.File;
+import java.io.IOException;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
@@ -14,22 +15,26 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
+import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.widgets.ToolBar;
 import org.eclipse.swt.widgets.ToolItem;
 
 import ch.mtSystems.javaCompiler.control.AppController;
+import ch.mtSystems.javaCompiler.control.IAppControllerListener;
+import ch.mtSystems.javaCompiler.model.JavaCompilerProject;
 import ch.mtSystems.javaCompiler.model.utilities.FileUtilities;
 import ch.mtSystems.javaCompiler.model.utilities.GuiSettingsMemory;
 import ch.mtSystems.javaCompiler.view.dialogs.SettingsDialog;
 import ch.mtSystems.javaCompiler.view.utilities.LayoutUtilities;
 
 
-public class JavaCompilerGui implements SelectionListener
+public class JavaCompilerGui implements SelectionListener, IAppControllerListener
 {
 	public final static String VERSION = "0.7a";
 
@@ -37,11 +42,12 @@ public class JavaCompilerGui implements SelectionListener
 	private SashForm sash;
 	private static Composite contentComposite;
 	private static Button bPrevious, bNext, bHelp;
-	private static Text tHelp;
+	private Text tHelp;
 
 	private ToolItem tiSettings, tiSave;
 	private Menu popupMenu;
 	private MenuItem miSave, miSaveAs;
+	private Label lFileName;
 
 
 	public JavaCompilerGui()
@@ -56,13 +62,17 @@ public class JavaCompilerGui implements SelectionListener
 		cSashNorth.setLayout(LayoutUtilities.createGridLayout(1, 0));
 		cSashNorth.setLayoutData(new GridData(GridData.FILL_BOTH));
 
-		contentComposite = new Composite(cSashNorth, SWT.NONE);
+		contentComposite = new Composite(cSashNorth, SWT.NO_RADIO_GROUP);
 		contentComposite.setLayout(LayoutUtilities.createGridLayout(1, 0));
 		contentComposite.setLayoutData(new GridData(GridData.FILL_BOTH));
 
 		new Label(cSashNorth, SWT.SEPARATOR|SWT.HORIZONTAL).setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 
 		createButtonComposite(cSashNorth);
+
+		AppController.getAppController().addAppControllerListener(this);
+		AppController.getAppController().loadPage(GuiSettingsMemory.getSettingsMemory().skipIntro() ?
+				AppController.PAGE_CREATE_PROJECT : AppController.PAGE_INTRODUCTION);
 	}
 
 
@@ -71,28 +81,6 @@ public class JavaCompilerGui implements SelectionListener
 	public static void setTitle(String title)
 	{
 		shell.setText(title);
-	}
-
-	public static void updateHelpPage(int page)
-	{
-		if(tHelp == null) return;
-
-		if(page == AppController.PAGE_INTRODUCTION)
-		{
-			tHelp.setText(FileUtilities.readTextFile(new File("ressources/helpIntroPage.txt")));
-		} else if(page == AppController.PAGE_CREATE_PROJECT)
-		{
-			tHelp.setText(FileUtilities.readTextFile(new File("ressources/helpCreateProjectPage.txt")));
-		} else if(page == AppController.PAGE_SOURCE)
-		{
-			tHelp.setText(FileUtilities.readTextFile(new File("ressources/helpSourcePage.txt")));
-		} else if(page == AppController.PAGE_SETTINGS)
-		{
-			tHelp.setText(FileUtilities.readTextFile(new File("ressources/helpSettingsPage.txt")));
-		} else if(page == AppController.PAGE_COMPILATION)
-		{
-			tHelp.setText(FileUtilities.readTextFile(new File("ressources/helpCompilePage.txt")));
-		}
 	}
 
 	public static Composite getContentComposite() { return contentComposite; }
@@ -135,7 +123,7 @@ public class JavaCompilerGui implements SelectionListener
 				tHelp.setLayoutData(new GridData(GridData.FILL_BOTH));
 				tHelp.setBackground(Display.getCurrent().getSystemColor(SWT.COLOR_WHITE));
 				bHelp.setText("hide help");
-				updateHelpPage(AppController.getAppController().getCurrentPage());
+				pageLoaded(AppController.getAppController().getCurrentPage());
 
 				shell.setSize(500, 650);
 				sash.setWeights(new int[] { 466, 147 });
@@ -153,6 +141,59 @@ public class JavaCompilerGui implements SelectionListener
 
 
 	public void widgetDefaultSelected(SelectionEvent e) { }
+
+
+	// ---------------IAppControllerListener ---------------
+
+	public void projectChanged(JavaCompilerProject project)
+	{
+		File f = project.getSaveFile();
+
+		tiSave.setEnabled(true);
+
+		lFileName.setText((f == null) ? "not yet saved" : f.getName());
+		lFileName.getParent().layout();
+	}
+
+	public void projectUpdated()
+	{
+		File f = AppController.getAppController().getCurrentProject().getSaveFile();
+		if(f == null || f.getName().charAt(0) == '*') return;
+
+		lFileName.setText("*" + f.getName());
+		lFileName.getParent().layout();
+	}
+
+	public void projectSaved()
+	{
+		File f = AppController.getAppController().getCurrentProject().getSaveFile();
+		if(f == null) return;
+
+		lFileName.setText(f.getName());
+		lFileName.getParent().layout();
+	}
+
+	public void pageLoaded(int page)
+	{
+		if(tHelp == null) return;
+
+		if(page == AppController.PAGE_INTRODUCTION)
+		{
+			tHelp.setText(FileUtilities.readTextFile(new File("ressources/helpIntroPage.txt")));
+		} else if(page == AppController.PAGE_CREATE_PROJECT)
+		{
+			tHelp.setText(FileUtilities.readTextFile(new File("ressources/helpCreateProjectPage.txt")));
+		} else if(page == AppController.PAGE_SOURCE)
+		{
+			tHelp.setText(FileUtilities.readTextFile(new File("ressources/helpSourcePage.txt")));
+		} else if(page == AppController.PAGE_SETTINGS)
+		{
+			tHelp.setText(FileUtilities.readTextFile(new File("ressources/helpSettingsPage.txt")));
+		} else if(page == AppController.PAGE_COMPILATION)
+		{
+			tHelp.setText(FileUtilities.readTextFile(new File("ressources/helpCompilePage.txt")));
+		}
+	}
 
 
 	// --------------- private methods ---------------
@@ -177,6 +218,7 @@ public class JavaCompilerGui implements SelectionListener
 		tiSave.setImage(new Image(Display.getCurrent(), "ressources/save.png"));
 		tiSave.setToolTipText("save");
 		tiSave.addSelectionListener(this);
+		tiSave.setEnabled(false);
 
 		popupMenu = new Menu(toolBar.getShell(), SWT.POP_UP);
 		miSave = new MenuItem(popupMenu, SWT.PUSH);
@@ -186,8 +228,7 @@ public class JavaCompilerGui implements SelectionListener
 		miSaveAs.setText("save as...");
 		miSaveAs.addSelectionListener(this);
 
-		Label lFileName = new Label(buttonComposite, SWT.NONE);
-		lFileName.setText("not yet saved");
+		lFileName = new Label(buttonComposite, SWT.NONE);
 
 		GridData gdSettings = new GridData();
 		gdSettings.grabExcessHorizontalSpace = true;
@@ -206,14 +247,59 @@ public class JavaCompilerGui implements SelectionListener
 
 	private void saveProject()
 	{
-		System.out.println("save");
+		JavaCompilerProject project = AppController.getAppController().getCurrentProject();
+		File f = project.getSaveFile();
+
+		if(f == null) saveProjectAs();
+		else          fileSave(f);
 	}
 
 	private void saveProjectAs()
 	{
-		System.out.println("save as");
+		FileDialog fileDialog = new FileDialog(Display.getCurrent().getActiveShell(), SWT.SAVE);
+		fileDialog.setText("projekt speichern");
+		fileDialog.setFileName("default.jcp");
+		if(AppController.curDir != null) fileDialog.setFilterPath(AppController.curDir.toString());
+		fileDialog.setFilterExtensions(new String[] { "*.jcp" });
+		fileDialog.setFilterNames(new String[] { "JavaCompilerProject (*.jcp)" });
+
+		String ret = fileDialog.open();
+		if(ret == null) return;
+
+		if(!ret.toLowerCase().endsWith(".jcp")) ret += ".jcp";
+		File f = new File(ret);
+		AppController.curDir = f.getParentFile();
+
+		if(f.exists())
+		{
+			String title = "replace file";
+			String msg = "The file " + f.getName() + " exists already. Replace it?";
+
+			MessageBox mb = new MessageBox(Display.getCurrent().getActiveShell(), SWT.ICON_QUESTION|SWT.YES|SWT.NO);
+			mb.setText(title);
+			mb.setMessage(msg);
+			if(mb.open() != SWT.YES) return;
+		}
+
+		fileSave(f);
 	}
 
+	private void fileSave(File f)
+	{
+		try
+		{
+			AppController.getAppController().getCurrentProject().save(f);
+		} catch(IOException ioex)
+		{
+			String title = "error on save";
+			String msg = "An error occured while trying to save:\n" + ioex.getMessage();
+
+			MessageBox mb = new MessageBox(Display.getCurrent().getActiveShell(), SWT.ICON_ERROR|SWT.OK);
+			mb.setText(title);
+			mb.setMessage(msg);
+			mb.open();
+		}
+	}
 
 	// --------------- our mighty main paw ---------------
 
@@ -221,11 +307,8 @@ public class JavaCompilerGui implements SelectionListener
 	{
 		new JavaCompilerGui();
 		shell.setSize(500, 500);
+		shell.setFocus(); // prevent autoselection of radiobuttons
 		shell.open();
-
-		// swt bug; needs to be called after open. if earlier, radiobuttons are magically selected
-		AppController.getAppController().loadPage(GuiSettingsMemory.getSettingsMemory().skipIntro() ?
-				AppController.PAGE_CREATE_PROJECT : AppController.PAGE_INTRODUCTION);
 
 		while(!shell.isDisposed())
 		{

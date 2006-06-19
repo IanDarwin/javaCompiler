@@ -1,6 +1,7 @@
 package ch.mtSystems.javaCompiler.control;
 
 import java.io.File;
+import java.util.Vector;
 
 import org.eclipse.swt.widgets.Control;
 
@@ -26,6 +27,7 @@ public class AppController
 	public static File curDir; // used for file and directory dialogs
 	private int curPage = -1;
 	private JavaCompilerProject currentProject;
+	private Vector<IAppControllerListener> vListeners = new Vector<IAppControllerListener>();
 
 
 	// --------------- public methods ---------------
@@ -38,6 +40,11 @@ public class AppController
 	public void setCurrentProject(JavaCompilerProject project)
 	{
 		currentProject = project;
+
+		for(int i=0; i<vListeners.size(); i++)
+		{
+			vListeners.get(i).projectChanged(project);
+		}
 	}
 
 	public void loadPage(int page)
@@ -53,13 +60,36 @@ public class AppController
 
 		curPage = page;
 		JavaCompilerGui.getContentComposite().layout();
-		JavaCompilerGui.updateHelpPage(page);
+
+		for(int i=0; i<vListeners.size(); i++)
+		{
+			vListeners.get(i).pageLoaded(page);
+		}
 	}
 
 	public int getCurrentPage()
 	{
 		return curPage;
 	}
+
+	public void fireProjectChanged()
+	{
+		for(int i=0; i<vListeners.size(); i++)
+		{
+			vListeners.get(i).projectUpdated();
+		}
+	}
+
+	public void fireProjectSaved()
+	{
+		for(int i=0; i<vListeners.size(); i++)
+		{
+			vListeners.get(i).projectSaved();
+		}
+	}
+
+	public void addAppControllerListener(IAppControllerListener acl) { vListeners.add(acl); }
+	public void removeAppControllerListener(IAppControllerListener acl) { vListeners.remove(acl); }
 
 
 	// --------------- singleton pattern ---------------
