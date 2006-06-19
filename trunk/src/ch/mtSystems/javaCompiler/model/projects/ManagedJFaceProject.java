@@ -1,7 +1,7 @@
 package ch.mtSystems.javaCompiler.model.projects;
 
 
-public class JFaceProject extends SwtProject
+public class ManagedJFaceProject extends ManagedSwtProject
 {
 
 }

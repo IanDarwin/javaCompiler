@@ -263,7 +263,7 @@ public class SettingsPage implements ModifyListener, SelectionListener, DisposeL
 			if(ret == null) return;
 
 			File f = new File(ret);
-			AppController.curDir = f;
+			AppController.curDir = f.getParentFile();
 
 			tIcon.setText(f.toString());
 			AppController.getAppController().getCurrentProject().setIconFile(f);

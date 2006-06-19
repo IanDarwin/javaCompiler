@@ -275,16 +275,16 @@ public class MainClassDialog extends Dialog implements SelectionListener
 
 	private void addFilesFromDir(File dir)
 	{
-		ArrayList al = new ArrayList();
+		ArrayList<String> al = new ArrayList<String>();
 		getFiles(dir, al);
 
-		String[] sa = (String[])al.toArray(new String[0]);
+		String[] sa = al.toArray(new String[0]);
 		Arrays.sort(sa);
 
 		lClasses.setItems(sa);
 	}
 
-	private void getFiles(File dir, ArrayList al)
+	private void getFiles(File dir, ArrayList<String> al)
 	{
 		File[] fa = dir.listFiles();
 		for(int i=0; i<fa.length; i++)
@@ -307,7 +307,7 @@ public class MainClassDialog extends Dialog implements SelectionListener
 			JarFile jarFile = new JarFile(jar);
 			Enumeration e = jarFile.entries();
 
-			ArrayList al = new ArrayList();
+			ArrayList<String> al = new ArrayList<String>();
 
 			while(e.hasMoreElements())
 			{
@@ -318,7 +318,7 @@ public class MainClassDialog extends Dialog implements SelectionListener
 				if(name.endsWith(".class")) al.add(name);
 			}
 
-			String[] sa = (String[])al.toArray(new String[0]);
+			String[] sa = al.toArray(new String[0]);
 			Arrays.sort(sa);
 
 			lClasses.setItems(sa);
