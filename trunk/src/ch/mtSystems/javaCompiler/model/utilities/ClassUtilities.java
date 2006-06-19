@@ -31,10 +31,11 @@ import org.apache.bcel.classfile.ConstantPool;
 import org.apache.bcel.classfile.ConstantUtf8;
 import org.apache.bcel.classfile.JavaClass;
 
+import com.thoughtworks.qdox.JavaDocBuilder;
+
 
 public class ClassUtilities
 {
-	private static final Pattern pPackage = Pattern.compile("package\\s+([^;]+);");
 	private static final Pattern pAwt = Pattern.compile("java\\s*.\\s*awt\\s*.");
 	private static final Pattern pSwing = Pattern.compile("javax\\s*.\\s*swing\\s*.");
 
@@ -49,7 +50,7 @@ public class ClassUtilities
 		String simpleClassName = fileName.substring(0, fileName.lastIndexOf('.'));
 		String thePackage = getPackage(f);
 
-		return (thePackage.length() == 0) ? simpleClassName : thePackage + "." + simpleClassName;
+		return (thePackage == null) ? simpleClassName : thePackage + "." + simpleClassName;
 	}
 
 	/**
@@ -79,15 +80,16 @@ public class ClassUtilities
 
 	private static String getPackageFromSource(File f) throws IOException
 	{
-		String s = new String(FileUtilities.readFile(f));
-		Matcher m = pPackage.matcher(s);
-		return (m.find()) ? m.group(1).replaceAll("\\s", "") : "";
+		JavaDocBuilder javaDocBuilder = new JavaDocBuilder();
+		String thePackage = javaDocBuilder.addSource(f).getPackage();
+		return (thePackage == null || thePackage.length() == 0) ? null : thePackage;
 	}
 
 	private static String getPackageFromClass(File f) throws IOException
 	{
 		JavaClass javaClass = (new ClassParser(f.toString())).parse();
-		return javaClass.getPackageName();
+		String thePackage = javaClass.getPackageName();
+		return (thePackage == null || thePackage.length() == 0) ? null : thePackage;
 	}
 
 	private static void convertSourceToSwingWT(File f) throws IOException

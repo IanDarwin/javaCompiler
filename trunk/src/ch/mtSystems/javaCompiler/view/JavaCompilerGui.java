@@ -326,6 +326,7 @@ public class JavaCompilerGui implements SelectionListener, IAppControllerListene
 	{
 		new JavaCompilerGui();
 		shell.setSize(500, 500);
+		shell.setImage(new Image(shell.getDisplay(), "ressources/icon.ico"));
 		shell.setFocus(); // prevent autoselection of radiobuttons
 		shell.open();
 

@@ -221,7 +221,7 @@ public class SettingsPage implements ModifyListener, SelectionListener, DisposeL
 			AppController.getAppController().getCurrentProject().setMainClass(mainClassRessource, mainClass);
 			updateNextButton();
 
-			if(tOutputDir.getText().equals(""))
+			if(tOutputDir.getText().equals("") && outputDirSuggestion != null)
 			{
 				tOutputDir.setText(outputDirSuggestion.toString());
 				AppController.getAppController().getCurrentProject().setOutputDir(outputDirSuggestion);
