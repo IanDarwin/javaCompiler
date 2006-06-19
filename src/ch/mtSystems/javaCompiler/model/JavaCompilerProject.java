@@ -27,8 +27,9 @@ import java.io.IOException;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.Set;
+import java.util.Vector;
 
-import ch.mtSystems.javaCompiler.control.AppController;
+import ch.mtSystems.javaCompiler.control.IAppControllerListener;
 import ch.mtSystems.javaCompiler.model.projects.ManagedAwtSwingProject;
 import ch.mtSystems.javaCompiler.model.projects.ManagedJFaceProject;
 import ch.mtSystems.javaCompiler.model.projects.ManagedSwtProject;
@@ -37,6 +38,8 @@ import ch.mtSystems.javaCompiler.model.projects.UnmanagedProject;
 
 public abstract class JavaCompilerProject
 {
+	private Vector<IAppControllerListener> vListeners = new Vector<IAppControllerListener>();
+
 	// the source
 	private Set<File> lFiles = new LinkedHashSet<File>();
 	private Set<File> lDirectories = new LinkedHashSet<File>();
@@ -71,14 +74,14 @@ public abstract class JavaCompilerProject
 	public void addFile(File f)
 	{
 		lFiles.add(f);
-		AppController.getAppController().fireProjectChanged();
+		for(int i=0; i<vListeners.size(); i++) vListeners.get(i).projectUpdated();
 	}
 
 	public void removeFile(File f)
 	{
 		lFiles.remove(f);
 		checkIfMainClassDeleted(f);
-		AppController.getAppController().fireProjectChanged();
+		for(int i=0; i<vListeners.size(); i++) vListeners.get(i).projectUpdated();
 	}
 
 	public File[] getFiles()
@@ -91,14 +94,14 @@ public abstract class JavaCompilerProject
 	public void addDirectory(File dir)
 	{
 		lDirectories.add(dir);
-		AppController.getAppController().fireProjectChanged();
+		for(int i=0; i<vListeners.size(); i++) vListeners.get(i).projectUpdated();
 	}
 
 	public void removeDirectory(File dir)
 	{
 		lDirectories.remove(dir);
 		checkIfMainClassDeleted(dir);
-		AppController.getAppController().fireProjectChanged();
+		for(int i=0; i<vListeners.size(); i++) vListeners.get(i).projectUpdated();
 	}
 
 	public File[] getDirectories()
@@ -111,14 +114,14 @@ public abstract class JavaCompilerProject
 	public void addJar(File f)
 	{
 		lJars.add(f);
-		AppController.getAppController().fireProjectChanged();
+		for(int i=0; i<vListeners.size(); i++) vListeners.get(i).projectUpdated();
 	}
 
 	public void removeJar(File f)
 	{
 		lJars.remove(f);
 		checkIfMainClassDeleted(f);
-		AppController.getAppController().fireProjectChanged();
+		for(int i=0; i<vListeners.size(); i++) vListeners.get(i).projectUpdated();
 	}
 
 	public File[] getJars()
@@ -138,7 +141,7 @@ public abstract class JavaCompilerProject
 	{
 		this.mainClassRessource = mainClassRessource;
 		this.mainClass = mainClass;
-		AppController.getAppController().fireProjectChanged();
+		for(int i=0; i<vListeners.size(); i++) vListeners.get(i).projectUpdated();
 	}
 
 	public String getMainClass()
@@ -151,7 +154,7 @@ public abstract class JavaCompilerProject
 	public void setJava5Preprocessing(boolean preprocess)
 	{
 		java5Preprocessing = preprocess;
-		AppController.getAppController().fireProjectChanged();
+		for(int i=0; i<vListeners.size(); i++) vListeners.get(i).projectUpdated();
 	}
 
 	public boolean getSuppressDeprecationWarnings() { return suppressDeprecationWarnings; }
@@ -159,7 +162,7 @@ public abstract class JavaCompilerProject
 	public void setSuppressDeprecationWarnings(boolean suppress)
 	{
 		suppressDeprecationWarnings = suppress;
-		AppController.getAppController().fireProjectChanged();
+		for(int i=0; i<vListeners.size(); i++) vListeners.get(i).projectUpdated();
 	}
 
 	public File getOutputDir() { return outputDir; }
@@ -167,7 +170,7 @@ public abstract class JavaCompilerProject
 	public void setOutputDir(File outputDir)
 	{
 		this.outputDir = outputDir;
-		AppController.getAppController().fireProjectChanged();
+		for(int i=0; i<vListeners.size(); i++) vListeners.get(i).projectUpdated();
 	}
 
 	public String getOutputName() { return outputName; }
@@ -175,7 +178,7 @@ public abstract class JavaCompilerProject
 	public void setOutputName(String outputName)
 	{
 		this.outputName = outputName;
-		AppController.getAppController().fireProjectChanged();
+		for(int i=0; i<vListeners.size(); i++) vListeners.get(i).projectUpdated();
 	}
 
 	public boolean getOmitWindows() { return omitWindows; }
@@ -183,7 +186,7 @@ public abstract class JavaCompilerProject
 	public void setOmitWindows(boolean omit)
 	{
 		omitWindows = omit;
-		AppController.getAppController().fireProjectChanged();
+		for(int i=0; i<vListeners.size(); i++) vListeners.get(i).projectUpdated();
 	}
 
 	public boolean getOmitLinux() { return omitLinux; }
@@ -191,7 +194,7 @@ public abstract class JavaCompilerProject
 	public void setOmitLinux(boolean omit)
 	{
 		omitLinux = omit;
-		AppController.getAppController().fireProjectChanged();
+		for(int i=0; i<vListeners.size(); i++) vListeners.get(i).projectUpdated();
 	}
 
 	public boolean getOmitStripping() { return omitStripping; }
@@ -199,7 +202,7 @@ public abstract class JavaCompilerProject
 	public void setOmitStripping(boolean omit)
 	{
 		omitStripping = omit;
-		AppController.getAppController().fireProjectChanged();
+		for(int i=0; i<vListeners.size(); i++) vListeners.get(i).projectUpdated();
 	}
 
 	public boolean getOmitPacking() { return omitPacking; }
@@ -207,7 +210,7 @@ public abstract class JavaCompilerProject
 	public void setOmitPacking(boolean omit)
 	{
 		omitPacking = omit;
-		AppController.getAppController().fireProjectChanged();
+		for(int i=0; i<vListeners.size(); i++) vListeners.get(i).projectUpdated();
 	}
 
 	public boolean getUseIcon() { return useIcon; }
@@ -215,7 +218,7 @@ public abstract class JavaCompilerProject
 	public void setUseIcon(boolean useIt)
 	{
 		useIcon = useIt;
-		AppController.getAppController().fireProjectChanged();
+		for(int i=0; i<vListeners.size(); i++) vListeners.get(i).projectUpdated();
 	}
 
 	public File getIconFile() { return iconFile; }
@@ -223,7 +226,7 @@ public abstract class JavaCompilerProject
 	public void setIconFile(File iconFile)
 	{
 		this.iconFile = iconFile;
-		AppController.getAppController().fireProjectChanged();
+		for(int i=0; i<vListeners.size(); i++) vListeners.get(i).projectUpdated();
 	}
 
 	public boolean getHideConsole() { return hideConsole; }
@@ -231,7 +234,7 @@ public abstract class JavaCompilerProject
 	public void setHideConsole(boolean hide)
 	{
 		hideConsole = hide;
-		AppController.getAppController().fireProjectChanged();
+		for(int i=0; i<vListeners.size(); i++) vListeners.get(i).projectUpdated();
 	}
 
 	public File getSaveFile() { return saveFile; }
@@ -266,7 +269,7 @@ public abstract class JavaCompilerProject
 		fw.flush();
 		fw.close();
 
-		AppController.getAppController().fireProjectSaved();
+		for(int i=0; i<vListeners.size(); i++) vListeners.get(i).projectSaved();
 	}
 
 	public static JavaCompilerProject open(File f) throws IOException
@@ -325,6 +328,9 @@ public abstract class JavaCompilerProject
 		if(project == null) throw new IOException("Not a JavaCompilerProject file!");
 		return project;
 	}
+
+	public void addProjectListener(IAppControllerListener acl) { vListeners.add(acl); }
+	public void removeProjectListener(IAppControllerListener acl) { vListeners.remove(acl); }
 
 
 	// --------------- private methods ---------------
