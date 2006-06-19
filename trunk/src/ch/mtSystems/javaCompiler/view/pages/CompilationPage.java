@@ -85,14 +85,14 @@ public class CompilationPage implements SelectionListener, DisposeListener, ICom
 
 	// --------------- CompilationProgressLogger ---------------
 
-	public void log(final String s, final boolean intent)
+	public void log(final String s, final boolean indent)
 	{
 		tLog.getDisplay().syncExec(new Runnable()
 				{
 					public void run()
 					{
 						if(tLog.getCharCount() > 0) tLog.append("\n");
-						if(intent) tLog.append("\t");
+						if(indent) tLog.append("\t");
 						tLog.append(s);
 					}
 				});
