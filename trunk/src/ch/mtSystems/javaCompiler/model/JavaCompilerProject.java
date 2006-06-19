@@ -245,10 +245,10 @@ public abstract class JavaCompilerProject
 		FileWriter fw = new FileWriter(f);
 
 		String projectType;
-			 if(this instanceof UnmanagedProject)       projectType = "UnmanagedProject";
-		else if(this instanceof ManagedSwtProject)      projectType = "ManagedSwtProject";
+			 if(this instanceof ManagedAwtSwingProject) projectType = "ManagedAwtSwingProject";
 		else if(this instanceof ManagedJFaceProject)    projectType = "ManagedJFaceProject";
-		else if(this instanceof ManagedAwtSwingProject) projectType = "ManagedAwtSwingProject";
+		else if(this instanceof ManagedSwtProject)      projectType = "ManagedSwtProject";
+		else if(this instanceof UnmanagedProject)       projectType = "UnmanagedProject";
 		else                                            throw new IOException("Unknown projectType!");
 		fw.write("projectType=" + projectType + "\n");
 
