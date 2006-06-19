@@ -113,9 +113,9 @@ public class JavaCompiler
 			File file = it.next();
 			if(file.getName().endsWith(".java") || file.getName().endsWith(".class"))
 			{
-				String filePackage = ClassUtilities.getPackage(file);
+				String thePackage = ClassUtilities.getPackage(file);
 
-				File dir = new File(outDir, filePackage.replaceAll("\\.", "/"));
+				File dir = (thePackage == null) ? outDir : new File(outDir, thePackage.replaceAll("\\.", "/"));
 				if(!dir.exists() && !dir.mkdirs()) throw new IOException("Create tmp dir failed:\n" + dir);
 
 				FileUtilities.copyFile(file, new File(dir, file.getName()));
