@@ -33,7 +33,7 @@ import ch.mtSystems.javaCompiler.view.pages.CreateProjectPage;
 import ch.mtSystems.javaCompiler.view.pages.IntroductionPage;
 
 
-public class AppController
+public class AppController implements IAppControllerListener
 {
 	public static int uniqueID = 0;
 	public static final int PAGE_INTRODUCTION = ++uniqueID;
@@ -49,6 +49,22 @@ public class AppController
 	private Vector<IAppControllerListener> vListeners = new Vector<IAppControllerListener>();
 
 
+	// --------------- IAppControllerListener
+
+	public void projectChanged(JavaCompilerProject project) { }
+	public void pageLoaded(int page) { }
+
+	public void projectUpdated()
+	{
+		for(int i=0; i<vListeners.size(); i++) vListeners.get(i).projectUpdated();
+	}
+
+	public void projectSaved()
+	{
+		for(int i=0; i<vListeners.size(); i++) vListeners.get(i).projectSaved();
+	}
+
+
 	// --------------- public methods ---------------
 
 	public JavaCompilerProject getCurrentProject()
@@ -58,7 +74,9 @@ public class AppController
 
 	public void setCurrentProject(JavaCompilerProject project)
 	{
+		if(currentProject != null) currentProject.removeProjectListener(this);
 		currentProject = project;
+		currentProject.addProjectListener(this);
 
 		for(int i=0; i<vListeners.size(); i++)
 		{
@@ -91,21 +109,6 @@ public class AppController
 		return curPage;
 	}
 
-	public void fireProjectChanged()
-	{
-		for(int i=0; i<vListeners.size(); i++)
-		{
-			vListeners.get(i).projectUpdated();
-		}
-	}
-
-	public void fireProjectSaved()
-	{
-		for(int i=0; i<vListeners.size(); i++)
-		{
-			vListeners.get(i).projectSaved();
-		}
-	}
 
 	public void addAppControllerListener(IAppControllerListener acl) { vListeners.add(acl); }
 	public void removeAppControllerListener(IAppControllerListener acl) { vListeners.remove(acl); }
