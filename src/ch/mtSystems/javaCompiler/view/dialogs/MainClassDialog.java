@@ -394,7 +394,7 @@ public class MainClassDialog extends Dialog implements SelectionListener
 		if(bFromFiles.getSelection())
 		{
 			int endIndex = sSelected.indexOf(choosenClass.replaceAll("\\.", "\\\\"));
-			outputDirSuggestion = new File(sSelected.substring(0, endIndex));
+			if(endIndex > -1) outputDirSuggestion = new File(sSelected.substring(0, endIndex));
 		} else if(bFromDirectory.getSelection())
 		{
 			outputDirSuggestion = choosenClassRessource;
