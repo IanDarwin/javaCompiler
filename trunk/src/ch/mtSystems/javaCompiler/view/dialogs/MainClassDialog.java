@@ -366,13 +366,7 @@ public class MainClassDialog extends Dialog implements SelectionListener
 
 		if(bFromFiles.getSelection() || bFromDirectory.getSelection())
 		{
-			if(sSelected.endsWith(".class"))
-			{
-				choosenClass = ClassUtilities.getFromClass(new File(sSelected));
-			} else if(sSelected.endsWith(".java"))
-			{
-				choosenClass = ClassUtilities.getFromSource(new File(sSelected));
-			}
+			choosenClass = ClassUtilities.getClassName(new File(sSelected));
 		} else if(bFromJar.getSelection())
 		{
 			choosenClass = sSelected.substring(0, sSelected.lastIndexOf('.')).replaceAll("/", ".");

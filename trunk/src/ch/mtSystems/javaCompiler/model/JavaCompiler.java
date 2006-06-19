@@ -6,9 +6,9 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedList;
 
 import ch.mtSystems.javaCompiler.model.exceptions.NoJavaException;
 import ch.mtSystems.javaCompiler.model.projects.ManagedAwtSwingProject;
@@ -88,11 +88,19 @@ public class JavaCompiler
 	 */
 	private void copyDataToOutDir() throws IOException
 	{
-		HashSet hsFiles = getAllFiles();
-		for(Iterator it=hsFiles.iterator(); it.hasNext();)
+		HashSet<File> hsFiles = getAllFiles();
+		for(Iterator<File> it=hsFiles.iterator(); it.hasNext();)
 		{
-			File f = (File)it.next();
-			FileUtilities.copyFile(f, new File(outDir, f.getName()));
+			File file = it.next();
+			if(file.getName().endsWith(".java") || file.getName().endsWith(".class"))
+			{
+				String filePackage = ClassUtilities.getPackage(file);
+
+				File dir = new File(outDir, filePackage.replaceAll("\\.", "/"));
+				if(!dir.exists() && !dir.mkdirs()) throw new IOException("Create tmp dir failed:\n" + dir);
+
+				FileUtilities.copyFile(file, new File(dir, file.getName()));
+			}
 		}
 
 		File[] fa = project.getJars();
@@ -111,18 +119,16 @@ public class JavaCompiler
 	private void swingWT(String os) throws IOException
 	{
 		if(!(project instanceof ManagedAwtSwingProject)) return;
-		File[] fa = outDir.listFiles();
 
-		// replace "javax.swing" with "swingwtx.swing" and
-		// "java.awt" with "swingwt.awt" in all .java files
-		for(int i=0; i<fa.length; i++)
+		HashSet<File> hsFiles = new HashSet<File>();
+		getFiles(outDir, hsFiles);
+
+		for(Iterator<File> it=hsFiles.iterator(); it.hasNext();)
 		{
-			if(fa[i].getName().endsWith(".java"))
+			File f = it.next();
+			if(f.getName().endsWith(".java") || f.getName().endsWith(".class"))
 			{
-				ClassUtilities.sourceAwtSwingToSwingWT(fa[i]);
-			} else if(fa[i].getName().endsWith(".class"))
-			{
-				ClassUtilities.classAwtSwingToSwingWT(fa[i]);
+				ClassUtilities.convertToSwingWT(it.next());
 			}
 		}
 
@@ -179,14 +185,15 @@ public class JavaCompiler
 	private boolean retroWeaver(String os) throws Exception
 	{
 		if(!project.getJava5Preprocessing()) return true;
-		File[] fa = outDir.listFiles();
 
+		HashSet<File> hsFiles = new HashSet<File>();
+		getFiles(outDir, hsFiles);
 
 		// check if there are source (.java) files. they would have to be compiled
 		boolean hasSourceFiles = false;
-		for(int i=0; i<fa.length; i++)
+		for(Iterator<File> it=hsFiles.iterator(); it.hasNext();)
 		{
-			if(fa[i].getName().endsWith(".java"))
+			if(it.next().getName().endsWith(".java"))
 			{
 				hasSourceFiles = true;
 				break;
@@ -202,34 +209,39 @@ public class JavaCompiler
 
 
 			// compile all .java files
-			ArrayList<String> alCmd = new ArrayList<String>();
+			LinkedList<String> alCmd = new LinkedList<String>();
 			alCmd.add(javac);
 
 			StringBuffer sbJars = new StringBuffer();
-			for(int i=0; i<fa.length; i++)
+			for(Iterator<File> it=hsFiles.iterator(); it.hasNext();)
 			{
-				if(!fa[i].getName().endsWith(".jar")) continue;
-				if(sbJars.length() > 0) sbJars.append(';');
-				sbJars.append(fa[i].toString());
+				File f = it.next();
+				if(f.getName().endsWith(".jar"))
+				{
+					if(sbJars.length() > 0) sbJars.append(';');
+					sbJars.append(f);
+				} else if(f.getName().endsWith(".java"))
+				{
+					alCmd.add(f.toString());
+				}
 			}
 			if(sbJars.length() > 0)
 			{
-				alCmd.add("-cp");
-				alCmd.add(sbJars.toString());
+				alCmd.add(1, "-cp");
+				alCmd.add(2, sbJars.toString());
 			}
-
-			alCmd.add(new File(outDir, "*.java").toString());
 
 			if(!runCmd(alCmd.toArray(new String[0]),
 					"compiling sources for Java 1.5 preprocessing", true)) return false;
 
 
 			// delete all .java files
-			for(int i=0; i<fa.length; i++)
+			for(Iterator<File> it=hsFiles.iterator(); it.hasNext();)
 			{
-				if(fa[i].getName().endsWith(".java") && !fa[i].delete())
+				File f = it.next();
+				if(f.getName().endsWith(".java") && !f.delete())
 				{
-					logger.log("deleting " + fa[i].getName() + "failed!", true);
+					logger.log("deleting " + f.getName() + "failed!", true);
 					return false;
 				}
 			}
@@ -246,23 +258,24 @@ public class JavaCompiler
 
 
 		// weave all .jar files in outDir and delete the original jars
-		for(int i=0; i<fa.length; i++)
+		for(Iterator<File> it=hsFiles.iterator(); it.hasNext();)
 		{
-			if(!fa[i].getName().endsWith(".jar")) continue;
+			File f = it.next();
+			if(!f.getName().endsWith(".jar")) continue;
 
 			// ignore any jar that have already an object file (swt, jface, swingwt, ...)
-			if((new File(fa[i].getParent(), fa[i].getName()+".o")).exists()) continue;
+			if((new File(f.getParent(), f.getName()+".o")).exists()) continue;
 
 			cmd = new String[]
 				{
 					"ressources\\retroweaver-1.2.3\\weaver.exe",
-					"-jar", fa[i].toString(), fa[i].toString() + "-weaved.jar"
+					"-jar", f.toString(), f.toString() + "-weaved.jar"
 				};
-			if(!runCmd(cmd, "Java 1.5 preprocessing: " + fa[i].getName(), true)) return false;
+			if(!runCmd(cmd, "Java 1.5 preprocessing: " + f.getName(), true)) return false;
 
-			if(!fa[i].delete())
+			if(!f.delete())
 			{
-				logger.log("deleting " + fa[i].getName() + "failed!", true);
+				logger.log("deleting " + f.getName() + "failed!", true);
 				return false;
 			}
 		}
@@ -282,8 +295,7 @@ public class JavaCompiler
 		{
 			if(!fa[i].getName().endsWith(".jar")) continue;
 
-			// some preprocessing steps might already copy an object for a jar
-			// currently this is done for swt and retroweaver
+			// ignore any jar that have already an object file (swt, jface, swingwt, ...)
 			File fOut = new File(fa[i].getParentFile(), fa[i].getName()+".o");
 			if(fOut.exists()) continue;
 
@@ -307,7 +319,7 @@ public class JavaCompiler
 
 	private boolean finalCompile(String os) throws Exception
 	{
-		ArrayList<String> alCmd = new ArrayList<String>();
+		LinkedList<String> alCmd = new LinkedList<String>();
 
 		String gcj, fileName;
 		if(os.equals("win"))
@@ -340,18 +352,22 @@ public class JavaCompiler
 			if(!addIcon()) return false;
 		}
 
-		File[] fa = outDir.listFiles();
-		for(int i=0; i<fa.length; i++) // all jars
+		HashSet<File> hsFiles = new HashSet<File>();
+		getFiles(outDir, hsFiles);
+
+		int jarInsertIndex = alCmd.size();
+		for(Iterator<File> it=hsFiles.iterator(); it.hasNext();)
 		{
-			if(fa[i].getName().endsWith(".jar")) alCmd.add("-I" + fa[i].toString());
-		}
-		for(int i=0; i<fa.length; i++) // all .java and .class
-		{
-			if(fa[i].getName().endsWith(".java") || fa[i].getName().endsWith(".class")) alCmd.add(fa[i].toString());
-		}
-		for(int i=0; i<fa.length; i++) // all jar objects
-		{
-			if(fa[i].getName().endsWith(".o")) alCmd.add(fa[i].toString());
+			File f = it.next();
+
+			if(f.getName().endsWith(".jar"))
+			{
+				alCmd.add(jarInsertIndex, "-I");
+				alCmd.add(jarInsertIndex+1, f.toString());
+			} else if(f.getName().endsWith(".java") || f.getName().endsWith(".class") || f.getName().endsWith(".o"))
+			{
+				alCmd.add(f.toString());
+			}
 		}
 
 		String[] saCmd = alCmd.toArray(new String[0]);
@@ -366,7 +382,7 @@ public class JavaCompiler
 		return true;
 	}
 
-	private HashSet getAllFiles()
+	private HashSet<File> getAllFiles()
 	{
 		HashSet<File> hsFiles = new HashSet<File>();
 
@@ -381,20 +397,17 @@ public class JavaCompiler
 		return hsFiles;
 	}
 
+	/**
+	 * Adds all files from the directory and all subdirectories to the provided HashSet.
+	 */
 	private void getFiles(File dir, HashSet<File> hs)
 	{
 		File[] fa = dir.listFiles();
 
 		for(int i=0; i<fa.length; i++)
 		{
-			if(fa[i].isDirectory())
-			{
-				getFiles(fa[i], hs);
-			} else
-			{
-				String name = fa[i].getName();
-				if(name.endsWith(".java") || name.endsWith(".class")) hs.add(fa[i]);
-			}
+			if(fa[i].isDirectory()) getFiles(fa[i], hs);
+			else                    hs.add(fa[i]);
 		}
 	}
 
@@ -451,8 +464,8 @@ public class JavaCompiler
 	{
 		logger.log("- " + logLine, false);
 
-		//for(int i=0; i<cmd.length; i++) System.out.print(cmd[i] + " ");
-		//System.out.println();
+		for(int i=0; i<cmd.length; i++) System.out.print(cmd[i] + " ");
+		System.out.println();
 
 		Process p = Runtime.getRuntime().exec(cmd);
 		if(logInput) log(p.getInputStream());

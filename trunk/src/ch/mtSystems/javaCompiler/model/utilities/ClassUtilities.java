@@ -1,10 +1,8 @@
 package ch.mtSystems.javaCompiler.model.utilities;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -17,36 +15,63 @@ import org.apache.bcel.classfile.JavaClass;
 
 public class ClassUtilities
 {
-	public static final String CMD_CLASS = "ressources\\gcc-4.1.1-win\\bin\\jcf-dump.exe";
-
 	private static final Pattern pPackage = Pattern.compile("package\\s+([^;]+);");
 	private static final Pattern pAwt = Pattern.compile("java\\s*.\\s*awt\\s*.");
 	private static final Pattern pSwing = Pattern.compile("javax\\s*.\\s*swing\\s*.");
 
 
 	/**
-	 * For Text.java in package ch.foo.bar, returns:<br>
+	 * For Test.java or Test.class in package ch.foo.bar, returns:<br>
 	 * ch.foo.bar.Text
 	 */
-	public static String getFromSource(File f) throws IOException
+	public static String getClassName(File f) throws IOException
 	{
-		byte[] ba = FileUtilities.readFile(f);
-		String s = new String(ba);
-
 		String fileName = f.getName();
 		String simpleClassName = fileName.substring(0, fileName.lastIndexOf('.'));
+		String thePackage = getPackage(f);
 
-		Matcher m = pPackage.matcher(s);
-		if(m.find())
-		{
-			return m.group(1).replaceAll("\\s", "") + "." + simpleClassName;
-		} else
-		{
-			return simpleClassName;
-		}
+		return (thePackage.length() == 0) ? simpleClassName : thePackage + "." + simpleClassName;
 	}
 
-	public static void sourceAwtSwingToSwingWT(File f) throws IOException
+	/**
+	 * For Test.java or Test.class in package ch.foo.bar, returns:<br>
+	 * ch.foo.bar
+	 */
+	public static String getPackage(File f) throws IOException
+	{
+		if(f.getName().endsWith(".java")) return getPackageFromSource(f);
+		if(f.getName().endsWith(".class")) return getPackageFromClass(f);
+
+		throw new IOException("Filetype " + f.getName() + " not supported!");
+	}
+
+	/**
+	 * replaces:<br>
+	 * - "javax.swing" with "swingwtx.swing"
+	 * - "java.awt" with "swingwt.awt"
+	 */
+	public static void convertToSwingWT(File f) throws IOException
+	{
+		if(f.getName().endsWith(".java")) { convertSourceToSwingWT(f); return; }
+		if(f.getName().endsWith(".class")) { convertClassToSwingWT(f); return; }
+
+		throw new IOException("Filetype " + f.getName() + " not supported!");
+	}
+
+	private static String getPackageFromSource(File f) throws IOException
+	{
+		String s = new String(FileUtilities.readFile(f));
+		Matcher m = pPackage.matcher(s);
+		return (m.find()) ? m.group(1).replaceAll("\\s", "") : "";
+	}
+
+	private static String getPackageFromClass(File f) throws IOException
+	{
+		JavaClass javaClass = (new ClassParser(f.toString())).parse();
+		return javaClass.getPackageName();
+	}
+
+	private static void convertSourceToSwingWT(File f) throws IOException
 	{
 		byte[] ba = FileUtilities.readFile(f);
 		String s = new String(ba);
@@ -63,27 +88,7 @@ public class ClassUtilities
 		fw.close();
 	}
 
-	/**
-	 * For Text.class in package ch.foo.bar, returns:<br>
-	 * ch.foo.bar.Text
-	 */
-	public static String getFromClass(File fClass) throws Exception
-	{
-		Process p = Runtime.getRuntime().exec(new String[] { CMD_CLASS, "--javap", fClass.toString() });
-		BufferedReader br = new BufferedReader(new InputStreamReader(p.getInputStream()));
-
-		String line;
-		while((line = br.readLine()) != null)
-		{
-			if(line.startsWith("This class: ")) break;
-		}
-		br.close();
-		if(p.waitFor() != 0) throw new Exception("Reading the class-name failed!");
-
-		return line.substring(12, line.indexOf(", super:"));
-	}
-
-	public static void classAwtSwingToSwingWT(File f) throws IOException
+	private static void convertClassToSwingWT(File f) throws IOException
 	{
 		JavaClass javaClass = (new ClassParser(f.toString())).parse();
 		ConstantPool constantPool = javaClass.getConstantPool();
