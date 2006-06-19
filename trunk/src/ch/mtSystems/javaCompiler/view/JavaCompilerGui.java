@@ -55,7 +55,7 @@ import ch.mtSystems.javaCompiler.view.utilities.LayoutUtilities;
 
 public class JavaCompilerGui implements SelectionListener, IAppControllerListener
 {
-	public final static String VERSION = "0.7a";
+	public final static String VERSION = "0.7";
 
 	private static Shell shell;
 	private SashForm sash;
