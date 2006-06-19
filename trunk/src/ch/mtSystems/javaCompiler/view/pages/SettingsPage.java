@@ -40,6 +40,8 @@ public class SettingsPage implements ModifyListener, SelectionListener, DisposeL
 	private Button bOpenOutputDir, bOmitWindows, bOmitLinux, bOmitMac, bOmitStripping, bOmitPacking;
 	private Button bIcon, bOpenIcon, bHideConsole;
 
+	private boolean ignoreEvents = false;
+
 
 	public SettingsPage()
 	{
@@ -166,6 +168,8 @@ public class SettingsPage implements ModifyListener, SelectionListener, DisposeL
 
 	public void modifyText(ModifyEvent e)
 	{
+		if(ignoreEvents) return;
+
 		String text = ((Text)e.getSource()).getText();
 		if(text.trim().length() == 0) text = null;
 
@@ -291,6 +295,7 @@ public class SettingsPage implements ModifyListener, SelectionListener, DisposeL
 	private void updateData()
 	{
 		JavaCompilerProject project = AppController.getAppController().getCurrentProject();
+		ignoreEvents = true;
 
 		if(project.getMainClass() != null) tMainClass.setText(project.getMainClass());
 		if(project.getOutputDir() != null) tOutputDir.setText(project.getOutputDir().toString());
@@ -309,6 +314,8 @@ public class SettingsPage implements ModifyListener, SelectionListener, DisposeL
 
 		updateWindowsSettings();
 		updateNextButton();
+
+		ignoreEvents = false;
 	}
 
 	private void updateWindowsSettings()
