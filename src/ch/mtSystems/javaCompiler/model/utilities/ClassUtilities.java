@@ -31,11 +31,13 @@ import org.apache.bcel.classfile.ConstantPool;
 import org.apache.bcel.classfile.ConstantUtf8;
 import org.apache.bcel.classfile.JavaClass;
 
-import com.thoughtworks.qdox.JavaDocBuilder;
-
 
 public class ClassUtilities
 {
+	private static final Pattern pComment1 = Pattern.compile("/\\*.*?\\*/", Pattern.DOTALL);
+	private static final Pattern pComment2 = Pattern.compile("//.*");
+	private static final Pattern pPackage = Pattern.compile("package\\s+([^;]+);");
+
 	private static final Pattern pAwt = Pattern.compile("java\\s*.\\s*awt\\s*.");
 	private static final Pattern pSwing = Pattern.compile("javax\\s*.\\s*swing\\s*.");
 
@@ -80,9 +82,23 @@ public class ClassUtilities
 
 	private static String getPackageFromSource(File f) throws IOException
 	{
-		JavaDocBuilder javaDocBuilder = new JavaDocBuilder();
-		String thePackage = javaDocBuilder.addSource(f).getPackage();
-		return (thePackage == null || thePackage.length() == 0) ? null : thePackage;
+		String s = new String(FileUtilities.readFile(f));
+
+		// cut all /* ... */ comments
+		Matcher mComments1 = pComment1.matcher(s);
+		s = mComments1.replaceAll("");
+
+		// cut all // ... comments
+		Matcher mComments2 = pComment2.matcher(s);
+		s = mComments2.replaceAll("");
+
+		// cut after the first opening brace
+		int braceIndex = s.indexOf('{');
+		if(braceIndex > -1) s = s.substring(0, braceIndex);
+
+		// now, finally, check for the package
+		Matcher m = pPackage.matcher(s);
+		return (m.find()) ? m.group(1).replaceAll("\\s", "") : null;
 	}
 
 	private static String getPackageFromClass(File f) throws IOException
