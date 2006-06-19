@@ -147,7 +147,7 @@ public class JavaCompiler
 			File f = it.next();
 			if(f.getName().endsWith(".java") || f.getName().endsWith(".class"))
 			{
-				ClassUtilities.convertToSwingWT(it.next());
+				ClassUtilities.convertToSwingWT(f);
 			}
 		}
 
