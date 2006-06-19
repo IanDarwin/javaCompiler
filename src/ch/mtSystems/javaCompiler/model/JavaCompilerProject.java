@@ -240,7 +240,7 @@ public abstract class JavaCompilerProject
 	{
 		saveFile = f;
 		FileWriter fw = new FileWriter(f);
-		fw.write("projectType=" + getClass().getSimpleName() + "\n");
+		fw.write("projectType=" + getClass().getName() + "\n");
 
 		// the source
 		for(Iterator it=lFiles.iterator();       it.hasNext();) fw.write("file=" + it.next() + "\n");
@@ -282,12 +282,12 @@ public abstract class JavaCompilerProject
 
 			if(sa[0].equals("projectType"))
 			{
-					 if(sa[1].equals("null") || project != null)                    throw new IOException("Not a JavaCompilerProject file!");
-				else if(sa[1].equals(UnmanagedProject.class.getSimpleName()))       project = new UnmanagedProject();
-				else if(sa[1].equals(ManagedSwtProject.class.getSimpleName()))      project = new ManagedSwtProject();
-				else if(sa[1].equals(ManagedJFaceProject.class.getSimpleName()))    project = new ManagedJFaceProject();
-				else if(sa[1].equals(ManagedAwtSwingProject.class.getSimpleName())) project = new ManagedAwtSwingProject();
-				else                                                                throw new IOException("Not a JavaCompilerProject file!");
+					 if(sa[1].equals("null") || project != null)              throw new IOException("Not a JavaCompilerProject file!");
+				else if(sa[1].equals(UnmanagedProject.class.getName()))       project = new UnmanagedProject();
+				else if(sa[1].equals(ManagedSwtProject.class.getName()))      project = new ManagedSwtProject();
+				else if(sa[1].equals(ManagedJFaceProject.class.getName()))    project = new ManagedJFaceProject();
+				else if(sa[1].equals(ManagedAwtSwingProject.class.getName())) project = new ManagedAwtSwingProject();
+				else                                                          throw new IOException("Not a JavaCompilerProject file!");
 
 				project.saveFile = f;
 			} else
