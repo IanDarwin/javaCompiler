@@ -323,14 +323,20 @@ public class JavaCompiler
 			else if(os.equals("lin")) gcj = CMD_LIN_GCJ;
 			else                      throw new Exception("unknown plattform: " + os);
 
-			String[] cmd =
-					{
-						gcj,
-						"-c", fa[i].toString(),
-						"-o", fOut.toString()
-					};
+			LinkedList<String> alCmd = new LinkedList<String>();
+			alCmd.add(gcj);
+			alCmd.add("-c"); alCmd.add(fa[i].toString());
+			alCmd.add("-o"); alCmd.add(fOut.toString());
+			for(int j=0; j<fa.length; j++)
+			{
+				if(fa[j].getName().endsWith(".jar") && !fa[j].equals(fa[i]))
+				{
+					alCmd.add("-I"); alCmd.add(fa[j].toString());
+				}
+			}
 
-			if(!runCmd(cmd, "preprocessing " + fa[i].getName(), true)) return false;
+			String[] saCmd = alCmd.toArray(new String[0]);
+			if(!runCmd(saCmd, "preprocessing " + fa[i].getName(), true)) return false;
 		}
 
 		return true;
@@ -478,8 +484,8 @@ public class JavaCompiler
 	{
 		logger.log("- " + logLine, false);
 
-		//for(int i=0; i<cmd.length; i++) System.out.print(cmd[i] + " ");
-		//System.out.println();
+		for(int i=0; i<cmd.length; i++) System.out.print(cmd[i] + " ");
+		System.out.println();
 
 		Process p = Runtime.getRuntime().exec(cmd);
 		if(logInput) log(p.getInputStream());
