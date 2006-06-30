@@ -40,9 +40,9 @@ import ch.mtSystems.javaCompiler.model.utilities.SettingsMemory;
 
 public class JavaCompiler
 {
-	private static final String CMD_WIN_GCJ = "ressources\\gcc-4.1.1-win\\bin\\gcj.exe";
-	private static final String CMD_LIN_GCJ = "ressources\\gcc-4.1.1-lin\\bin\\gcj.exe";
-	private static final String CMD_WINDRES = "ressources\\gcc-4.1.1-win\\bin\\windres.exe";
+	private static final String CMD_WIN_GCJ = "ressources\\gcc-4.2.0-win\\bin\\gcj.exe";
+	private static final String CMD_LIN_GCJ = "ressources\\gcc-4.2.0-lin\\bin\\gcj.exe";
+	private static final String CMD_WINDRES = "ressources\\gcc-4.2.0-win\\bin\\windres.exe";
 	private static final String CMD_UPX = "ressources\\upx200w\\upx.exe";
 
 
@@ -379,21 +379,34 @@ public class JavaCompiler
 
 		HashSet<File> hsFiles = new HashSet<File>();
 		getFiles(outDir, hsFiles);
+		boolean hasObjects = false;
 
-		int jarInsertIndex = alCmd.size();
+		File fInputList = File.createTempFile("SourceList", ".list", outDir);
+		FileWriter fw = new FileWriter(fInputList);
+
 		for(Iterator<File> it=hsFiles.iterator(); it.hasNext();)
 		{
 			File f = it.next();
 
 			if(f.getName().endsWith(".jar"))
 			{
-				alCmd.add(jarInsertIndex, "-I");
-				alCmd.add(jarInsertIndex+1, f.toString());
-			} else if(f.getName().endsWith(".java") || f.getName().endsWith(".class") || f.getName().endsWith(".o"))
-			{
+				alCmd.add("-I");
 				alCmd.add(f.toString());
+			} else if(f.getName().endsWith(".java") || f.getName().endsWith(".class"))
+			{
+				fw.write(f.toString().replaceAll("\\\\", "/"));
+				fw.write(" ");
+			} else if(f.getName().endsWith(".o"))
+			{
+				hasObjects = true;
 			}
 		}
+
+		fw.flush();
+		fw.close();
+
+		if(hasObjects) alCmd.add((new File(outDir, "*.o")).toString());
+		alCmd.add("@" + fInputList.toString());
 
 		String[] saCmd = alCmd.toArray(new String[0]);
 		if(!runCmd(saCmd, "main compilation step", true)) return false;
@@ -484,8 +497,8 @@ public class JavaCompiler
 	{
 		logger.log("- " + logLine, false);
 
-		for(int i=0; i<cmd.length; i++) System.out.print(cmd[i] + " ");
-		System.out.println();
+		//for(int i=0; i<cmd.length; i++) System.out.print(cmd[i] + " ");
+		//System.out.println();
 
 		Process p = Runtime.getRuntime().exec(cmd);
 		if(logInput) log(p.getInputStream());
