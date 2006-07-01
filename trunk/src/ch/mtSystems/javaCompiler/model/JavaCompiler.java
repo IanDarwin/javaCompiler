@@ -33,6 +33,7 @@ import ch.mtSystems.javaCompiler.model.exceptions.NoJavaException;
 import ch.mtSystems.javaCompiler.model.projects.ManagedAwtSwingProject;
 import ch.mtSystems.javaCompiler.model.projects.ManagedJFaceProject;
 import ch.mtSystems.javaCompiler.model.projects.ManagedSwtProject;
+import ch.mtSystems.javaCompiler.model.utilities.Beep;
 import ch.mtSystems.javaCompiler.model.utilities.ClassUtilities;
 import ch.mtSystems.javaCompiler.model.utilities.FileUtilities;
 import ch.mtSystems.javaCompiler.model.utilities.SettingsMemory;
@@ -59,9 +60,18 @@ public class JavaCompiler
 
 	public boolean compile() throws Exception
 	{
-		if(!project.getOmitWindows() && !compile("win")) return false;
-		if(!project.getOmitLinux() && !compile("lin")) return false;
-		return true;
+		try
+		{
+			if(!project.getOmitWindows() && !compile("win")) { beep(true); return false; }
+			if(!project.getOmitLinux() && !compile("lin")) { beep(true); return false; }
+
+			beep(false);
+			return true;
+		} catch(Exception ex)
+		{
+			beep(true);
+			throw ex;
+		}
 	}
 
 	private boolean compile(String os) throws Exception
@@ -325,6 +335,7 @@ public class JavaCompiler
 
 			LinkedList<String> alCmd = new LinkedList<String>();
 			alCmd.add(gcj);
+			if(project.getUseJni()) alCmd.add("-fjni");
 			alCmd.add("-c"); alCmd.add(fa[i].toString());
 			alCmd.add("-o"); alCmd.add(fOut.toString());
 			for(int j=0; j<fa.length; j++)
@@ -362,6 +373,7 @@ public class JavaCompiler
 
 		alCmd.add(gcj);
 		if(!project.getOmitStripping()) alCmd.add("-s");
+		if(project.getUseJni()) alCmd.add("-fjni");
 		alCmd.add("--main=" + project.getMainClass());
 		alCmd.add("-o");
 
@@ -369,7 +381,7 @@ public class JavaCompiler
 		alCmd.add(fExecutable.toString());
 
 		if(project instanceof ManagedSwtProject) alCmd.add("-Djava.library.path=.");
-		if(project.getSuppressDeprecationWarnings()) alCmd.add("-Wno-deprecated");
+		if(project.getBeepWhenDone()) alCmd.add("-Wno-deprecated");
 
 		if(os.equals("win"))
 		{
@@ -526,5 +538,16 @@ public class JavaCompiler
 				}
 			}
 		}.start();
+	}
+
+	/**
+	 * Beeps twice if error ist true, once otherwise.
+	 */
+	private void beep(boolean error) throws Exception
+	{
+		if(!project.getBeepWhenDone()) return;
+
+		if(error) Beep.beep(900, 300);
+		else      Beep.beep(400, 200);
 	}
 }

@@ -40,12 +40,13 @@ import ch.mtSystems.javaCompiler.model.JavaCompiler;
 import ch.mtSystems.javaCompiler.model.exceptions.NoJavaException;
 import ch.mtSystems.javaCompiler.view.JavaCompilerGui;
 import ch.mtSystems.javaCompiler.view.dialogs.SettingsDialog;
+import ch.mtSystems.javaCompiler.view.utilities.LayoutUtilities;
 
 
 public class CompilationPage implements SelectionListener, DisposeListener, ICompilationProgressLogger
 {
 	private Text tLog;
-	private Button bCompile;
+	private Button bBeep, bCompile;
 
 
 	public CompilationPage()
@@ -60,8 +61,17 @@ public class CompilationPage implements SelectionListener, DisposeListener, ICom
 		tLog.setBackground(Display.getCurrent().getSystemColor(SWT.COLOR_WHITE));
 		tLog.setLayoutData(new GridData(GridData.FILL_BOTH));
 
-		bCompile = new Button(JavaCompilerGui.getContentComposite(), SWT.NONE);
-		bCompile.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_END));
+		Composite tmpComposite = new Composite(JavaCompilerGui.getContentComposite(), SWT.NONE);
+		tmpComposite.setLayout(LayoutUtilities.createGridLayout(2, 0));
+		tmpComposite.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+
+		bBeep = new Button(tmpComposite, SWT.CHECK);
+		bBeep.setSelection(AppController.getAppController().getCurrentProject().getBeepWhenDone());
+		bBeep.setText("beep when done");
+		bBeep.addSelectionListener(this);
+
+		bCompile = new Button(tmpComposite, SWT.NONE);
+		bCompile.setLayoutData(new GridData(GridData.FILL_HORIZONTAL|GridData.HORIZONTAL_ALIGN_END));
 		bCompile.setText("compile");
 		bCompile.addSelectionListener(this);
 
@@ -84,6 +94,10 @@ public class CompilationPage implements SelectionListener, DisposeListener, ICom
 		if(e.getSource() == JavaCompilerGui.getPreviousButton())
 		{
 			AppController.getAppController().loadPage(AppController.PAGE_SETTINGS);
+		} else if(e.getSource() == bBeep)
+		{
+			AppController.getAppController().getCurrentProject().
+					setBeepWhenDone(bBeep.getSelection());
 		} else if(e.getSource() == bCompile)
 		{
 			compile(Display.getCurrent());
