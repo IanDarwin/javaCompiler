@@ -55,7 +55,7 @@ public class SettingsPage implements ModifyListener, SelectionListener, DisposeL
 
 
 	private Text tMainClass, tOutputDir, tOutputName, tIcon;
-	private Button bOpenMainClass, bJava5Preprocessing, bSuppressDeprecationWarnings;
+	private Button bOpenMainClass, bJava5Preprocessing, bUseJni;
 	private Button bOpenOutputDir, bOmitWindows, bOmitLinux, bOmitMac, bOmitStripping, bOmitPacking;
 	private Button bIcon, bOpenIcon, bHideConsole;
 
@@ -95,9 +95,9 @@ public class SettingsPage implements ModifyListener, SelectionListener, DisposeL
 		bJava5Preprocessing.setText("enable Java 1.5 preprocessing");
 		bJava5Preprocessing.addSelectionListener(this);
 
-		bSuppressDeprecationWarnings = new Button(groupJavaSettings, SWT.CHECK);
-		bSuppressDeprecationWarnings.setText("suppress deprecation warnings");
-		bSuppressDeprecationWarnings.addSelectionListener(this);
+		bUseJni = new Button(groupJavaSettings, SWT.CHECK);
+		bUseJni.setText("use JNI (CNI is default)");
+		bUseJni.addSelectionListener(this);
 
 
 		// common output settings
@@ -248,10 +248,10 @@ public class SettingsPage implements ModifyListener, SelectionListener, DisposeL
 		{
 			AppController.getAppController().getCurrentProject().
 					setJava5Preprocessing(bJava5Preprocessing.getSelection());
-		} else if(e.getSource() == bSuppressDeprecationWarnings)
+		} else if(e.getSource() == bUseJni)
 		{
 			AppController.getAppController().getCurrentProject().
-					setSuppressDeprecationWarnings(bSuppressDeprecationWarnings.getSelection());
+					setUseJni(bUseJni.getSelection());
 		} else if(e.getSource() == bOmitWindows)
 		{
 			AppController.getAppController().getCurrentProject().
@@ -322,7 +322,7 @@ public class SettingsPage implements ModifyListener, SelectionListener, DisposeL
 		if(project.getIconFile() != null) tIcon.setText(project.getIconFile().toString());
 
 		bJava5Preprocessing.setSelection(project.getJava5Preprocessing());
-		bSuppressDeprecationWarnings.setSelection(project.getSuppressDeprecationWarnings());
+		bUseJni.setSelection(project.getUseJni());
 
 		bOmitWindows.setSelection(project.getOmitWindows());
 		bOmitLinux.setSelection(project.getOmitLinux());

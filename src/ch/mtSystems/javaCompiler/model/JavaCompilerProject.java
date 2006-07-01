@@ -53,7 +53,7 @@ public abstract class JavaCompilerProject
 	private String outputName;
 
 	private boolean java5Preprocessing = false;
-	private boolean suppressDeprecationWarnings = false;
+	private boolean useJni = false;
 
 	private boolean omitWindows = false;
 	private boolean omitLinux = false;
@@ -64,6 +64,9 @@ public abstract class JavaCompilerProject
 	private File iconFile;
 	private boolean useIcon = false;
 	private boolean hideConsole = false;
+
+	// compile settings
+	private boolean beepWhenDone = false;
 
 	// save file
 	private File saveFile = null;
@@ -130,7 +133,6 @@ public abstract class JavaCompilerProject
 	}
 
 
-
 	/**
 	 * Sets the main class for the project.
 	 * 
@@ -157,11 +159,11 @@ public abstract class JavaCompilerProject
 		for(int i=0; i<vListeners.size(); i++) vListeners.get(i).projectUpdated();
 	}
 
-	public boolean getSuppressDeprecationWarnings() { return suppressDeprecationWarnings; }
+	public boolean getUseJni() { return useJni; }
 
-	public void setSuppressDeprecationWarnings(boolean suppress)
+	public void setUseJni(boolean useJni)
 	{
-		suppressDeprecationWarnings = suppress;
+		this.useJni = useJni;
 		for(int i=0; i<vListeners.size(); i++) vListeners.get(i).projectUpdated();
 	}
 
@@ -237,21 +239,21 @@ public abstract class JavaCompilerProject
 		for(int i=0; i<vListeners.size(); i++) vListeners.get(i).projectUpdated();
 	}
 
+	public boolean getBeepWhenDone() { return beepWhenDone; }
+
+	public void setBeepWhenDone(boolean beep)
+	{
+		beepWhenDone = beep;
+		for(int i=0; i<vListeners.size(); i++) vListeners.get(i).projectUpdated();
+	}
+
 	public File getSaveFile() { return saveFile; }
 
 	public void save(File f) throws IOException
 	{
 		saveFile = f;
 		FileWriter fw = new FileWriter(f);
-
-		String projectType;
-			 if(this instanceof ManagedAwtSwingProject) projectType = "ManagedAwtSwingProject";
-		else if(this instanceof ManagedJFaceProject)    projectType = "ManagedJFaceProject";
-		else if(this instanceof ManagedSwtProject)      projectType = "ManagedSwtProject";
-		else if(this instanceof UnmanagedProject)       projectType = "UnmanagedProject";
-		else                                            throw new IOException("Unknown projectType!");
-		fw.write("projectType=" + projectType + "\n");
-
+		fw.write("projectType=" + getClass().getSimpleName() + "\n");
 
 		// the source
 		for(Iterator it=lFiles.iterator();       it.hasNext();) fw.write("file=" + it.next() + "\n");
@@ -263,7 +265,7 @@ public abstract class JavaCompilerProject
 		fw.write("outputDir=" + outputDir + "\n");
 		fw.write("outputName=" + outputName + "\n");
 		fw.write("java5Preprocessing=" + java5Preprocessing + "\n");
-		fw.write("suppressDeprecationWarnings=" + suppressDeprecationWarnings + "\n");
+		fw.write("useJni=" + useJni + "\n");
 		fw.write("omitWindows=" + omitWindows + "\n");
 		fw.write("omitLinux=" + omitLinux + "\n");
 		fw.write("omitStripping=" + omitStripping + "\n");
@@ -272,7 +274,10 @@ public abstract class JavaCompilerProject
 		// windows settings
 		fw.write("iconFile=" + iconFile + "\n");
 		fw.write("useIcon=" + useIcon + "\n");
-		fw.write("hideConsole=" + hideConsole);
+		fw.write("hideConsole=" + hideConsole + "\n");
+
+		// compile settings
+		fw.write("beepWhenDone=" + beepWhenDone);
 
 		fw.flush();
 		fw.close();
@@ -317,17 +322,18 @@ public abstract class JavaCompilerProject
 					project.mainClass = saSub[0];
 					project.mainClassRessource = new File(saSub[1]);
 				}
-				else if(sa[0].equals("outputDir"))                   project.outputDir = new File(sa[1]);
-				else if(sa[0].equals("outputName"))                  project.outputName = sa[1];
-				else if(sa[0].equals("java5Preprocessing"))          project.java5Preprocessing = sa[1].equals("true");
-				else if(sa[0].equals("suppressDeprecationWarnings")) project.suppressDeprecationWarnings = sa[1].equals("true");
-				else if(sa[0].equals("omitWindows"))                 project.omitWindows = sa[1].equals("true");
-				else if(sa[0].equals("omitLinux"))                   project.omitLinux = sa[1].equals("true");
-				else if(sa[0].equals("omitStripping"))               project.omitStripping = sa[1].equals("true");
-				else if(sa[0].equals("omitPacking"))                 project.omitPacking = sa[1].equals("true");
-				else if(sa[0].equals("iconFile"))                    project.iconFile = new File(sa[1]);
-				else if(sa[0].equals("useIcon"))                     project.useIcon = sa[1].equals("true");
-				else if(sa[0].equals("hideConsole"))                 project.hideConsole = sa[1].equals("true");
+				else if(sa[0].equals("outputDir"))          project.outputDir = new File(sa[1]);
+				else if(sa[0].equals("outputName"))         project.outputName = sa[1];
+				else if(sa[0].equals("java5Preprocessing")) project.java5Preprocessing = sa[1].equals("true");
+				else if(sa[0].equals("useJni"))             project.useJni = sa[1].equals("true");
+				else if(sa[0].equals("omitWindows"))        project.omitWindows = sa[1].equals("true");
+				else if(sa[0].equals("omitLinux"))          project.omitLinux = sa[1].equals("true");
+				else if(sa[0].equals("omitStripping"))      project.omitStripping = sa[1].equals("true");
+				else if(sa[0].equals("omitPacking"))        project.omitPacking = sa[1].equals("true");
+				else if(sa[0].equals("iconFile"))           project.iconFile = new File(sa[1]);
+				else if(sa[0].equals("useIcon"))            project.useIcon = sa[1].equals("true");
+				else if(sa[0].equals("hideConsole"))        project.hideConsole = sa[1].equals("true");
+				else if(sa[0].equals("beepWhenDone"))       project.beepWhenDone = sa[1].equals("true");
 			}
 		}
 
