@@ -309,6 +309,8 @@ public class JavaCompiler
 					return false;
 				}
 			}
+
+			hasClassFiles = true; // might have been false until now
 		}
 
 		if(hasClassFiles) // weave all .class files
