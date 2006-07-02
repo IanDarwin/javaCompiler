@@ -42,6 +42,7 @@ import org.eclipse.swt.widgets.List;
 
 import ch.mtSystems.javaCompiler.control.AppController;
 import ch.mtSystems.javaCompiler.model.JavaCompilerProject;
+import ch.mtSystems.javaCompiler.model.projects.ObjectProject;
 import ch.mtSystems.javaCompiler.view.JavaCompilerGui;
 
 
@@ -52,7 +53,7 @@ public class SourcePage implements SelectionListener, DisposeListener
 
 
 	private List lFiles, lDirs, lJars;
-	private Button bAddFiles, bRemoveFiles, bAddDirectories, bRemoveDirectories, bAddJars, bRemoveJars;
+	private Button bAddFiles, bRemoveFiles, bAddDirs, bRemoveDirs, bAddJars, bRemoveJars;
 
 
 	public SourcePage()
@@ -91,15 +92,15 @@ public class SourcePage implements SelectionListener, DisposeListener
 		lDirs = new List(groupDirs, SWT.BORDER|SWT.V_SCROLL|SWT.H_SCROLL|SWT.MULTI);
 		lDirs.setLayoutData(new GridData(GridData.FILL_BOTH));
 
-		bAddDirectories = new Button(groupDirs, SWT.NONE);
-		bAddDirectories.setLayoutData(new GridData(GridData.VERTICAL_ALIGN_END));
-		bAddDirectories.setImage(imgOpen);
-		bAddDirectories.addSelectionListener(this);
+		bAddDirs = new Button(groupDirs, SWT.NONE);
+		bAddDirs.setLayoutData(new GridData(GridData.VERTICAL_ALIGN_END));
+		bAddDirs.setImage(imgOpen);
+		bAddDirs.addSelectionListener(this);
 
-		bRemoveDirectories = new Button(groupDirs, SWT.NONE);
-		bRemoveDirectories.setLayoutData(new GridData(GridData.VERTICAL_ALIGN_END));
-		bRemoveDirectories.setImage(imgRemove);
-		bRemoveDirectories.addSelectionListener(this);
+		bRemoveDirs = new Button(groupDirs, SWT.NONE);
+		bRemoveDirs.setLayoutData(new GridData(GridData.VERTICAL_ALIGN_END));
+		bRemoveDirs.setImage(imgRemove);
+		bRemoveDirs.addSelectionListener(this);
 
 		// jars
 		Group groupJars = new Group(JavaCompilerGui.getContentComposite(), SWT.SHADOW_ETCHED_IN);
@@ -130,6 +131,19 @@ public class SourcePage implements SelectionListener, DisposeListener
 		JavaCompilerGui.setTitle("JavaCompiler v" + JavaCompilerGui.VERSION + " - 1/3: source");
 
 		lTitle.addDisposeListener(this);
+
+		// check if it's a jar object project
+		if(AppController.getAppController().getCurrentProject() instanceof ObjectProject)
+		{
+			groupFiles.setEnabled(false);
+			lFiles.setEnabled(false);
+			bAddFiles.setEnabled(false);
+			bRemoveFiles.setEnabled(false);
+			groupDirs.setEnabled(false);
+			lDirs.setEnabled(false);
+			bAddDirs.setEnabled(false);
+			bRemoveDirs.setEnabled(false);
+		}
 	}
 
 
@@ -159,7 +173,7 @@ public class SourcePage implements SelectionListener, DisposeListener
 			File[] fa = new File[sa.length];
 			for(int i=0; i<sa.length; i++) fa[i] = new File(AppController.curDir, sa[i]);
 			addSource(0, fa);
-		} else if(e.getSource() == bAddDirectories)
+		} else if(e.getSource() == bAddDirs)
 		{
 			DirectoryDialog dirDialog = new DirectoryDialog(Display.getCurrent().getActiveShell());
 			if(AppController.curDir != null) dirDialog.setFilterPath(AppController.curDir.toString());
@@ -190,7 +204,7 @@ public class SourcePage implements SelectionListener, DisposeListener
 		} else if(e.getSource() == bRemoveFiles)
 		{
 			removeSelected(0);
-		} else if(e.getSource() == bRemoveDirectories)
+		} else if(e.getSource() == bRemoveDirs)
 		{
 			removeSelected(1);
 		} else if(e.getSource() == bRemoveJars)

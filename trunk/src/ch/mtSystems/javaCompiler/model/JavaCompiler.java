@@ -33,6 +33,7 @@ import ch.mtSystems.javaCompiler.model.exceptions.NoJavaException;
 import ch.mtSystems.javaCompiler.model.projects.ManagedAwtSwingProject;
 import ch.mtSystems.javaCompiler.model.projects.ManagedJFaceProject;
 import ch.mtSystems.javaCompiler.model.projects.ManagedSwtProject;
+import ch.mtSystems.javaCompiler.model.projects.ObjectProject;
 import ch.mtSystems.javaCompiler.model.utilities.Beep;
 import ch.mtSystems.javaCompiler.model.utilities.ClassUtilities;
 import ch.mtSystems.javaCompiler.model.utilities.FileUtilities;
@@ -79,27 +80,49 @@ public class JavaCompiler
 		outDir = FileUtilities.createTempDir("JavaCompilerTemp", ".out");
 		if(!outDir.exists() && !outDir.mkdirs()) throw new IOException("Creating the output directory (" + outDir + ") failed!");
 
-		if(os.equals("win"))
-		{
-			logger.log("creating " + project.getOutputName() + "-win.exe", false);
-		} else if(os.equals("lin"))
-		{
-			logger.log("creating " + project.getOutputName() + "-lin", false);
-		} else
-		{
-			throw new Exception("unknown plattform: " + os);
-		}
-
 		try
 		{
-			copyDataToOutDir();
+			if(project instanceof ObjectProject)
+			{
+				File in = new File(project.getMainClass());
 
-			swingWT(os);
-			jFace(os);
-			swt(os);
-			if(!retroWeaver(os)) return false;
-			if(!createObjects(os)) return false;
-			if(!finalCompile(os)) return false;
+				String outName = in.getName();
+				outName = outName.substring(0, outName.length()-4) + "-" + os + ".jar.o";
+				File out = new File(in.getParent(), outName);
+
+				logger.log("creating " + outName, false);
+				FileUtilities.copyFile(in, new File(outDir, in.getName()));
+				if(!retroWeaver(os)) return false;
+
+				LinkedList<File> llLibs = new LinkedList<File>();
+				File[] allJars = project.getJars();
+				for(int i=0; i<allJars.length; i++)
+				{
+					if(!allJars[i].equals(in)) llLibs.add(allJars[i]);
+				}
+
+				createObject(os, outDir.listFiles()[0], out, llLibs.toArray(new File[0]));
+			} else
+			{
+				if(os.equals("win"))
+				{
+					logger.log("creating " + project.getOutputName() + "-win.exe", false);
+				} else if(os.equals("lin"))
+				{
+					logger.log("creating " + project.getOutputName() + "-lin", false);
+				} else
+				{
+					throw new Exception("unknown plattform: " + os);
+				}
+
+				copyDataToOutDir(os);
+				swingWT(os);
+				jFace(os);
+				swt(os);
+				if(!retroWeaver(os)) return false;
+				if(!createObjects(os)) return false;
+				if(!finalCompile(os)) return false;
+			}
 		} finally
 		{
 			FileUtilities.deleteDirRecursively(outDir);
@@ -115,7 +138,7 @@ public class JavaCompiler
 	 * - all configured jars<br>
 	 * to outDir.
 	 */
-	private void copyDataToOutDir() throws IOException
+	private void copyDataToOutDir(String os) throws IOException
 	{
 		HashSet<File> hsFiles = getAllFiles();
 		for(Iterator<File> it=hsFiles.iterator(); it.hasNext();)
@@ -136,6 +159,13 @@ public class JavaCompiler
 		for(int i=0; i<fa.length; i++)
 		{
 			FileUtilities.copyFile(fa[i], new File(outDir, fa[i].getName()));
+
+			// check if there's already an object file
+			String objectName = fa[i].getName();
+			objectName = objectName.substring(0, objectName.length()-4) + "-" + os + ".jar.o";
+
+			File fObject = new File(fa[i].getParent(), objectName);
+			if(fObject.exists()) FileUtilities.copyFile(fObject, new File(outDir, fa[i].getName()+".o"));
 		}
 	}
 
@@ -218,14 +248,21 @@ public class JavaCompiler
 		HashSet<File> hsFiles = new HashSet<File>();
 		getFiles(outDir, hsFiles);
 
-		// check if there are source (.java) files. they would have to be compiled
 		boolean hasSourceFiles = false;
+		boolean hasClassFiles = false;
+
 		for(Iterator<File> it=hsFiles.iterator(); it.hasNext();)
 		{
-			if(it.next().getName().endsWith(".java"))
+			File f = it.next();
+
+			if(f.getName().endsWith(".java"))
 			{
 				hasSourceFiles = true;
-				break;
+				if(hasClassFiles) break;
+			} else if(f.getName().endsWith(".class"))
+			{
+				hasClassFiles = true;
+				if(hasSourceFiles) break;
 			}
 		}
 
@@ -276,14 +313,15 @@ public class JavaCompiler
 			}
 		}
 
-
-		// weave all .class files
-		String[] cmd = new String[]
-				{
-					"ressources\\retroweaver-1.2.3\\weaver.exe",
-					"-source", outDir.toString()
-				};
-		if(!runCmd(cmd, "Java 1.5 file (*.class) preprocessing", true)) return false;
+		if(hasClassFiles) // weave all .class files
+		{
+			String[] cmd = new String[]
+					{
+						"ressources\\retroweaver-1.2.3\\weaver.exe",
+						"-source", outDir.toString()
+					};
+			if(!runCmd(cmd, "Java 1.5 file (*.class) preprocessing", true)) return false;
+		}
 
 
 		// weave all .jar files in outDir and delete the original jars
@@ -295,7 +333,7 @@ public class JavaCompiler
 			// ignore any jar that have already an object file (swt, jface, swingwt, ...)
 			if((new File(f.getParent(), f.getName()+".o")).exists()) continue;
 
-			cmd = new String[]
+			String[] cmd = new String[]
 				{
 					"ressources\\retroweaver-1.2.3\\weaver.exe",
 					"-jar", f.toString(), f.toString() + "-weaved.jar"
@@ -328,29 +366,34 @@ public class JavaCompiler
 			File fOut = new File(fa[i].getParentFile(), fa[i].getName()+".o");
 			if(fOut.exists()) continue;
 
-			String gcj;
-				 if(os.equals("win")) gcj = CMD_WIN_GCJ;
-			else if(os.equals("lin")) gcj = CMD_LIN_GCJ;
-			else                      throw new Exception("unknown plattform: " + os);
-
-			LinkedList<String> alCmd = new LinkedList<String>();
-			alCmd.add(gcj);
-			if(project.getUseJni()) alCmd.add("-fjni");
-			alCmd.add("-c"); alCmd.add(fa[i].toString());
-			alCmd.add("-o"); alCmd.add(fOut.toString());
-			for(int j=0; j<fa.length; j++)
-			{
-				if(fa[j].getName().endsWith(".jar") && !fa[j].equals(fa[i]))
-				{
-					alCmd.add("-I"); alCmd.add(fa[j].toString());
-				}
-			}
-
-			String[] saCmd = alCmd.toArray(new String[0]);
-			if(!runCmd(saCmd, "preprocessing " + fa[i].getName(), true)) return false;
+			if(!createObject(os, fa[i], fOut, fa)) return false;
 		}
 
 		return true;
+	}
+
+	private boolean createObject(String os, File in, File out, File[] fa) throws Exception
+	{
+		String gcj;
+			 if(os.equals("win")) gcj = CMD_WIN_GCJ;
+		else if(os.equals("lin")) gcj = CMD_LIN_GCJ;
+		else                      throw new Exception("unknown plattform: " + os);
+
+		LinkedList<String> alCmd = new LinkedList<String>();
+		alCmd.add(gcj);
+		if(project.getUseJni()) alCmd.add("-fjni");
+		alCmd.add("-c"); alCmd.add(in.toString());
+		alCmd.add("-o"); alCmd.add(out.toString());
+		for(int i=0; i<fa.length; i++)
+		{
+			if(fa[i].getName().endsWith(".jar") && !fa[i].equals(in))
+			{
+				alCmd.add("-I"); alCmd.add(fa[i].toString());
+			}
+		}
+
+		String[] saCmd = alCmd.toArray(new String[0]);
+		return runCmd(saCmd, "processing " + in.getName(), true);
 	}
 
 	private boolean finalCompile(String os) throws Exception
@@ -509,8 +552,8 @@ public class JavaCompiler
 	{
 		logger.log("- " + logLine, false);
 
-		//for(int i=0; i<cmd.length; i++) System.out.print(cmd[i] + " ");
-		//System.out.println();
+		for(int i=0; i<cmd.length; i++) System.out.print(cmd[i] + " ");
+		System.out.println();
 
 		Process p = Runtime.getRuntime().exec(cmd);
 		if(logInput) log(p.getInputStream());
