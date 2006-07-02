@@ -20,7 +20,6 @@
 package ch.mtSystems.javaCompiler.view.pages;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 
 import org.eclipse.swt.SWT;
@@ -44,6 +43,7 @@ import org.eclipse.swt.widgets.Text;
 import ch.mtSystems.javaCompiler.control.AppController;
 import ch.mtSystems.javaCompiler.model.JavaCompilerProject;
 import ch.mtSystems.javaCompiler.model.projects.ManagedAwtSwingProject;
+import ch.mtSystems.javaCompiler.model.projects.ObjectProject;
 import ch.mtSystems.javaCompiler.model.projects.UnmanagedProject;
 import ch.mtSystems.javaCompiler.model.projects.ManagedJFaceProject;
 import ch.mtSystems.javaCompiler.model.projects.ManagedSwtProject;
@@ -56,7 +56,7 @@ public class CreateProjectPage implements SelectionListener, DisposeListener
 	private static Image imgOpen = new Image(Display.getCurrent(), "ressources/open.png");
 
 
-	private Button rbUnmanagedProject, rbSwtProject, rbJFaceProject, rbAwtSwingProject;
+	private Button rbUnmanagedProject, rbSwtProject, rbJFaceProject, rbAwtSwingProject, rbObjectProject;
 	private Button rbOpenProject, bOpenProject, rbKeepCurrent;
 	private Text tOpenProject;
 
@@ -73,27 +73,33 @@ public class CreateProjectPage implements SelectionListener, DisposeListener
 
 		rbUnmanagedProject = new Button(JavaCompilerGui.getContentComposite(), SWT.RADIO);
 		rbUnmanagedProject.setLayoutData(LayoutUtilities.createGridData(-1, -1, -1, 10, 15));
-		rbUnmanagedProject.setText("create unmanaged project");
+		rbUnmanagedProject.setText("create unmanaged application project");
 		rbUnmanagedProject.addSelectionListener(this);
 		buttonList.add(rbUnmanagedProject);
 
 		rbSwtProject = new Button(JavaCompilerGui.getContentComposite(), SWT.RADIO);
 		rbSwtProject.setLayoutData(LayoutUtilities.createGridData(-1, -1, -1, -1, 15));
-		rbSwtProject.setText("create managed SWT project");
+		rbSwtProject.setText("create managed SWT application project");
 		rbSwtProject.addSelectionListener(this);
 		buttonList.add(rbSwtProject);
 
 		rbJFaceProject = new Button(JavaCompilerGui.getContentComposite(), SWT.RADIO);
 		rbJFaceProject.setLayoutData(LayoutUtilities.createGridData(-1, -1, -1, -1, 15));
-		rbJFaceProject.setText("create managed JFace project");
+		rbJFaceProject.setText("create managed JFace application project");
 		rbJFaceProject.addSelectionListener(this);
 		buttonList.add(rbJFaceProject);
 
 		rbAwtSwingProject = new Button(JavaCompilerGui.getContentComposite(), SWT.RADIO);
 		rbAwtSwingProject.setLayoutData(LayoutUtilities.createGridData(-1, -1, -1, -1, 15));
-		rbAwtSwingProject.setText("create managed AWT or Swing project");
+		rbAwtSwingProject.setText("create managed AWT or Swing application project");
 		rbAwtSwingProject.addSelectionListener(this);
 		buttonList.add(rbAwtSwingProject);
+
+		rbObjectProject = new Button(JavaCompilerGui.getContentComposite(), SWT.RADIO);
+		rbObjectProject.setLayoutData(LayoutUtilities.createGridData(-1, -1, -1, -1, 15));
+		rbObjectProject.setText("create jar object project");
+		rbObjectProject.addSelectionListener(this);
+		buttonList.add(rbObjectProject);
 
 		Composite openComposite = new Composite(JavaCompilerGui.getContentComposite(), SWT.NO_RADIO_GROUP);
 		openComposite.setLayout(LayoutUtilities.createGridLayout(3, 0));
@@ -144,7 +150,8 @@ public class CreateProjectPage implements SelectionListener, DisposeListener
 
 			if(ap.getCurrentProject() != null &&
 			   (rbUnmanagedProject.getSelection() == true || rbSwtProject.getSelection() == true ||
-				rbJFaceProject.getSelection() == true   || rbAwtSwingProject.getSelection() == true))
+				rbJFaceProject.getSelection() == true || rbAwtSwingProject.getSelection() == true ||
+				rbObjectProject.getSelection() == true))
 			{
 				String title = "discard current project?";
 				String msg = "You have currently another project that will be discarded.\nContinue?";
@@ -167,18 +174,21 @@ public class CreateProjectPage implements SelectionListener, DisposeListener
 			} else if(rbAwtSwingProject.getSelection())
 			{
 				ap.setCurrentProject(new ManagedAwtSwingProject());
+			} else if(rbObjectProject.getSelection())
+			{
+				ap.setCurrentProject(new ObjectProject());
 			} else if(rbOpenProject.getSelection())
 			{
 				try
 				{
 					File f = new File(tOpenProject.getText());
 					ap.setCurrentProject(JavaCompilerProject.open(f));
-				} catch(IOException ioex)
+				} catch(Exception ex)
 				{
-					ioex.printStackTrace();
+					ex.printStackTrace();
 
 					String title = "error on open";
-					String msg = "An error occured while trying to open:\n" + ioex.getMessage();
+					String msg = "An error occured while trying to open:\n" + ex.getMessage();
 
 					MessageBox mb = new MessageBox(Display.getCurrent().getActiveShell(), SWT.ICON_ERROR|SWT.OK);
 					mb.setText(title);

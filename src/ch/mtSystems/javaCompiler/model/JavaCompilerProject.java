@@ -30,10 +30,6 @@ import java.util.Set;
 import java.util.Vector;
 
 import ch.mtSystems.javaCompiler.control.IAppControllerListener;
-import ch.mtSystems.javaCompiler.model.projects.ManagedAwtSwingProject;
-import ch.mtSystems.javaCompiler.model.projects.ManagedJFaceProject;
-import ch.mtSystems.javaCompiler.model.projects.ManagedSwtProject;
-import ch.mtSystems.javaCompiler.model.projects.UnmanagedProject;
 
 
 public abstract class JavaCompilerProject
@@ -253,7 +249,7 @@ public abstract class JavaCompilerProject
 	{
 		saveFile = f;
 		FileWriter fw = new FileWriter(f);
-		fw.write("projectType=" + getClass().getSimpleName() + "\n");
+		fw.write("projectType=" + getClass().getName() + "\n");
 
 		// the source
 		for(Iterator it=lFiles.iterator();       it.hasNext();) fw.write("file=" + it.next() + "\n");
@@ -285,7 +281,7 @@ public abstract class JavaCompilerProject
 		for(int i=0; i<vListeners.size(); i++) vListeners.get(i).projectSaved();
 	}
 
-	public static JavaCompilerProject open(File f) throws IOException
+	public static JavaCompilerProject open(File f) throws Exception
 	{
 		BufferedReader br = new BufferedReader(new FileReader(f));
 		JavaCompilerProject project = null;
@@ -298,13 +294,9 @@ public abstract class JavaCompilerProject
 
 			if(sa[0].equals("projectType"))
 			{
-					 if(sa[1].equals("null") || project != null) throw new IOException("Not a JavaCompilerProject file!");
-				else if(sa[1].equals("UnmanagedProject"))        project = new UnmanagedProject();
-				else if(sa[1].equals("ManagedSwtProject"))       project = new ManagedSwtProject();
-				else if(sa[1].equals("ManagedJFaceProject"))     project = new ManagedJFaceProject();
-				else if(sa[1].equals("ManagedAwtSwingProject"))  project = new ManagedAwtSwingProject();
-				else                                             throw new IOException("Not a JavaCompilerProject file!");
+				if(project != null) throw new IOException("Not a JavaCompilerProject file!");
 
+				project = (JavaCompilerProject)Class.forName(sa[1]).newInstance();
 				project.saveFile = f;
 			} else
 			{

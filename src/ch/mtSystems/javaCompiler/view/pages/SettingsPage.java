@@ -26,6 +26,7 @@ import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
+import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Font;
@@ -34,6 +35,7 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.DirectoryDialog;
 import org.eclipse.swt.widgets.Display;
@@ -44,6 +46,7 @@ import org.eclipse.swt.widgets.Text;
 
 import ch.mtSystems.javaCompiler.control.AppController;
 import ch.mtSystems.javaCompiler.model.JavaCompilerProject;
+import ch.mtSystems.javaCompiler.model.projects.ObjectProject;
 import ch.mtSystems.javaCompiler.view.JavaCompilerGui;
 import ch.mtSystems.javaCompiler.view.dialogs.MainClassDialog;
 import ch.mtSystems.javaCompiler.view.utilities.LayoutUtilities;
@@ -81,7 +84,8 @@ public class SettingsPage implements ModifyListener, SelectionListener, DisposeL
 		mainClassComposite.setLayout(LayoutUtilities.createGridLayout(3, 0));
 		mainClassComposite.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 
-		new Label(mainClassComposite, SWT.NONE).setText("main class: ");
+		Label lMainClass = new Label(mainClassComposite, SWT.NONE);
+		lMainClass.setText("main class: ");
 
 		tMainClass = new Text(mainClassComposite, SWT.BORDER|SWT.READ_ONLY);
 		tMainClass.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
@@ -110,7 +114,8 @@ public class SettingsPage implements ModifyListener, SelectionListener, DisposeL
 		outputDirComposite.setLayout(LayoutUtilities.createGridLayout(3, 0));
 		outputDirComposite.setLayoutData(LayoutUtilities.createGridData(GridData.FILL_HORIZONTAL, 2, 1, 0, 0));
 
-		new Label(outputDirComposite, SWT.NONE).setText("directory: ");
+		Label lOutputDir = new Label(outputDirComposite, SWT.NONE);
+		lOutputDir.setText("directory: ");
 
 		tOutputDir = new Text(outputDirComposite, SWT.BORDER|SWT.READ_ONLY);
 		tOutputDir.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
@@ -120,7 +125,8 @@ public class SettingsPage implements ModifyListener, SelectionListener, DisposeL
 		bOpenOutputDir.setImage(imgOpen);
 		bOpenOutputDir.addSelectionListener(this);
 
-		new Label(outputDirComposite, SWT.NONE).setText("name: ");
+		Label lOutputName = new Label(outputDirComposite, SWT.NONE);
+		lOutputName.setText("name: ");
 
 		tOutputName = new Text(outputDirComposite, SWT.BORDER);
 		tOutputName.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
@@ -181,6 +187,55 @@ public class SettingsPage implements ModifyListener, SelectionListener, DisposeL
 		JavaCompilerGui.setTitle("JavaCompiler v" + JavaCompilerGui.VERSION + " - 2/3: settings");
 
 		lTitle.addDisposeListener(this);
+
+
+		// check if it's a jar object project
+		if(AppController.getAppController().getCurrentProject() instanceof ObjectProject)
+		{
+			lMainClass.setText("main jar: ");
+			tMainClass.dispose();
+			bOpenMainClass.dispose();
+			mainClassComposite.setLayout(LayoutUtilities.createGridLayout(2, 0));
+
+			final Combo jarsCombo = new Combo(mainClassComposite, SWT.READ_ONLY);
+			jarsCombo.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+
+			final JavaCompilerProject project = AppController.getAppController().getCurrentProject();
+			final File[] faJars = project.getJars();
+
+			for(int i=0; i<faJars.length; i++) jarsCombo.add(faJars[i].getName());
+			if(project.getMainClass() != null)
+			{
+				File f = new File(project.getMainClass());
+				int index = jarsCombo.indexOf(f.getName());
+				jarsCombo.select(index);
+			}
+
+			jarsCombo.addSelectionListener(new SelectionAdapter()
+					{
+						public void widgetSelected(SelectionEvent e)
+						{
+							File fSel = faJars[jarsCombo.getSelectionIndex()];
+							project.setMainClass(fSel, fSel.toString());
+							updateNextButton();
+						}
+					});
+
+			lOutputDir.setEnabled(false);
+			tOutputDir.setEnabled(false);
+			tOutputDir.setBackground(null);
+			lOutputName.setEnabled(false);
+			tOutputName.setEnabled(false);
+			bOmitWindows.setText("don't create windows object file");
+			bOmitLinux.setText("don't create linux object file");
+			bOmitStripping.setEnabled(false);
+			bOmitPacking.setEnabled(false);
+			groupWindowsOutputSettings.setEnabled(false);
+			bIcon.setEnabled(false);
+			tIcon.setEnabled(false);
+			bOpenIcon.setEnabled(false);
+			bHideConsole.setEnabled(false);
+		}
 	}
 
 	// --------------- ModifyListener ---------------
@@ -340,6 +395,7 @@ public class SettingsPage implements ModifyListener, SelectionListener, DisposeL
 	private void updateWindowsSettings()
 	{
 		JavaCompilerProject project = AppController.getAppController().getCurrentProject();
+		if(project instanceof ObjectProject) return; // objects have no windows specific settings
 
 		bIcon.setEnabled(!project.getOmitWindows());
 		bHideConsole.setEnabled(!project.getOmitWindows());
@@ -354,8 +410,14 @@ public class SettingsPage implements ModifyListener, SelectionListener, DisposeL
 	private void updateNextButton()
 	{
 		JavaCompilerProject project = AppController.getAppController().getCurrentProject();
-		JavaCompilerGui.getNextButton().setEnabled(project.getMainClass() != null &&
-				project.getOutputDir() != null && project.getOutputName() != null &&
+		boolean enabled = (project.getMainClass() != null &&
 				(!project.getOmitWindows() || !project.getOmitLinux()));
+
+		if(!(project instanceof ObjectProject))
+		{
+			enabled = (enabled && project.getOutputDir() != null && project.getOutputName() != null);
+		}
+
+		JavaCompilerGui.getNextButton().setEnabled(enabled);
 	}
 }
