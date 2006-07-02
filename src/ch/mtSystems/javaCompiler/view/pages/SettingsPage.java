@@ -33,7 +33,6 @@ import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
-import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
@@ -58,7 +57,7 @@ public class SettingsPage implements ModifyListener, SelectionListener, DisposeL
 
 
 	private Text tMainClass, tOutputDir, tOutputName, tIcon;
-	private Button bOpenMainClass, bJava5Preprocessing, bUseJni;
+	private Button bOpenMainClass, bJava5Preprocessing, bUseJni, bIgnoreMissingReferences;
 	private Button bOpenOutputDir, bOmitWindows, bOmitLinux, bOmitMac, bOmitStripping, bOmitPacking;
 	private Button bIcon, bOpenIcon, bHideConsole;
 
@@ -76,13 +75,13 @@ public class SettingsPage implements ModifyListener, SelectionListener, DisposeL
 
 		// java settings
 		Group groupJavaSettings = new Group(JavaCompilerGui.getContentComposite(), SWT.SHADOW_ETCHED_IN);
-		groupJavaSettings.setLayout(new GridLayout());
+		groupJavaSettings.setLayout(LayoutUtilities.createGridLayout(2, 5, 20));
 		groupJavaSettings.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		groupJavaSettings.setText("java settings");
 
 		Composite mainClassComposite = new Composite(groupJavaSettings, SWT.NONE);
 		mainClassComposite.setLayout(LayoutUtilities.createGridLayout(3, 0));
-		mainClassComposite.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		mainClassComposite.setLayoutData(LayoutUtilities.createGridData(GridData.FILL_HORIZONTAL, 2, 1, 0, 0));
 
 		Label lMainClass = new Label(mainClassComposite, SWT.NONE);
 		lMainClass.setText("main class: ");
@@ -98,6 +97,10 @@ public class SettingsPage implements ModifyListener, SelectionListener, DisposeL
 		bJava5Preprocessing = new Button(groupJavaSettings, SWT.CHECK);
 		bJava5Preprocessing.setText("enable Java 1.5 preprocessing");
 		bJava5Preprocessing.addSelectionListener(this);
+
+		bIgnoreMissingReferences = new Button(groupJavaSettings, SWT.CHECK);
+		bIgnoreMissingReferences.setText("ignore missing references in jars");
+		bIgnoreMissingReferences.addSelectionListener(this);
 
 		bUseJni = new Button(groupJavaSettings, SWT.CHECK);
 		bUseJni.setText("use JNI (CNI is default)");
@@ -221,6 +224,7 @@ public class SettingsPage implements ModifyListener, SelectionListener, DisposeL
 						}
 					});
 
+			bIgnoreMissingReferences.setText("ignore missing references");
 			lOutputDir.setEnabled(false);
 			tOutputDir.setEnabled(false);
 			tOutputDir.setBackground(null);
@@ -307,6 +311,10 @@ public class SettingsPage implements ModifyListener, SelectionListener, DisposeL
 		{
 			AppController.getAppController().getCurrentProject().
 					setUseJni(bUseJni.getSelection());
+		} else if(e.getSource() == bIgnoreMissingReferences)
+		{
+			AppController.getAppController().getCurrentProject().
+					setIgnoreMissingReferences(bIgnoreMissingReferences.getSelection());
 		} else if(e.getSource() == bOmitWindows)
 		{
 			AppController.getAppController().getCurrentProject().
@@ -378,6 +386,7 @@ public class SettingsPage implements ModifyListener, SelectionListener, DisposeL
 
 		bJava5Preprocessing.setSelection(project.getJava5Preprocessing());
 		bUseJni.setSelection(project.getUseJni());
+		bIgnoreMissingReferences.setSelection(project.getIgnoreMissingReferences());
 
 		bOmitWindows.setSelection(project.getOmitWindows());
 		bOmitLinux.setSelection(project.getOmitLinux());
