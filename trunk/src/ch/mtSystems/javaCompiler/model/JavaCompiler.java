@@ -101,7 +101,7 @@ public class JavaCompiler
 					if(!allJars[i].equals(in)) llLibs.add(allJars[i]);
 				}
 
-				createObject(os, outDir.listFiles()[0], out, llLibs.toArray(new File[0]));
+				return createObject(os, outDir.listFiles()[0], out, llLibs.toArray(new File[0]));
 			} else
 			{
 				if(os.equals("win"))
@@ -121,14 +121,12 @@ public class JavaCompiler
 				swt(os);
 				if(!retroWeaver(os)) return false;
 				if(!createObjects(os)) return false;
-				if(!finalCompile(os)) return false;
+				return finalCompile(os);
 			}
 		} finally
 		{
 			FileUtilities.deleteDirRecursively(outDir);
 		}
-
-		return true;
 	}
 
 	/**
@@ -382,6 +380,7 @@ public class JavaCompiler
 		LinkedList<String> alCmd = new LinkedList<String>();
 		alCmd.add(gcj);
 		if(project.getUseJni()) alCmd.add("-fjni");
+		if(project.getIgnoreMissingReferences()) alCmd.add("-findirect-dispatch");
 		alCmd.add("-c"); alCmd.add(in.toString());
 		alCmd.add("-o"); alCmd.add(out.toString());
 		for(int i=0; i<fa.length; i++)
@@ -417,6 +416,7 @@ public class JavaCompiler
 		alCmd.add(gcj);
 		if(!project.getOmitStripping()) alCmd.add("-s");
 		if(project.getUseJni()) alCmd.add("-fjni");
+		if(project.getIgnoreMissingReferences()) alCmd.add("-findirect-dispatch");
 		alCmd.add("--main=" + project.getMainClass());
 		alCmd.add("-o");
 
@@ -424,7 +424,6 @@ public class JavaCompiler
 		alCmd.add(fExecutable.toString());
 
 		if(project instanceof ManagedSwtProject) alCmd.add("-Djava.library.path=.");
-		if(project.getBeepWhenDone()) alCmd.add("-Wno-deprecated");
 
 		if(os.equals("win"))
 		{
@@ -552,8 +551,8 @@ public class JavaCompiler
 	{
 		logger.log("- " + logLine, false);
 
-		for(int i=0; i<cmd.length; i++) System.out.print(cmd[i] + " ");
-		System.out.println();
+		//for(int i=0; i<cmd.length; i++) System.out.print(cmd[i] + " ");
+		//System.out.println();
 
 		Process p = Runtime.getRuntime().exec(cmd);
 		if(logInput) log(p.getInputStream());

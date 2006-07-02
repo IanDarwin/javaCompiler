@@ -50,6 +50,7 @@ public abstract class JavaCompilerProject
 
 	private boolean java5Preprocessing = false;
 	private boolean useJni = false;
+	private boolean ignoreMissingReferences = false;
 
 	private boolean omitWindows = false;
 	private boolean omitLinux = false;
@@ -163,6 +164,14 @@ public abstract class JavaCompilerProject
 		for(int i=0; i<vListeners.size(); i++) vListeners.get(i).projectUpdated();
 	}
 
+	public boolean getIgnoreMissingReferences() { return ignoreMissingReferences; }
+
+	public void setIgnoreMissingReferences(boolean ignore)
+	{
+		ignoreMissingReferences = ignore;
+		for(int i=0; i<vListeners.size(); i++) vListeners.get(i).projectUpdated();
+	}
+
 	public File getOutputDir() { return outputDir; }
 
 	public void setOutputDir(File outputDir)
@@ -262,6 +271,7 @@ public abstract class JavaCompilerProject
 		fw.write("outputName=" + outputName + "\n");
 		fw.write("java5Preprocessing=" + java5Preprocessing + "\n");
 		fw.write("useJni=" + useJni + "\n");
+		fw.write("ignoreMissingReferences=" + ignoreMissingReferences + "\n");
 		fw.write("omitWindows=" + omitWindows + "\n");
 		fw.write("omitLinux=" + omitLinux + "\n");
 		fw.write("omitStripping=" + omitStripping + "\n");
@@ -314,18 +324,19 @@ public abstract class JavaCompilerProject
 					project.mainClass = saSub[0];
 					project.mainClassRessource = new File(saSub[1]);
 				}
-				else if(sa[0].equals("outputDir"))          project.outputDir = new File(sa[1]);
-				else if(sa[0].equals("outputName"))         project.outputName = sa[1];
-				else if(sa[0].equals("java5Preprocessing")) project.java5Preprocessing = sa[1].equals("true");
-				else if(sa[0].equals("useJni"))             project.useJni = sa[1].equals("true");
-				else if(sa[0].equals("omitWindows"))        project.omitWindows = sa[1].equals("true");
-				else if(sa[0].equals("omitLinux"))          project.omitLinux = sa[1].equals("true");
-				else if(sa[0].equals("omitStripping"))      project.omitStripping = sa[1].equals("true");
-				else if(sa[0].equals("omitPacking"))        project.omitPacking = sa[1].equals("true");
-				else if(sa[0].equals("iconFile"))           project.iconFile = new File(sa[1]);
-				else if(sa[0].equals("useIcon"))            project.useIcon = sa[1].equals("true");
-				else if(sa[0].equals("hideConsole"))        project.hideConsole = sa[1].equals("true");
-				else if(sa[0].equals("beepWhenDone"))       project.beepWhenDone = sa[1].equals("true");
+				else if(sa[0].equals("outputDir"))               project.outputDir = new File(sa[1]);
+				else if(sa[0].equals("outputName"))              project.outputName = sa[1];
+				else if(sa[0].equals("java5Preprocessing"))      project.java5Preprocessing = sa[1].equals("true");
+				else if(sa[0].equals("useJni"))                  project.useJni = sa[1].equals("true");
+				else if(sa[0].equals("ignoreMissingReferences")) project.ignoreMissingReferences = sa[1].equals("true");
+				else if(sa[0].equals("omitWindows"))             project.omitWindows = sa[1].equals("true");
+				else if(sa[0].equals("omitLinux"))               project.omitLinux = sa[1].equals("true");
+				else if(sa[0].equals("omitStripping"))           project.omitStripping = sa[1].equals("true");
+				else if(sa[0].equals("omitPacking"))             project.omitPacking = sa[1].equals("true");
+				else if(sa[0].equals("iconFile"))                project.iconFile = new File(sa[1]);
+				else if(sa[0].equals("useIcon"))                 project.useIcon = sa[1].equals("true");
+				else if(sa[0].equals("hideConsole"))             project.hideConsole = sa[1].equals("true");
+				else if(sa[0].equals("beepWhenDone"))            project.beepWhenDone = sa[1].equals("true");
 			}
 		}
 
