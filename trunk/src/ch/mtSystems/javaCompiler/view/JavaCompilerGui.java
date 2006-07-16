@@ -141,7 +141,7 @@ public class JavaCompilerGui implements SelectionListener, IAppControllerListene
 				tHelp = new Text(sash, SWT.MULTI|SWT.BORDER|SWT.READ_ONLY|SWT.WRAP|SWT.V_SCROLL);
 				tHelp.setLayoutData(new GridData(GridData.FILL_BOTH));
 				tHelp.setBackground(Display.getCurrent().getSystemColor(SWT.COLOR_WHITE));
-				bHelp.setText("hide help");
+				bHelp.setText("Hide Help");
 				pageLoaded(AppController.getAppController().getCurrentPage());
 
 				shell.setSize(500, 650);
@@ -150,7 +150,7 @@ public class JavaCompilerGui implements SelectionListener, IAppControllerListene
 			{
 				tHelp.dispose();
 				tHelp = null;
-				bHelp.setText("show help");
+				bHelp.setText("Show Help");
 				shell.setSize(500, 500);
 			}
 
@@ -228,23 +228,23 @@ public class JavaCompilerGui implements SelectionListener, IAppControllerListene
 
 		tiSettings = new ToolItem(toolBar, SWT.NONE);
 		tiSettings.setImage(new Image(Display.getCurrent(), "ressources/settings.png"));
-		tiSettings.setToolTipText("settings");
+		tiSettings.setToolTipText("Settings");
 		tiSettings.addSelectionListener(this);
 
 		new ToolItem(toolBar, SWT.SEPARATOR);
 
 		tiSave = new ToolItem(toolBar, SWT.DROP_DOWN);
 		tiSave.setImage(new Image(Display.getCurrent(), "ressources/save.png"));
-		tiSave.setToolTipText("save");
+		tiSave.setToolTipText("Save");
 		tiSave.addSelectionListener(this);
 		tiSave.setEnabled(false);
 
 		popupMenu = new Menu(toolBar.getShell(), SWT.POP_UP);
 		miSave = new MenuItem(popupMenu, SWT.PUSH);
-		miSave.setText("save");
+		miSave.setText("Save");
 		miSave.addSelectionListener(this);
 		miSaveAs = new MenuItem(popupMenu, SWT.PUSH);
-		miSaveAs.setText("save as...");
+		miSaveAs.setText("Save As...");
 		miSaveAs.addSelectionListener(this);
 
 		lFileName = new Label(buttonComposite, SWT.NONE);
@@ -254,13 +254,13 @@ public class JavaCompilerGui implements SelectionListener, IAppControllerListene
 		lFileName.setLayoutData(gdSettings);
 
 		bPrevious = new Button(buttonComposite, SWT.NONE);
-		bPrevious.setText("< previous");
+		bPrevious.setText("< Previous");
 
 		bNext = new Button(buttonComposite, SWT.NONE);
-		bNext.setText("next >");
+		bNext.setText("Next >");
 
 		bHelp = new Button(buttonComposite, SWT.NONE);
-		bHelp.setText("show help");
+		bHelp.setText("Show Help");
 		bHelp.addSelectionListener(this);
 	}
 
@@ -276,7 +276,7 @@ public class JavaCompilerGui implements SelectionListener, IAppControllerListene
 	private void saveProjectAs()
 	{
 		FileDialog fileDialog = new FileDialog(Display.getCurrent().getActiveShell(), SWT.SAVE);
-		fileDialog.setText("projekt speichern");
+		fileDialog.setText("Save Project");
 		fileDialog.setFileName("default.jcp");
 		if(AppController.curDir != null) fileDialog.setFilterPath(AppController.curDir.toString());
 		fileDialog.setFilterExtensions(new String[] { "*.jcp" });

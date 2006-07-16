@@ -69,35 +69,35 @@ public class CreateProjectPage implements SelectionListener, DisposeListener
 		FontData fd = lTitle.getFont().getFontData()[0];
 		fd.setHeight(fd.getHeight()*2);
 		lTitle.setFont(new Font(Display.getCurrent(), fd));
-		lTitle.setText("Start: create/open a project");
+		lTitle.setText("Start: Create/Open a project");
 
 		rbUnmanagedProject = new Button(JavaCompilerGui.getContentComposite(), SWT.RADIO);
 		rbUnmanagedProject.setLayoutData(LayoutUtilities.createGridData(-1, -1, -1, 10, 15));
-		rbUnmanagedProject.setText("create unmanaged application project");
+		rbUnmanagedProject.setText("Create unmanaged application project");
 		rbUnmanagedProject.addSelectionListener(this);
 		buttonList.add(rbUnmanagedProject);
 
 		rbSwtProject = new Button(JavaCompilerGui.getContentComposite(), SWT.RADIO);
 		rbSwtProject.setLayoutData(LayoutUtilities.createGridData(-1, -1, -1, -1, 15));
-		rbSwtProject.setText("create managed SWT application project");
+		rbSwtProject.setText("Create managed SWT application project");
 		rbSwtProject.addSelectionListener(this);
 		buttonList.add(rbSwtProject);
 
 		rbJFaceProject = new Button(JavaCompilerGui.getContentComposite(), SWT.RADIO);
 		rbJFaceProject.setLayoutData(LayoutUtilities.createGridData(-1, -1, -1, -1, 15));
-		rbJFaceProject.setText("create managed JFace application project");
+		rbJFaceProject.setText("Create managed JFace application project");
 		rbJFaceProject.addSelectionListener(this);
 		buttonList.add(rbJFaceProject);
 
 		rbAwtSwingProject = new Button(JavaCompilerGui.getContentComposite(), SWT.RADIO);
 		rbAwtSwingProject.setLayoutData(LayoutUtilities.createGridData(-1, -1, -1, -1, 15));
-		rbAwtSwingProject.setText("create managed AWT or Swing application project");
+		rbAwtSwingProject.setText("Create managed AWT or Swing application project");
 		rbAwtSwingProject.addSelectionListener(this);
 		buttonList.add(rbAwtSwingProject);
 
 		rbObjectProject = new Button(JavaCompilerGui.getContentComposite(), SWT.RADIO);
 		rbObjectProject.setLayoutData(LayoutUtilities.createGridData(-1, -1, -1, -1, 15));
-		rbObjectProject.setText("create jar object project");
+		rbObjectProject.setText("Create jar object project");
 		rbObjectProject.addSelectionListener(this);
 		buttonList.add(rbObjectProject);
 
@@ -107,7 +107,7 @@ public class CreateProjectPage implements SelectionListener, DisposeListener
 
 		rbOpenProject = new Button(openComposite, SWT.RADIO);
 		rbOpenProject.setLayoutData(LayoutUtilities.createGridData(-1, -1, -1, -1, 15));
-		rbOpenProject.setText("open project:");
+		rbOpenProject.setText("Open project:");
 		rbOpenProject.addSelectionListener(this);
 		buttonList.add(rbOpenProject);
 
@@ -123,7 +123,7 @@ public class CreateProjectPage implements SelectionListener, DisposeListener
 		{
 			rbKeepCurrent = new Button(JavaCompilerGui.getContentComposite(), SWT.RADIO);
 			rbKeepCurrent.setLayoutData(LayoutUtilities.createGridData(-1, -1, -1, -1, 15));
-			rbKeepCurrent.setText("keep current project");
+			rbKeepCurrent.setText("Keep current project");
 			rbKeepCurrent.setSelection(true);
 			rbKeepCurrent.addSelectionListener(this);
 			buttonList.add(rbKeepCurrent);
@@ -134,7 +134,7 @@ public class CreateProjectPage implements SelectionListener, DisposeListener
 		JavaCompilerGui.getNextButton().addSelectionListener(this);
 		JavaCompilerGui.getPreviousButton().setVisible(true);
 		JavaCompilerGui.getPreviousButton().addSelectionListener(this);
-		JavaCompilerGui.setTitle("JavaCompiler v" + JavaCompilerGui.VERSION + " - create/open a project");
+		JavaCompilerGui.setTitle("JavaCompiler v" + JavaCompilerGui.VERSION + " - Create/Open a project");
 
 		lTitle.addDisposeListener(this);
 	}
@@ -207,7 +207,7 @@ public class CreateProjectPage implements SelectionListener, DisposeListener
 		{
 			FileDialog fileDialog = new FileDialog(Display.getCurrent().getActiveShell(), SWT.OPEN);
 			if(AppController.curDir != null) fileDialog.setFilterPath(AppController.curDir.toString());
-			fileDialog.setText("open project");
+			fileDialog.setText("Open Project");
 			fileDialog.setFilterExtensions(new String[] { "*jcp" });
 			fileDialog.setFilterNames(new String[] { "JavaCompilerProject (*.jcp)" });
 			String ret = fileDialog.open();

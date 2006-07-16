@@ -70,21 +70,21 @@ public class SettingsPage implements ModifyListener, SelectionListener, DisposeL
 		FontData fd = lTitle.getFont().getFontData()[0];
 		fd.setHeight(fd.getHeight()*2);
 		lTitle.setFont(new Font(Display.getCurrent(), fd));
-		lTitle.setText("Step 2 of 3: settings");
+		lTitle.setText("Step 2 of 3: Settings");
 
 
 		// java settings
 		Group groupJavaSettings = new Group(JavaCompilerGui.getContentComposite(), SWT.SHADOW_ETCHED_IN);
 		groupJavaSettings.setLayout(LayoutUtilities.createGridLayout(2, 5, 20));
 		groupJavaSettings.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-		groupJavaSettings.setText("java settings");
+		groupJavaSettings.setText("Java settings");
 
 		Composite mainClassComposite = new Composite(groupJavaSettings, SWT.NONE);
 		mainClassComposite.setLayout(LayoutUtilities.createGridLayout(3, 0));
 		mainClassComposite.setLayoutData(LayoutUtilities.createGridData(GridData.FILL_HORIZONTAL, 2, 1, 0, 0));
 
 		Label lMainClass = new Label(mainClassComposite, SWT.NONE);
-		lMainClass.setText("main class: ");
+		lMainClass.setText("Main class: ");
 
 		tMainClass = new Text(mainClassComposite, SWT.BORDER|SWT.READ_ONLY);
 		tMainClass.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
@@ -95,15 +95,15 @@ public class SettingsPage implements ModifyListener, SelectionListener, DisposeL
 		bOpenMainClass.addSelectionListener(this);
 
 		bJava5Preprocessing = new Button(groupJavaSettings, SWT.CHECK);
-		bJava5Preprocessing.setText("enable Java 1.5 preprocessing");
+		bJava5Preprocessing.setText("Enable Java 1.5 preprocessing");
 		bJava5Preprocessing.addSelectionListener(this);
 
 		bIgnoreMissingReferences = new Button(groupJavaSettings, SWT.CHECK);
-		bIgnoreMissingReferences.setText("ignore missing references in jars");
+		bIgnoreMissingReferences.setText("Ignore missing references in jars");
 		bIgnoreMissingReferences.addSelectionListener(this);
 
 		bUseJni = new Button(groupJavaSettings, SWT.CHECK);
-		bUseJni.setText("use JNI (CNI is default)");
+		bUseJni.setText("Use JNI (CNI is default)");
 		bUseJni.addSelectionListener(this);
 
 
@@ -111,14 +111,14 @@ public class SettingsPage implements ModifyListener, SelectionListener, DisposeL
 		Group groupCommonOutputSettings = new Group(JavaCompilerGui.getContentComposite(), SWT.SHADOW_ETCHED_IN);
 		groupCommonOutputSettings.setLayout(LayoutUtilities.createGridLayout(2, 5, 20));
 		groupCommonOutputSettings.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-		groupCommonOutputSettings.setText("common output settings");
+		groupCommonOutputSettings.setText("Common output settings");
 
 		Composite outputDirComposite = new Composite(groupCommonOutputSettings, SWT.NONE);
 		outputDirComposite.setLayout(LayoutUtilities.createGridLayout(3, 0));
 		outputDirComposite.setLayoutData(LayoutUtilities.createGridData(GridData.FILL_HORIZONTAL, 2, 1, 0, 0));
 
 		Label lOutputDir = new Label(outputDirComposite, SWT.NONE);
-		lOutputDir.setText("directory: ");
+		lOutputDir.setText("Directory: ");
 
 		tOutputDir = new Text(outputDirComposite, SWT.BORDER|SWT.READ_ONLY);
 		tOutputDir.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
@@ -129,30 +129,30 @@ public class SettingsPage implements ModifyListener, SelectionListener, DisposeL
 		bOpenOutputDir.addSelectionListener(this);
 
 		Label lOutputName = new Label(outputDirComposite, SWT.NONE);
-		lOutputName.setText("name: ");
+		lOutputName.setText("Name: ");
 
 		tOutputName = new Text(outputDirComposite, SWT.BORDER);
 		tOutputName.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		tOutputName.addModifyListener(this);
 
 		bOmitWindows = new Button(groupCommonOutputSettings, SWT.CHECK);
-		bOmitWindows.setText("don't create windows binary");
+		bOmitWindows.setText("Don't create windows binary");
 		bOmitWindows.addSelectionListener(this);
 
 		bOmitStripping = new Button(groupCommonOutputSettings, SWT.CHECK);
-		bOmitStripping.setText("omit stripping");
+		bOmitStripping.setText("Omit stripping");
 		bOmitStripping.addSelectionListener(this);
 
 		bOmitLinux = new Button(groupCommonOutputSettings, SWT.CHECK);
-		bOmitLinux.setText("don't create linux binary");
+		bOmitLinux.setText("Don't create linux binary");
 		bOmitLinux.addSelectionListener(this);
 
 		bOmitPacking = new Button(groupCommonOutputSettings, SWT.CHECK);
-		bOmitPacking.setText("omit packing");
+		bOmitPacking.setText("Omit packing");
 		bOmitPacking.addSelectionListener(this);
 
 		bOmitMac = new Button(groupCommonOutputSettings, SWT.CHECK);
-		bOmitMac.setText("don't create mac binary");
+		bOmitMac.setText("Don't create mac binary");
 		bOmitMac.setEnabled(false);
 
 
@@ -160,14 +160,14 @@ public class SettingsPage implements ModifyListener, SelectionListener, DisposeL
 		Group groupWindowsOutputSettings = new Group(JavaCompilerGui.getContentComposite(), SWT.SHADOW_ETCHED_IN);
 		groupWindowsOutputSettings.setLayout(LayoutUtilities.createGridLayout(2, 5, 20));
 		groupWindowsOutputSettings.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-		groupWindowsOutputSettings.setText("windows output settings");
+		groupWindowsOutputSettings.setText("Windows output settings");
 
 		Composite iconComposite = new Composite(groupWindowsOutputSettings, SWT.NONE);
 		iconComposite.setLayout(LayoutUtilities.createGridLayout(3, 0));
 		iconComposite.setLayoutData(LayoutUtilities.createGridData(GridData.FILL_HORIZONTAL, 2, 1));
 
 		bIcon = new Button(iconComposite, SWT.CHECK);
-		bIcon.setText("icon: ");
+		bIcon.setText("Icon: ");
 		bIcon.addSelectionListener(this);
 
 		tIcon = new Text(iconComposite, SWT.BORDER|SWT.READ_ONLY);
@@ -178,7 +178,7 @@ public class SettingsPage implements ModifyListener, SelectionListener, DisposeL
 		bOpenIcon.addSelectionListener(this);
 
 		bHideConsole = new Button(groupWindowsOutputSettings, SWT.CHECK);
-		bHideConsole.setText("hide console");
+		bHideConsole.setText("Hide console");
 		bHideConsole.addSelectionListener(this);
 
 
@@ -187,7 +187,7 @@ public class SettingsPage implements ModifyListener, SelectionListener, DisposeL
 		updateData(); // will handle the next button
 		JavaCompilerGui.getNextButton().addSelectionListener(this);
 		JavaCompilerGui.getPreviousButton().addSelectionListener(this);
-		JavaCompilerGui.setTitle("JavaCompiler v" + JavaCompilerGui.VERSION + " - 2/3: settings");
+		JavaCompilerGui.setTitle("JavaCompiler v" + JavaCompilerGui.VERSION + " - 2/3: Settings");
 
 		lTitle.addDisposeListener(this);
 
@@ -195,7 +195,7 @@ public class SettingsPage implements ModifyListener, SelectionListener, DisposeL
 		// check if it's a jar object project
 		if(AppController.getAppController().getCurrentProject() instanceof ObjectProject)
 		{
-			lMainClass.setText("main jar: ");
+			lMainClass.setText("Main jar: ");
 			tMainClass.dispose();
 			bOpenMainClass.dispose();
 			mainClassComposite.setLayout(LayoutUtilities.createGridLayout(2, 0));
@@ -224,14 +224,14 @@ public class SettingsPage implements ModifyListener, SelectionListener, DisposeL
 						}
 					});
 
-			bIgnoreMissingReferences.setText("ignore missing references");
+			bIgnoreMissingReferences.setText("Ignore missing references");
 			lOutputDir.setEnabled(false);
 			tOutputDir.setEnabled(false);
 			tOutputDir.setBackground(null);
 			lOutputName.setEnabled(false);
 			tOutputName.setEnabled(false);
-			bOmitWindows.setText("don't create windows object file");
-			bOmitLinux.setText("don't create linux object file");
+			bOmitWindows.setText("Don't create windows object file");
+			bOmitLinux.setText("Don't create linux object file");
 			bOmitStripping.setEnabled(false);
 			bOmitPacking.setEnabled(false);
 			groupWindowsOutputSettings.setEnabled(false);
@@ -293,7 +293,7 @@ public class SettingsPage implements ModifyListener, SelectionListener, DisposeL
 		{
 			DirectoryDialog dirDialog = new DirectoryDialog(Display.getCurrent().getActiveShell());
 			if(AppController.curDir != null) dirDialog.setFilterPath(AppController.curDir.toString());
-			dirDialog.setText("select output directory");
+			dirDialog.setText("Select output directory");
 			String ret = dirDialog.open();
 			if(ret == null) return;
 
@@ -343,7 +343,7 @@ public class SettingsPage implements ModifyListener, SelectionListener, DisposeL
 		{
 			FileDialog fileDialog = new FileDialog(Display.getCurrent().getActiveShell(), SWT.OPEN);
 			if(AppController.curDir != null) fileDialog.setFilterPath(AppController.curDir.toString());
-			fileDialog.setText("select an icon for the exe file");
+			fileDialog.setText("Select icon for the exe file");
 			fileDialog.setFilterExtensions(new String[] { "*.ico" });
 			String ret = fileDialog.open();
 			if(ret == null) return;

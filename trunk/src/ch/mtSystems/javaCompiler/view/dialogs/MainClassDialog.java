@@ -112,7 +112,7 @@ public class MainClassDialog extends Dialog implements SelectionListener
 	{
 		Shell parent = getParent();
 		shell = new Shell(parent, SWT.DIALOG_TRIM|SWT.APPLICATION_MODAL|SWT.RESIZE);
-		shell.setText("please choose the main class");
+		shell.setText("Please choose the main class");
 		shell.setSize(400, 300);
 		shell.setLayout(new GridLayout());
 
@@ -137,17 +137,17 @@ public class MainClassDialog extends Dialog implements SelectionListener
 		JavaCompilerProject project = AppController.getAppController().getCurrentProject();
 
 		bFromFiles = new Button(shell, SWT.RADIO);
-		bFromFiles.setText("choose from files");
+		bFromFiles.setText("Choose from files");
 		bFromFiles.addSelectionListener(this);
 		bFromFiles.setEnabled(project.getFiles().length > 0);
 
 		bFromDirectory = new Button(shell, SWT.RADIO);
-		bFromDirectory.setText("choose from a directory");
+		bFromDirectory.setText("Choose from a directory");
 		bFromDirectory.addSelectionListener(this);
 		bFromDirectory.setEnabled(project.getDirectories().length > 0);
 
 		bFromJar = new Button(shell, SWT.RADIO);
-		bFromJar.setText("choose from a jar");
+		bFromJar.setText("Choose from a jar");
 		bFromJar.addSelectionListener(this);
 		bFromJar.setEnabled(project.getJars().length > 0);
 
@@ -227,7 +227,7 @@ public class MainClassDialog extends Dialog implements SelectionListener
 		lClasses.removeAll();
 		bOk.setEnabled(false);
 
-		addList("directory:", AppController.getAppController().getCurrentProject().getDirectories());
+		addList("Directory:", AppController.getAppController().getCurrentProject().getDirectories());
 	}
 
 	private void chooseFromJar()
@@ -238,7 +238,7 @@ public class MainClassDialog extends Dialog implements SelectionListener
 		lClasses.removeAll();
 		bOk.setEnabled(false);
 
-		addList("jar:", AppController.getAppController().getCurrentProject().getJars());
+		addList("Jar:", AppController.getAppController().getCurrentProject().getJars());
 	}
 
 	private void listElementSelected()

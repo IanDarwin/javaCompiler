@@ -86,11 +86,11 @@ public class IntroductionPage implements SelectionListener, DisposeListener
 				}
 			});
 
-		addText(textComposite, "version:", 5);
+		addText(textComposite, "Version:", 5);
 		addText(textComposite, JavaCompilerGui.VERSION, 5);
-		addText(textComposite, "homepage:", -1);
+		addText(textComposite, "Homepage:", -1);
 		addText(textComposite, "http://javaCompiler.sourceforge.net", -1);
-		addText(textComposite, "programmer:", -1);
+		addText(textComposite, "Programmer:", -1);
 		addText(textComposite, "Marco Trudel (mtrudel@gmx.ch)", -1);
 
 		Text introText = new Text(introductionComposite, SWT.MULTI|SWT.BORDER|SWT.READ_ONLY|SWT.WRAP|SWT.V_SCROLL);
@@ -100,7 +100,7 @@ public class IntroductionPage implements SelectionListener, DisposeListener
 
 		bSkipIntro = new Button(introductionComposite, SWT.CHECK);
 		bSkipIntro.setLayoutData(LayoutUtilities.createGridData(-1, 2, 1, -1, -1));
-		bSkipIntro.setText("skip this Intro page when starting JavaCompiler");
+		bSkipIntro.setText("Skip this Intro page when starting JavaCompiler");
 		bSkipIntro.setSelection(GuiSettingsMemory.getSettingsMemory().skipIntro());
 		bSkipIntro.addSelectionListener(this);
 

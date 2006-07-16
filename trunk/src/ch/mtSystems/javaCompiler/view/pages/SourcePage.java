@@ -62,13 +62,13 @@ public class SourcePage implements SelectionListener, DisposeListener
 		FontData fd = lTitle.getFont().getFontData()[0];
 		fd.setHeight(fd.getHeight()*2);
 		lTitle.setFont(new Font(Display.getCurrent(), fd));
-		lTitle.setText("Step 1 of 3: source");
+		lTitle.setText("Step 1 of 3: Source");
 
 		// files
 		Group groupFiles = new Group(JavaCompilerGui.getContentComposite(), SWT.SHADOW_ETCHED_IN);
 		groupFiles.setLayout(new GridLayout(3, false));
 		groupFiles.setLayoutData(new GridData(GridData.FILL_BOTH));
-		groupFiles.setText("files (.java and .class)");
+		groupFiles.setText("Files (.java and .class)");
 
 		lFiles = new List(groupFiles, SWT.BORDER|SWT.V_SCROLL|SWT.H_SCROLL|SWT.MULTI);
 		lFiles.setLayoutData(new GridData(GridData.FILL_BOTH));
@@ -87,7 +87,7 @@ public class SourcePage implements SelectionListener, DisposeListener
 		Group groupDirs = new Group(JavaCompilerGui.getContentComposite(), SWT.SHADOW_ETCHED_IN);
 		groupDirs.setLayout(new GridLayout(3, false));
 		groupDirs.setLayoutData(new GridData(GridData.FILL_BOTH));
-		groupDirs.setText("directories (with subdirs)");
+		groupDirs.setText("Directories (with subdirs)");
 
 		lDirs = new List(groupDirs, SWT.BORDER|SWT.V_SCROLL|SWT.H_SCROLL|SWT.MULTI);
 		lDirs.setLayoutData(new GridData(GridData.FILL_BOTH));
@@ -106,7 +106,7 @@ public class SourcePage implements SelectionListener, DisposeListener
 		Group groupJars = new Group(JavaCompilerGui.getContentComposite(), SWT.SHADOW_ETCHED_IN);
 		groupJars.setLayout(new GridLayout(3, false));
 		groupJars.setLayoutData(new GridData(GridData.FILL_BOTH));
-		groupJars.setText("archives (.jar)");
+		groupJars.setText("Archives (.jar)");
 
 		lJars = new List(groupJars, SWT.BORDER|SWT.V_SCROLL|SWT.H_SCROLL|SWT.MULTI);
 		lJars.setLayoutData(new GridData(GridData.FILL_BOTH));
@@ -128,7 +128,7 @@ public class SourcePage implements SelectionListener, DisposeListener
 		updateData(); // will handle the next button
 		JavaCompilerGui.getNextButton().addSelectionListener(this);
 		JavaCompilerGui.getPreviousButton().addSelectionListener(this);
-		JavaCompilerGui.setTitle("JavaCompiler v" + JavaCompilerGui.VERSION + " - 1/3: source");
+		JavaCompilerGui.setTitle("JavaCompiler v" + JavaCompilerGui.VERSION + " - 1/3: Source");
 
 		lTitle.addDisposeListener(this);
 
@@ -161,7 +161,7 @@ public class SourcePage implements SelectionListener, DisposeListener
 		{
 			FileDialog fileDialog = new FileDialog(Display.getCurrent().getActiveShell(), SWT.OPEN|SWT.MULTI);
 			if(AppController.curDir != null) fileDialog.setFilterPath(AppController.curDir.toString());
-			fileDialog.setText("add files");
+			fileDialog.setText("Add Files");
 			fileDialog.setFilterExtensions(new String[] { "*.java", "*.class" });
 			fileDialog.setFilterNames(new String[] { "Java source files (*.java)", "Java class files (*.class)" });
 			fileDialog.open();
@@ -177,7 +177,7 @@ public class SourcePage implements SelectionListener, DisposeListener
 		{
 			DirectoryDialog dirDialog = new DirectoryDialog(Display.getCurrent().getActiveShell());
 			if(AppController.curDir != null) dirDialog.setFilterPath(AppController.curDir.toString());
-			dirDialog.setText("add directory");
+			dirDialog.setText("Add Directory");
 			String ret = dirDialog.open();
 			if(ret == null) return;
 
@@ -189,7 +189,7 @@ public class SourcePage implements SelectionListener, DisposeListener
 		{
 			FileDialog fileDialog = new FileDialog(Display.getCurrent().getActiveShell(), SWT.OPEN|SWT.MULTI);
 			if(AppController.curDir != null) fileDialog.setFilterPath(AppController.curDir.toString());
-			fileDialog.setText("add archives");
+			fileDialog.setText("Add Archives");
 			fileDialog.setFilterExtensions(new String[] { "*.jar" });
 			fileDialog.setFilterNames(new String[] { "Java archive files (*.jar)" });
 			fileDialog.open();

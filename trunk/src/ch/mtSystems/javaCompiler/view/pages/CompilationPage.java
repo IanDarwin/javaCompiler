@@ -55,7 +55,7 @@ public class CompilationPage implements SelectionListener, DisposeListener, ICom
 		FontData fd = lTitle.getFont().getFontData()[0];
 		fd.setHeight(fd.getHeight()*2);
 		lTitle.setFont(new Font(Display.getCurrent(), fd));
-		lTitle.setText("Step 3 of 3: compilation");
+		lTitle.setText("Step 3 of 3: Compilation");
 
 		tLog = new Text(JavaCompilerGui.getContentComposite(), SWT.BORDER|SWT.READ_ONLY|SWT.MULTI|SWT.V_SCROLL|SWT.H_SCROLL);
 		tLog.setBackground(Display.getCurrent().getSystemColor(SWT.COLOR_WHITE));
@@ -67,12 +67,12 @@ public class CompilationPage implements SelectionListener, DisposeListener, ICom
 
 		bBeep = new Button(tmpComposite, SWT.CHECK);
 		bBeep.setSelection(AppController.getAppController().getCurrentProject().getBeepWhenDone());
-		bBeep.setText("beep when done");
+		bBeep.setText("Beep when done");
 		bBeep.addSelectionListener(this);
 
 		bCompile = new Button(tmpComposite, SWT.NONE);
 		bCompile.setLayoutData(new GridData(GridData.FILL_HORIZONTAL|GridData.HORIZONTAL_ALIGN_END));
-		bCompile.setText("compile");
+		bCompile.setText("Compile");
 		bCompile.addSelectionListener(this);
 
 		// keep a little space at the bottom
@@ -81,7 +81,7 @@ public class CompilationPage implements SelectionListener, DisposeListener, ICom
 		// page settings
 		JavaCompilerGui.getNextButton().setVisible(false);
 		JavaCompilerGui.getPreviousButton().addSelectionListener(this);
-		JavaCompilerGui.setTitle("JavaCompiler v" + JavaCompilerGui.VERSION + " - 3/3: compilation");
+		JavaCompilerGui.setTitle("JavaCompiler v" + JavaCompilerGui.VERSION + " - 3/3: Compilation");
 
 		lTitle.addDisposeListener(this);
 	}
