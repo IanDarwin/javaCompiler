@@ -125,7 +125,7 @@ public class SettingsDialog extends Dialog implements SelectionListener
 		tJavac.setLayoutData(gridData);
 
 		bOpen = new Button(javaHomeGroup, SWT.NONE);
-		bOpen.setImage(new Image(Display.getCurrent(), "ressources/open.png"));
+		bOpen.setImage(new Image(Display.getCurrent(), "resources/open.png"));
 		bOpen.setToolTipText("öffnen");
 		bOpen.addSelectionListener(this);
 

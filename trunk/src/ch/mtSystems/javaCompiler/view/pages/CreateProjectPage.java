@@ -53,7 +53,7 @@ import ch.mtSystems.javaCompiler.view.utilities.LayoutUtilities;
 
 public class CreateProjectPage implements SelectionListener, DisposeListener
 {
-	private static Image imgOpen = new Image(Display.getCurrent(), "ressources/open.png");
+	private static Image imgOpen = new Image(Display.getCurrent(), "resources/open.png");
 
 
 	private Button rbUnmanagedProject, rbSwtProject, rbJFaceProject, rbAwtSwingProject, rbObjectProject;

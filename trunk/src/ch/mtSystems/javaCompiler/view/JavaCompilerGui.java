@@ -198,19 +198,19 @@ public class JavaCompilerGui implements SelectionListener, IAppControllerListene
 
 		if(page == AppController.PAGE_INTRODUCTION)
 		{
-			tHelp.setText(FileUtilities.readTextFile(new File("ressources/helpIntroPage.txt")));
+			tHelp.setText(FileUtilities.readTextFile(new File("resources/helpIntroPage.txt")));
 		} else if(page == AppController.PAGE_CREATE_PROJECT)
 		{
-			tHelp.setText(FileUtilities.readTextFile(new File("ressources/helpCreateProjectPage.txt")));
+			tHelp.setText(FileUtilities.readTextFile(new File("resources/helpCreateProjectPage.txt")));
 		} else if(page == AppController.PAGE_SOURCE)
 		{
-			tHelp.setText(FileUtilities.readTextFile(new File("ressources/helpSourcePage.txt")));
+			tHelp.setText(FileUtilities.readTextFile(new File("resources/helpSourcePage.txt")));
 		} else if(page == AppController.PAGE_SETTINGS)
 		{
-			tHelp.setText(FileUtilities.readTextFile(new File("ressources/helpSettingsPage.txt")));
+			tHelp.setText(FileUtilities.readTextFile(new File("resources/helpSettingsPage.txt")));
 		} else if(page == AppController.PAGE_COMPILATION)
 		{
-			tHelp.setText(FileUtilities.readTextFile(new File("ressources/helpCompilePage.txt")));
+			tHelp.setText(FileUtilities.readTextFile(new File("resources/helpCompilePage.txt")));
 		}
 	}
 
@@ -227,14 +227,14 @@ public class JavaCompilerGui implements SelectionListener, IAppControllerListene
 		ToolBar toolBar = new ToolBar(buttonComposite, SWT.FLAT);
 
 		tiSettings = new ToolItem(toolBar, SWT.NONE);
-		tiSettings.setImage(new Image(Display.getCurrent(), "ressources/settings.png"));
+		tiSettings.setImage(new Image(Display.getCurrent(), "resources/settings.png"));
 		tiSettings.setToolTipText("Settings");
 		tiSettings.addSelectionListener(this);
 
 		new ToolItem(toolBar, SWT.SEPARATOR);
 
 		tiSave = new ToolItem(toolBar, SWT.DROP_DOWN);
-		tiSave.setImage(new Image(Display.getCurrent(), "ressources/save.png"));
+		tiSave.setImage(new Image(Display.getCurrent(), "resources/save.png"));
 		tiSave.setToolTipText("Save");
 		tiSave.addSelectionListener(this);
 		tiSave.setEnabled(false);
@@ -326,7 +326,7 @@ public class JavaCompilerGui implements SelectionListener, IAppControllerListene
 	{
 		new JavaCompilerGui();
 		shell.setSize(500, 500);
-		shell.setImage(new Image(shell.getDisplay(), "ressources/icon.ico"));
+		shell.setImage(new Image(shell.getDisplay(), "resources/icon.ico"));
 		shell.setFocus(); // prevent autoselection of radiobuttons
 		shell.open();
 

@@ -47,7 +47,7 @@ import ch.mtSystems.javaCompiler.view.utilities.LayoutUtilities;
 
 public class IntroductionPage implements SelectionListener, DisposeListener
 {
-	private static Image imgLogo = new Image(Display.getCurrent(), "ressources/logo.jpg");
+	private static Image imgLogo = new Image(Display.getCurrent(), "resources/logo.jpg");
 
 
 	private Button bSkipIntro;
@@ -96,7 +96,7 @@ public class IntroductionPage implements SelectionListener, DisposeListener
 		Text introText = new Text(introductionComposite, SWT.MULTI|SWT.BORDER|SWT.READ_ONLY|SWT.WRAP|SWT.V_SCROLL);
 		introText.setLayoutData(LayoutUtilities.createGridData(GridData.FILL_BOTH, 2, 1, -1, -1));
 		introText.setBackground(Display.getCurrent().getSystemColor(SWT.COLOR_WHITE));
-		introText.setText(FileUtilities.readTextFile(new File("ressources/description.txt")));
+		introText.setText(FileUtilities.readTextFile(new File("resources/description.txt")));
 
 		bSkipIntro = new Button(introductionComposite, SWT.CHECK);
 		bSkipIntro.setLayoutData(LayoutUtilities.createGridData(-1, 2, 1, -1, -1));

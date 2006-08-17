@@ -53,7 +53,7 @@ import ch.mtSystems.javaCompiler.view.utilities.LayoutUtilities;
 
 public class SettingsPage implements ModifyListener, SelectionListener, DisposeListener
 {
-	private static Image imgOpen = new Image(Display.getCurrent(), "ressources/open.png");
+	private static Image imgOpen = new Image(Display.getCurrent(), "resources/open.png");
 
 
 	private Text tMainClass, tOutputDir, tOutputName, tIcon;

@@ -48,8 +48,8 @@ import ch.mtSystems.javaCompiler.view.JavaCompilerGui;
 
 public class SourcePage implements SelectionListener, DisposeListener
 {
-	private static Image imgOpen = new Image(Display.getCurrent(), "ressources/open.png");
-	private static Image imgRemove = new Image(Display.getCurrent(), "ressources/remove.png");
+	private static Image imgOpen = new Image(Display.getCurrent(), "resources/open.png");
+	private static Image imgRemove = new Image(Display.getCurrent(), "resources/remove.png");
 
 
 	private List lFiles, lDirs, lJars;
