@@ -61,18 +61,6 @@ public class FileUtilities
 		return ba;
 	}
 
-	public static String readTextFile(File f)
-	{
-		try
-		{
-			byte[] ba = readFile(f);
-			return new String(ba);
-		} catch(IOException ioex)
-		{
-			return ioex.getMessage();
-		}
-	}
-
 	public static File createTempDir(String prefix, String suffix) throws IOException
 	{
 		File f = File.createTempFile(prefix, suffix);

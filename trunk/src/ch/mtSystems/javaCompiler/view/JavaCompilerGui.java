@@ -21,6 +21,7 @@ package ch.mtSystems.javaCompiler.view;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
@@ -47,7 +48,6 @@ import org.eclipse.swt.widgets.ToolItem;
 import ch.mtSystems.javaCompiler.control.AppController;
 import ch.mtSystems.javaCompiler.control.IAppControllerListener;
 import ch.mtSystems.javaCompiler.model.JavaCompilerProject;
-import ch.mtSystems.javaCompiler.model.utilities.FileUtilities;
 import ch.mtSystems.javaCompiler.model.utilities.GuiSettingsMemory;
 import ch.mtSystems.javaCompiler.view.dialogs.SettingsDialog;
 import ch.mtSystems.javaCompiler.view.utilities.LayoutUtilities;
@@ -71,7 +71,7 @@ public class JavaCompilerGui implements SelectionListener, IAppControllerListene
 
 	public JavaCompilerGui()
 	{
-		shell = new Shell(new Display());
+		shell = new Shell(Display.getDefault());
 		shell.setLayout(new GridLayout());
 
 		sash = new SashForm(shell, SWT.VERTICAL);
@@ -96,6 +96,47 @@ public class JavaCompilerGui implements SelectionListener, IAppControllerListene
 
 
 	// --------------- public static methods ---------------
+	
+	public static Image loadImage(String s)
+	{
+		try
+		{
+			InputStream stream = JavaCompilerGui.class.getResourceAsStream(s);
+			Image img = new Image(Display.getDefault(), stream);
+			stream.close();
+			return img;
+		} catch(Exception ex)
+		{
+			System.err.println("--- loadImage(" + s + ") ---");
+			ex.printStackTrace();
+			return null;
+		}
+	}
+	
+	public static String loadText(String s)
+	{
+		try
+		{
+			StringBuffer sb = new StringBuffer();
+			InputStream stream = JavaCompilerGui.class.getResourceAsStream(s);
+			byte[] ba = new byte[1024];
+			
+			while(true)
+			{
+				int len = stream.read(ba);
+				if(len < 0) break;
+				sb.append(new String(ba, 0, len));
+			}
+			
+			stream.close();
+			return sb.toString();
+		} catch(Exception ex)
+		{
+			System.err.println("--- loadText(" + s + ") ---");
+			ex.printStackTrace();
+			return "";
+		}
+	}
 
 	public static void setTitle(String title)
 	{
@@ -140,7 +181,7 @@ public class JavaCompilerGui implements SelectionListener, IAppControllerListene
 			{
 				tHelp = new Text(sash, SWT.MULTI|SWT.BORDER|SWT.READ_ONLY|SWT.WRAP|SWT.V_SCROLL);
 				tHelp.setLayoutData(new GridData(GridData.FILL_BOTH));
-				tHelp.setBackground(Display.getCurrent().getSystemColor(SWT.COLOR_WHITE));
+				tHelp.setBackground(Display.getDefault().getSystemColor(SWT.COLOR_WHITE));
 				bHelp.setText("Hide Help");
 				pageLoaded(AppController.getAppController().getCurrentPage());
 
@@ -198,19 +239,19 @@ public class JavaCompilerGui implements SelectionListener, IAppControllerListene
 
 		if(page == AppController.PAGE_INTRODUCTION)
 		{
-			tHelp.setText(FileUtilities.readTextFile(new File("resources/helpIntroPage.txt")));
+			tHelp.setText(JavaCompilerGui.loadText("helpIntroPage.txt"));
 		} else if(page == AppController.PAGE_CREATE_PROJECT)
 		{
-			tHelp.setText(FileUtilities.readTextFile(new File("resources/helpCreateProjectPage.txt")));
+			tHelp.setText(JavaCompilerGui.loadText("helpCreateProjectPage.txt"));
 		} else if(page == AppController.PAGE_SOURCE)
 		{
-			tHelp.setText(FileUtilities.readTextFile(new File("resources/helpSourcePage.txt")));
+			tHelp.setText(JavaCompilerGui.loadText("helpSourcePage.txt"));
 		} else if(page == AppController.PAGE_SETTINGS)
 		{
-			tHelp.setText(FileUtilities.readTextFile(new File("resources/helpSettingsPage.txt")));
+			tHelp.setText(JavaCompilerGui.loadText("helpSettingsPage.txt"));
 		} else if(page == AppController.PAGE_COMPILATION)
 		{
-			tHelp.setText(FileUtilities.readTextFile(new File("resources/helpCompilePage.txt")));
+			tHelp.setText(JavaCompilerGui.loadText("helpCompilePage.txt"));
 		}
 	}
 
@@ -227,14 +268,14 @@ public class JavaCompilerGui implements SelectionListener, IAppControllerListene
 		ToolBar toolBar = new ToolBar(buttonComposite, SWT.FLAT);
 
 		tiSettings = new ToolItem(toolBar, SWT.NONE);
-		tiSettings.setImage(new Image(Display.getCurrent(), "resources/settings.png"));
+		tiSettings.setImage(loadImage("settings.png"));
 		tiSettings.setToolTipText("Settings");
 		tiSettings.addSelectionListener(this);
 
 		new ToolItem(toolBar, SWT.SEPARATOR);
 
 		tiSave = new ToolItem(toolBar, SWT.DROP_DOWN);
-		tiSave.setImage(new Image(Display.getCurrent(), "resources/save.png"));
+		tiSave.setImage(loadImage("save.png"));
 		tiSave.setToolTipText("Save");
 		tiSave.addSelectionListener(this);
 		tiSave.setEnabled(false);
@@ -275,7 +316,7 @@ public class JavaCompilerGui implements SelectionListener, IAppControllerListene
 
 	private void saveProjectAs()
 	{
-		FileDialog fileDialog = new FileDialog(Display.getCurrent().getActiveShell(), SWT.SAVE);
+		FileDialog fileDialog = new FileDialog(Display.getDefault().getActiveShell(), SWT.SAVE);
 		fileDialog.setText("Save Project");
 		fileDialog.setFileName("default.jcp");
 		if(AppController.curDir != null) fileDialog.setFilterPath(AppController.curDir.toString());
@@ -294,7 +335,7 @@ public class JavaCompilerGui implements SelectionListener, IAppControllerListene
 			String title = "replace file";
 			String msg = "The file " + f.getName() + " exists already. Replace it?";
 
-			MessageBox mb = new MessageBox(Display.getCurrent().getActiveShell(), SWT.ICON_QUESTION|SWT.YES|SWT.NO);
+			MessageBox mb = new MessageBox(Display.getDefault().getActiveShell(), SWT.ICON_QUESTION|SWT.YES|SWT.NO);
 			mb.setText(title);
 			mb.setMessage(msg);
 			if(mb.open() != SWT.YES) return;
@@ -313,7 +354,7 @@ public class JavaCompilerGui implements SelectionListener, IAppControllerListene
 			String title = "error on save";
 			String msg = "An error occured while trying to save:\n" + ioex.getMessage();
 
-			MessageBox mb = new MessageBox(Display.getCurrent().getActiveShell(), SWT.ICON_ERROR|SWT.OK);
+			MessageBox mb = new MessageBox(Display.getDefault().getActiveShell(), SWT.ICON_ERROR|SWT.OK);
 			mb.setText(title);
 			mb.setMessage(msg);
 			mb.open();
@@ -326,7 +367,7 @@ public class JavaCompilerGui implements SelectionListener, IAppControllerListene
 	{
 		new JavaCompilerGui();
 		shell.setSize(500, 500);
-		shell.setImage(new Image(shell.getDisplay(), "resources/icon.ico"));
+		shell.setImage(loadImage("icon.ico"));
 		shell.setFocus(); // prevent autoselection of radiobuttons
 		shell.open();
 

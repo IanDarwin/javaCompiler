@@ -54,11 +54,11 @@ public class CompilationPage implements SelectionListener, DisposeListener, ICom
 		Label lTitle = new Label(JavaCompilerGui.getContentComposite(), SWT.NONE);
 		FontData fd = lTitle.getFont().getFontData()[0];
 		fd.setHeight(fd.getHeight()*2);
-		lTitle.setFont(new Font(Display.getCurrent(), fd));
+		lTitle.setFont(new Font(Display.getDefault(), fd));
 		lTitle.setText("Step 3 of 3: Compilation");
 
 		tLog = new Text(JavaCompilerGui.getContentComposite(), SWT.BORDER|SWT.READ_ONLY|SWT.MULTI|SWT.V_SCROLL|SWT.H_SCROLL);
-		tLog.setBackground(Display.getCurrent().getSystemColor(SWT.COLOR_WHITE));
+		tLog.setBackground(Display.getDefault().getSystemColor(SWT.COLOR_WHITE));
 		tLog.setLayoutData(new GridData(GridData.FILL_BOTH));
 
 		Composite tmpComposite = new Composite(JavaCompilerGui.getContentComposite(), SWT.NONE);
@@ -100,7 +100,7 @@ public class CompilationPage implements SelectionListener, DisposeListener, ICom
 					setBeepWhenDone(bBeep.getSelection());
 		} else if(e.getSource() == bCompile)
 		{
-			compile(Display.getCurrent());
+			compile(Display.getDefault());
 		}
 	}
 

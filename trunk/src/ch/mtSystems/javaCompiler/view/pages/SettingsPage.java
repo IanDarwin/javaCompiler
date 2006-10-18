@@ -53,7 +53,7 @@ import ch.mtSystems.javaCompiler.view.utilities.LayoutUtilities;
 
 public class SettingsPage implements ModifyListener, SelectionListener, DisposeListener
 {
-	private static Image imgOpen = new Image(Display.getCurrent(), "resources/open.png");
+	private static Image imgOpen = JavaCompilerGui.loadImage("open.png");
 
 
 	private Text tMainClass, tOutputDir, tOutputName, tIcon;
@@ -69,7 +69,7 @@ public class SettingsPage implements ModifyListener, SelectionListener, DisposeL
 		Label lTitle = new Label(JavaCompilerGui.getContentComposite(), SWT.NONE);
 		FontData fd = lTitle.getFont().getFontData()[0];
 		fd.setHeight(fd.getHeight()*2);
-		lTitle.setFont(new Font(Display.getCurrent(), fd));
+		lTitle.setFont(new Font(Display.getDefault(), fd));
 		lTitle.setText("Step 2 of 3: Settings");
 
 
@@ -88,7 +88,7 @@ public class SettingsPage implements ModifyListener, SelectionListener, DisposeL
 
 		tMainClass = new Text(mainClassComposite, SWT.BORDER|SWT.READ_ONLY);
 		tMainClass.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-		tMainClass.setBackground(Display.getCurrent().getSystemColor(SWT.COLOR_WHITE));
+		tMainClass.setBackground(Display.getDefault().getSystemColor(SWT.COLOR_WHITE));
 
 		bOpenMainClass = new Button(mainClassComposite, SWT.NONE);
 		bOpenMainClass.setImage(imgOpen);
@@ -122,7 +122,7 @@ public class SettingsPage implements ModifyListener, SelectionListener, DisposeL
 
 		tOutputDir = new Text(outputDirComposite, SWT.BORDER|SWT.READ_ONLY);
 		tOutputDir.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-		tOutputDir.setBackground(Display.getCurrent().getSystemColor(SWT.COLOR_WHITE));
+		tOutputDir.setBackground(Display.getDefault().getSystemColor(SWT.COLOR_WHITE));
 
 		bOpenOutputDir = new Button(outputDirComposite, SWT.NONE);
 		bOpenOutputDir.setImage(imgOpen);
@@ -291,7 +291,7 @@ public class SettingsPage implements ModifyListener, SelectionListener, DisposeL
 			}
 		} else if(e.getSource() == bOpenOutputDir)
 		{
-			DirectoryDialog dirDialog = new DirectoryDialog(Display.getCurrent().getActiveShell());
+			DirectoryDialog dirDialog = new DirectoryDialog(Display.getDefault().getActiveShell());
 			if(AppController.curDir != null) dirDialog.setFilterPath(AppController.curDir.toString());
 			dirDialog.setText("Select output directory");
 			String ret = dirDialog.open();
@@ -341,7 +341,7 @@ public class SettingsPage implements ModifyListener, SelectionListener, DisposeL
 			updateWindowsSettings();
 		} else if(e.getSource() == bOpenIcon)
 		{
-			FileDialog fileDialog = new FileDialog(Display.getCurrent().getActiveShell(), SWT.OPEN);
+			FileDialog fileDialog = new FileDialog(Display.getDefault().getActiveShell(), SWT.OPEN);
 			if(AppController.curDir != null) fileDialog.setFilterPath(AppController.curDir.toString());
 			fileDialog.setText("Select icon for the exe file");
 			fileDialog.setFilterExtensions(new String[] { "*.ico" });
@@ -411,7 +411,7 @@ public class SettingsPage implements ModifyListener, SelectionListener, DisposeL
 
 		tIcon.setEnabled(!project.getOmitWindows() && project.getUseIcon());
 		tIcon.setBackground((!project.getOmitWindows() && project.getUseIcon()) ?
-				Display.getCurrent().getSystemColor(SWT.COLOR_WHITE) :
+				Display.getDefault().getSystemColor(SWT.COLOR_WHITE) :
 				bHideConsole.getBackground());
 		bOpenIcon.setEnabled(!project.getOmitWindows() && project.getUseIcon());
 	}
