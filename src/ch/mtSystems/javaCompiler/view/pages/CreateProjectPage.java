@@ -53,7 +53,7 @@ import ch.mtSystems.javaCompiler.view.utilities.LayoutUtilities;
 
 public class CreateProjectPage implements SelectionListener, DisposeListener
 {
-	private static Image imgOpen = new Image(Display.getCurrent(), "resources/open.png");
+	private static Image imgOpen = JavaCompilerGui.loadImage("open.png");
 
 
 	private Button rbUnmanagedProject, rbSwtProject, rbJFaceProject, rbAwtSwingProject, rbObjectProject;
@@ -68,7 +68,7 @@ public class CreateProjectPage implements SelectionListener, DisposeListener
 		Label lTitle = new Label(JavaCompilerGui.getContentComposite(), SWT.NONE);
 		FontData fd = lTitle.getFont().getFontData()[0];
 		fd.setHeight(fd.getHeight()*2);
-		lTitle.setFont(new Font(Display.getCurrent(), fd));
+		lTitle.setFont(new Font(Display.getDefault(), fd));
 		lTitle.setText("Start: Create/Open a project");
 
 		rbUnmanagedProject = new Button(JavaCompilerGui.getContentComposite(), SWT.RADIO);
@@ -113,7 +113,7 @@ public class CreateProjectPage implements SelectionListener, DisposeListener
 
 		tOpenProject = new Text(openComposite, SWT.BORDER|SWT.READ_ONLY);
 		tOpenProject.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-		tOpenProject.setBackground(Display.getCurrent().getSystemColor(SWT.COLOR_WHITE));
+		tOpenProject.setBackground(Display.getDefault().getSystemColor(SWT.COLOR_WHITE));
 
 		bOpenProject = new Button(openComposite, SWT.NONE);
 		bOpenProject.setImage(imgOpen);
@@ -156,7 +156,7 @@ public class CreateProjectPage implements SelectionListener, DisposeListener
 				String title = "discard current project?";
 				String msg = "You have currently another project that will be discarded.\nContinue?";
 
-				MessageBox messageBox = new MessageBox(Display.getCurrent().getActiveShell(), SWT.ICON_QUESTION|SWT.YES|SWT.NO);
+				MessageBox messageBox = new MessageBox(Display.getDefault().getActiveShell(), SWT.ICON_QUESTION|SWT.YES|SWT.NO);
 				messageBox.setText(title);
 				messageBox.setMessage(msg);
 				if(messageBox.open() != SWT.YES) return;
@@ -190,7 +190,7 @@ public class CreateProjectPage implements SelectionListener, DisposeListener
 					String title = "error on open";
 					String msg = "An error occured while trying to open:\n" + ex.getMessage();
 
-					MessageBox mb = new MessageBox(Display.getCurrent().getActiveShell(), SWT.ICON_ERROR|SWT.OK);
+					MessageBox mb = new MessageBox(Display.getDefault().getActiveShell(), SWT.ICON_ERROR|SWT.OK);
 					mb.setText(title);
 					mb.setMessage(msg);
 					mb.open();
@@ -205,7 +205,7 @@ public class CreateProjectPage implements SelectionListener, DisposeListener
 			AppController.getAppController().loadPage(AppController.PAGE_INTRODUCTION);
 		} else if(e.getSource() == bOpenProject)
 		{
-			FileDialog fileDialog = new FileDialog(Display.getCurrent().getActiveShell(), SWT.OPEN);
+			FileDialog fileDialog = new FileDialog(Display.getDefault().getActiveShell(), SWT.OPEN);
 			if(AppController.curDir != null) fileDialog.setFilterPath(AppController.curDir.toString());
 			fileDialog.setText("Open Project");
 			fileDialog.setFilterExtensions(new String[] { "*jcp" });

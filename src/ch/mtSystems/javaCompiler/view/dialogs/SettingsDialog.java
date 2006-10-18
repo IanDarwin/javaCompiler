@@ -22,7 +22,6 @@ package ch.mtSystems.javaCompiler.view.dialogs;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
-import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -37,6 +36,7 @@ import org.eclipse.swt.widgets.Text;
 
 import ch.mtSystems.javaCompiler.control.AppController;
 import ch.mtSystems.javaCompiler.model.utilities.SettingsMemory;
+import ch.mtSystems.javaCompiler.view.JavaCompilerGui;
 import ch.mtSystems.javaCompiler.view.utilities.LayoutUtilities;
 
 
@@ -52,7 +52,7 @@ public class SettingsDialog extends Dialog implements SelectionListener
 
 	public SettingsDialog()
 	{
-		super(Display.getCurrent().getActiveShell());
+		super(Display.getDefault().getActiveShell());
 	}
 
 
@@ -62,7 +62,7 @@ public class SettingsDialog extends Dialog implements SelectionListener
 	{
 		if(e.getSource() == bOpen)
 		{
-			FileDialog fileDialog = new FileDialog(Display.getCurrent().getActiveShell(), SWT.OPEN);
+			FileDialog fileDialog = new FileDialog(Display.getDefault().getActiveShell(), SWT.OPEN);
 			if(AppController.curDir != null) fileDialog.setFilterPath(AppController.curDir.toString());
 			fileDialog.setText("select a JDK 1.5 javac");
 			fileDialog.setFilterExtensions(new String[] { "javac.exe" });
@@ -119,13 +119,13 @@ public class SettingsDialog extends Dialog implements SelectionListener
 
 		tJavac = new Text(javaHomeGroup, SWT.BORDER);
 		tJavac.setEditable(false);
-		tJavac.setBackground(Display.getCurrent().getSystemColor(SWT.COLOR_WHITE));
+		tJavac.setBackground(Display.getDefault().getSystemColor(SWT.COLOR_WHITE));
 		GridData gridData = new GridData(GridData.FILL_HORIZONTAL);
 		gridData.widthHint = 300;
 		tJavac.setLayoutData(gridData);
 
 		bOpen = new Button(javaHomeGroup, SWT.NONE);
-		bOpen.setImage(new Image(Display.getCurrent(), "resources/open.png"));
+		bOpen.setImage(JavaCompilerGui.loadImage("open.png"));
 		bOpen.setToolTipText("öffnen");
 		bOpen.addSelectionListener(this);
 

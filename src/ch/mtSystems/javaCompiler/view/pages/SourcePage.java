@@ -48,8 +48,8 @@ import ch.mtSystems.javaCompiler.view.JavaCompilerGui;
 
 public class SourcePage implements SelectionListener, DisposeListener
 {
-	private static Image imgOpen = new Image(Display.getCurrent(), "resources/open.png");
-	private static Image imgRemove = new Image(Display.getCurrent(), "resources/remove.png");
+	private static Image imgOpen = JavaCompilerGui.loadImage("open.png");
+	private static Image imgRemove = JavaCompilerGui.loadImage("remove.png");
 
 
 	private List lFiles, lDirs, lJars;
@@ -61,7 +61,7 @@ public class SourcePage implements SelectionListener, DisposeListener
 		Label lTitle = new Label(JavaCompilerGui.getContentComposite(), SWT.NONE);
 		FontData fd = lTitle.getFont().getFontData()[0];
 		fd.setHeight(fd.getHeight()*2);
-		lTitle.setFont(new Font(Display.getCurrent(), fd));
+		lTitle.setFont(new Font(Display.getDefault(), fd));
 		lTitle.setText("Step 1 of 3: Source");
 
 		// files
@@ -159,7 +159,7 @@ public class SourcePage implements SelectionListener, DisposeListener
 			AppController.getAppController().loadPage(AppController.PAGE_CREATE_PROJECT);
 		} else if(e.getSource() == bAddFiles)
 		{
-			FileDialog fileDialog = new FileDialog(Display.getCurrent().getActiveShell(), SWT.OPEN|SWT.MULTI);
+			FileDialog fileDialog = new FileDialog(Display.getDefault().getActiveShell(), SWT.OPEN|SWT.MULTI);
 			if(AppController.curDir != null) fileDialog.setFilterPath(AppController.curDir.toString());
 			fileDialog.setText("Add Files");
 			fileDialog.setFilterExtensions(new String[] { "*.java", "*.class" });
@@ -175,7 +175,7 @@ public class SourcePage implements SelectionListener, DisposeListener
 			addSource(0, fa);
 		} else if(e.getSource() == bAddDirs)
 		{
-			DirectoryDialog dirDialog = new DirectoryDialog(Display.getCurrent().getActiveShell());
+			DirectoryDialog dirDialog = new DirectoryDialog(Display.getDefault().getActiveShell());
 			if(AppController.curDir != null) dirDialog.setFilterPath(AppController.curDir.toString());
 			dirDialog.setText("Add Directory");
 			String ret = dirDialog.open();
@@ -187,7 +187,7 @@ public class SourcePage implements SelectionListener, DisposeListener
 			addSource(1, new File[] { f });
 		} else if(e.getSource() == bAddJars)
 		{
-			FileDialog fileDialog = new FileDialog(Display.getCurrent().getActiveShell(), SWT.OPEN|SWT.MULTI);
+			FileDialog fileDialog = new FileDialog(Display.getDefault().getActiveShell(), SWT.OPEN|SWT.MULTI);
 			if(AppController.curDir != null) fileDialog.setFilterPath(AppController.curDir.toString());
 			fileDialog.setText("Add Archives");
 			fileDialog.setFilterExtensions(new String[] { "*.jar" });

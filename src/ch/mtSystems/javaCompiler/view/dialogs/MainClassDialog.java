@@ -71,7 +71,7 @@ public class MainClassDialog extends Dialog implements SelectionListener
 
 	public MainClassDialog()
 	{
-		super(Display.getCurrent().getActiveShell());
+		super(Display.getDefault().getActiveShell());
 	}
 
 
@@ -348,7 +348,7 @@ public class MainClassDialog extends Dialog implements SelectionListener
 			String title = "error on read";
 			String msg = "An error occured while trying to read the jar file:\n" + ex.getMessage();
 
-			MessageBox messageBox = new MessageBox(Display.getCurrent().getActiveShell(), SWT.ICON_ERROR|SWT.OK);
+			MessageBox messageBox = new MessageBox(Display.getDefault().getActiveShell(), SWT.ICON_ERROR|SWT.OK);
 			messageBox.setText(title);
 			messageBox.setMessage(msg);
 			messageBox.open();
@@ -368,7 +368,7 @@ public class MainClassDialog extends Dialog implements SelectionListener
 			String title = "error on read";
 			String msg = "An error occured while trying to read the selected file:\n" + ex.getMessage();
 
-			MessageBox messageBox = new MessageBox(Display.getCurrent().getActiveShell(), SWT.ICON_ERROR|SWT.OK);
+			MessageBox messageBox = new MessageBox(Display.getDefault().getActiveShell(), SWT.ICON_ERROR|SWT.OK);
 			messageBox.setText(title);
 			messageBox.setMessage(msg);
 			messageBox.open();

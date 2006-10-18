@@ -19,8 +19,6 @@
 
 package ch.mtSystems.javaCompiler.view.pages;
 
-import java.io.File;
-
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ControlAdapter;
 import org.eclipse.swt.events.ControlEvent;
@@ -39,7 +37,6 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 
 import ch.mtSystems.javaCompiler.control.AppController;
-import ch.mtSystems.javaCompiler.model.utilities.FileUtilities;
 import ch.mtSystems.javaCompiler.model.utilities.GuiSettingsMemory;
 import ch.mtSystems.javaCompiler.view.JavaCompilerGui;
 import ch.mtSystems.javaCompiler.view.utilities.LayoutUtilities;
@@ -47,7 +44,7 @@ import ch.mtSystems.javaCompiler.view.utilities.LayoutUtilities;
 
 public class IntroductionPage implements SelectionListener, DisposeListener
 {
-	private static Image imgLogo = new Image(Display.getCurrent(), "resources/logo.jpg");
+	private static Image imgLogo = JavaCompilerGui.loadImage("logo.jpg");
 
 
 	private Button bSkipIntro;
@@ -69,7 +66,7 @@ public class IntroductionPage implements SelectionListener, DisposeListener
 		lTitle.setLayoutData(LayoutUtilities.createGridData(-1, 2, 1, -1, -1));
 		FontData fd = lTitle.getFont().getFontData()[0];
 		fd.setHeight(fd.getHeight()*2);
-		lTitle.setFont(new Font(Display.getCurrent(), fd));
+		lTitle.setFont(new Font(Display.getDefault(), fd));
 		lTitle.setText("JavaCompiler");
 
 		Label lMotto = new Label(textComposite, SWT.WRAP);
@@ -95,8 +92,8 @@ public class IntroductionPage implements SelectionListener, DisposeListener
 
 		Text introText = new Text(introductionComposite, SWT.MULTI|SWT.BORDER|SWT.READ_ONLY|SWT.WRAP|SWT.V_SCROLL);
 		introText.setLayoutData(LayoutUtilities.createGridData(GridData.FILL_BOTH, 2, 1, -1, -1));
-		introText.setBackground(Display.getCurrent().getSystemColor(SWT.COLOR_WHITE));
-		introText.setText(FileUtilities.readTextFile(new File("resources/description.txt")));
+		introText.setBackground(Display.getDefault().getSystemColor(SWT.COLOR_WHITE));
+		introText.setText(JavaCompilerGui.loadText("description.txt"));
 
 		bSkipIntro = new Button(introductionComposite, SWT.CHECK);
 		bSkipIntro.setLayoutData(LayoutUtilities.createGridData(-1, 2, 1, -1, -1));
