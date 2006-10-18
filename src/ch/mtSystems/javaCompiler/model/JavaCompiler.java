@@ -42,10 +42,10 @@ import ch.mtSystems.javaCompiler.model.utilities.SettingsMemory;
 
 public class JavaCompiler
 {
-	private static final String CMD_WIN_GCJ = "resources\\gcc-4.2.0-win\\bin\\gcj.exe";
-	private static final String CMD_LIN_GCJ = "resources\\gcc-4.2.0-lin\\bin\\gcj.exe";
-	private static final String CMD_WINDRES = "resources\\gcc-4.2.0-win\\bin\\windres.exe";
-	private static final String CMD_UPX = "resources\\upx200w\\upx.exe";
+	private static final String CMD_WIN_GCJ = "utilities/gcc-4.2.0-win/bin/gcj.exe";
+	private static final String CMD_LIN_GCJ = "utilities/gcc-4.2.0-lin/bin/gcj.exe";
+	private static final String CMD_WINDRES = "utilities/gcc-4.2.0-win/bin/windres.exe";
+	private static final String CMD_UPX = "utilities/upx200w/upx.exe";
 
 
 	private ICompilationProgressLogger logger;
@@ -189,7 +189,7 @@ public class JavaCompiler
 			}
 		}
 
-		copyJars(new File("resources/swingWT-0.87"), os);
+		copyJars(new File("utilities/swingWT-0.87"), os);
 	}
 
 	/**
@@ -200,7 +200,7 @@ public class JavaCompiler
 	{
 		if(!(project instanceof ManagedJFaceProject)) return;
 
-		copyJars(new File("resources/jface-3.1.1"), os);
+		copyJars(new File("utilities/jface-3.1.1"), os);
 	}
 
 	/**
@@ -215,20 +215,20 @@ public class JavaCompiler
 		// copy the needed library to the executable output dir
 		if(os.equals("win"))
 		{
-			FileUtilities.copyFile(new File("resources/swt3139/swt-win32-3139.dll"),
+			FileUtilities.copyFile(new File("utilities/swt3139/swt-win32-3139.dll"),
 					new File(project.getOutputDir(), "swt-win32-3139.dll"));
 		} else if(os.equals("lin"))
 		{
-			FileUtilities.copyFile(new File("resources/swt3139/libswt-gtk-3139.so"),
+			FileUtilities.copyFile(new File("utilities/swt3139/libswt-gtk-3139.so"),
 					new File(project.getOutputDir(), "libswt-gtk-3139.so"));
-			FileUtilities.copyFile(new File("resources/swt3139/libswt-pi-gtk-3139.so"),
+			FileUtilities.copyFile(new File("utilities/swt3139/libswt-pi-gtk-3139.so"),
 					new File(project.getOutputDir(), "libswt-pi-gtk-3139.so"));
 		} else
 		{
 			throw new Exception("unknown plattform: " + os);
 		}
 
-		copyJars(new File("resources/swt3139"), os);
+		copyJars(new File("utilities/swt3139"), os);
 	}
 
 	/**
@@ -317,7 +317,7 @@ public class JavaCompiler
 		{
 			String[] cmd = new String[]
 					{
-						"resources\\retroweaver-1.2.3\\weaver.exe",
+						"utilities/retroweaver-1.2.3/weaver.exe",
 						"-source", outDir.toString()
 					};
 			if(!runCmd(cmd, "Java 1.5 file (*.class) preprocessing", true)) return false;
@@ -335,7 +335,7 @@ public class JavaCompiler
 
 			String[] cmd = new String[]
 				{
-					"resources\\retroweaver-1.2.3\\weaver.exe",
+					"utilities/retroweaver-1.2.3/weaver.exe",
 					"-jar", f.toString(), f.toString() + "-weaved.jar"
 				};
 			if(!runCmd(cmd, "Java 1.5 preprocessing: " + f.getName(), true)) return false;
@@ -347,7 +347,7 @@ public class JavaCompiler
 			}
 		}
 
-		copyJars(new File("resources/retroweaver-1.2.3"), os);
+		copyJars(new File("utilities/retroweaver-1.2.3"), os);
 		return true;
 	}
 
