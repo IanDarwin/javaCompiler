@@ -405,7 +405,7 @@ public class NativeCompiler
 		if(!project.getOmitPacking())
 		{
 			String[] saCmdUpx = { "upx2.03/upx", "--best", "-q", outFile.toString() };
-			if(!runCmd(saCmdUpx, "packing executable", false)) return false;
+			if(!runCmd(saCmdUpx, "packing binary", false)) return false;
 		}
 
 		return true;
