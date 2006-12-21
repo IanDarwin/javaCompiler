@@ -263,7 +263,7 @@ public class BasicSettingsPage extends WizzardPage implements ModifyListener, Se
 			
 			FileDialog fileDialog = new FileDialog(JNC.getContentComposite().getShell(), SWT.SAVE);
 			if(AppController.curDir != null) fileDialog.setFilterPath(AppController.curDir.toString());
-			fileDialog.setText("Where to save the " + (win ? "Windows" : "Linux") + " executable?");
+			fileDialog.setText("Where to save the " + (win ? "Windows" : "Linux") + " binary?");
 			String ret = fileDialog.open();
 			if(ret == null) return;
 
