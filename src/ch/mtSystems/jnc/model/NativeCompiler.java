@@ -46,9 +46,9 @@ public class NativeCompiler
 	private JNCProject project;
 	private File outDir;
 	
+	private File compilerPath;
 	private String javaLibPath;
 	private boolean suppressCommandLogging = false;
-	private File compilerPath;
 
 
 	public NativeCompiler(ICompilationProgressLogger logger, JNCProject project)
@@ -184,6 +184,7 @@ public class NativeCompiler
 		alCmd.add((new File(compilerPath, "bin/gcj")).toString());
 		if(!project.getUseCni()) alCmd.add("-fjni");
 		if(!project.getDisableOptimisation()) alCmd.add("-O2");
+		alCmd.add("-I" + (new File(compilerPath, "share/awt/gui.jar")).toString());
 		alCmd.add("-c"); alCmd.add(sourceFile.toString());
 		alCmd.add("-o"); alCmd.add(objectFile.toString());
 
@@ -312,9 +313,8 @@ public class NativeCompiler
 			{
 				// TODO linux properties for AWT?
 			}
-
-			alCmd.add("-I" + (new File(compilerPath, "share/awt/gui.jar")).toString());
 		}
+		alCmd.add("-I" + (new File(compilerPath, "share/awt/gui.jar")).toString());
 
 		// Executable settings
 		alCmd.add("-o" + outFile);
