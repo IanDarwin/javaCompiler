@@ -60,7 +60,7 @@ import ch.mtSystems.jnc.view.utilities.LayoutUtilities;
 
 public class JNC implements SelectionListener, IAppControllerListener
 {
-	public final static String VERSION = "1.0";
+	public final static String VERSION = "1.0.1";
 
 	private static Shell shell;
 	private SashForm sash;

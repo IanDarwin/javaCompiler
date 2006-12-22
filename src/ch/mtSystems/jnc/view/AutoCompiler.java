@@ -23,6 +23,8 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.LinkedList;
+import java.util.List;
 
 
 public class AutoCompiler
@@ -36,20 +38,30 @@ public class AutoCompiler
 			return;
 		}
 
-		File projectFile;
-		if(args.length != 1 || !(projectFile = new File(args[0])).exists() || projectFile.isDirectory())
+		List<String> lCmd = new LinkedList<String>();
+		lCmd.add(cmd);
+		
+		if(args.length != 1)
 		{
 			System.err.println("Usage: AutoCompiler project.jnc");
 			return;
 		}
 
-		Process p = Runtime.getRuntime().exec(new String[]
+		if(!args[0].equals("-debug"))
+		{
+			File projectFile = new File(args[0]);
+			if(projectFile.exists() && !projectFile.isDirectory())
 			{
-				cmd,
-				"-compile",
-				projectFile.toString()
-			});
+				lCmd.add("-compile");
+				lCmd.add(projectFile.toString());
+			} else
+			{
+				System.err.println("Usage: AutoCompiler project.jnc");
+				return;
+			}
+		}
 
+		Process p = Runtime.getRuntime().exec(lCmd.toArray(new String[0]));
 		log(p.getInputStream(), false);
 		log(p.getErrorStream(), true);
 	}
