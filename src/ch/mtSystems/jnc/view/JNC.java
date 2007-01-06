@@ -181,7 +181,7 @@ public class JNC implements SelectionListener, IAppControllerListener
 		{
 			try
 			{
-				Program.launch((new File("manual/index.html")).toURL().toString());
+				Program.launch((new File("manual/index.html")).toURI().toURL().toString());
 			} catch(Exception ex)
 			{
 				MessageBox mb = new MessageBox(shell, SWT.NONE);
