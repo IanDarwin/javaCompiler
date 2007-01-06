@@ -226,11 +226,10 @@ public class NativeCompiler
 		ZipFile zipFile = new ZipFile(jarFile);
 		suppressCommandLogging = true;
 
-		File tmpArchiveFile = new File(tmpDir, "archive.a");
 		String[] saCmd = new String[4];
 		saCmd[0] = (new File(compilerPath, "bin/ar")).toString();
 		saCmd[1] = "qsc";
-		saCmd[2] = tmpArchiveFile.toString();
+		saCmd[2] = archiveFile.toString();
 
 		try
 		{
@@ -278,7 +277,7 @@ public class NativeCompiler
 				objectFile.delete();
 			}
 
-			FileUtilities.copyFile(tmpArchiveFile, archiveFile);
+			if(!archiveFile.exists()) logger.log("Warning: Nothing imported, JAR unused!", true);
 			return true;
 		} finally
 		{
