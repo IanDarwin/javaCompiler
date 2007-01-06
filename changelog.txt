@@ -1,0 +1,4 @@
+since 1.0.1
+-----------
+fixed an error that occured when nothing was imported from a jar
+replaced java.text with the one from SUN, needed for Swing
