@@ -226,10 +226,14 @@ public class NativeCompiler
 		ZipFile zipFile = new ZipFile(jarFile);
 		suppressCommandLogging = true;
 
+		// A temporary archive file is used since the compilation might fail.
+		// Otherwise the user might get a broken archive if he caches the jars...
+		File tmpArchiveFile = new File(tmpDir, "archive.a");
+		
 		String[] saCmd = new String[4];
 		saCmd[0] = (new File(compilerPath, "bin/ar")).toString();
 		saCmd[1] = "qsc";
-		saCmd[2] = archiveFile.toString();
+		saCmd[2] = tmpArchiveFile.toString();
 
 		try
 		{
@@ -277,7 +281,9 @@ public class NativeCompiler
 				objectFile.delete();
 			}
 
-			if(!archiveFile.exists()) logger.log("Warning: Nothing imported, JAR unused!", true);
+			if(tmpArchiveFile.exists()) FileUtilities.copyFile(tmpArchiveFile, archiveFile);
+			else                        logger.log("Warning: Nothing imported, JAR unused!", true);
+
 			return true;
 		} finally
 		{
