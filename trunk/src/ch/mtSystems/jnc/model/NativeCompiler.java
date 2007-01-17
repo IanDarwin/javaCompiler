@@ -382,7 +382,7 @@ public class NativeCompiler
 				fw.write("\"" + cachedJar.toString().replaceAll("\\\\", "/") + "\"\n");
 			}
 		}
-		
+
 		// add all temporary objects and archives
 		File[] tmpFiles = outDir.listFiles();
 		for(File f : tmpFiles)
@@ -403,7 +403,13 @@ public class NativeCompiler
 
 		if(!project.getOmitPacking())
 		{
-			String[] saCmdUpx = { "upx2.03/upx", "--best", "-q", outFile.toString() };
+			String[] saCmdUpx =
+				{
+					(new File("upx2.03/upx")).toString(),
+					"--best",
+					"-q",
+					outFile.toString()
+				};
 			if(!runCmd(saCmdUpx, "packing binary", false)) return false;
 		}
 
