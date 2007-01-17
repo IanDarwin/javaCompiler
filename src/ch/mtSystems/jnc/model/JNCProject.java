@@ -30,8 +30,6 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.Vector;
 
-import org.eclipse.swt.widgets.Text;
-
 import ch.mtSystems.jnc.control.IAppControllerListener;
 
 
@@ -59,7 +57,7 @@ public class JNCProject
 	private boolean useIcon, hideConsole;
 
 	// advanced settings
-	private String gcjFlags;
+	private HashMap<String, Boolean> hmGcjFlags = new HashMap<String, Boolean>();
 	private boolean showCommands;
 	private boolean excludeGui, excludeJce, addGnuRegex;
 	private boolean dontCacheJars;
@@ -93,6 +91,7 @@ public class JNCProject
 	}
 
 
+	// ----- directory handling -----
 
 	public boolean addDirectory(File dir)
 	{
@@ -114,6 +113,7 @@ public class JNCProject
 	}
 
 
+	// ----- Jar handling -----
 
 	public boolean addJar(File f, boolean complete)
 	{
@@ -147,7 +147,10 @@ public class JNCProject
 		hmJars.put(f, complete);
 		for(int i=0; i<vListeners.size(); i++) vListeners.get(i).projectUpdated();
 	}
-	
+
+
+	// ----- main-class handling -----
+
 	public void setMainClass(File mainClassRessource, String mainClass)
 	{
 		this.mainClassRessource = mainClassRessource;
@@ -271,18 +274,44 @@ public class JNCProject
 		for(int i=0; i<vListeners.size(); i++) vListeners.get(i).projectUpdated();
 	}
 
-	public String getGcjFlags(String newLine)
+
+	// ----- GCJ flags handling -----
+
+	public boolean addGcjFlags(String flag, boolean mainCompilationOnly)
 	{
-		return (gcjFlags == null) ? null : gcjFlags.replaceAll("<br>", newLine);
+		if(hmGcjFlags.put(flag, mainCompilationOnly) != null) return false;
+		for(int i=0; i<vListeners.size(); i++) vListeners.get(i).projectUpdated();
+		return true;
 	}
-	
-	public void setGcjFlags(String gcjFlags)
+
+	public void removeGcjFlag(String flag)
 	{
-		gcjFlags = gcjFlags.trim();
-		this.gcjFlags = (gcjFlags.length() == 0) ? null : gcjFlags.replaceAll(Text.DELIMITER, "<br>");
+		hmGcjFlags.remove(flag);
 		for(int i=0; i<vListeners.size(); i++) vListeners.get(i).projectUpdated();
 	}
-	
+
+	public String[] getGcjFlags()
+	{
+		return hmGcjFlags.keySet().toArray(new String[0]);
+	}
+
+	public boolean getFlagMainCompilationOnly(String flag)
+	{
+		Boolean b = hmGcjFlags.get(flag);
+		if(b == null) throw new IllegalArgumentException("Flag \"" + flag + "\" not configured!");
+		return b;
+	}
+
+	public void setFlagMainCompilationOnly(String flag, boolean mainCompilationOnly)
+	{
+		if(!hmGcjFlags.containsKey(flag)) throw new IllegalArgumentException("Flag \"" + flag + "\" not configured!");
+		hmGcjFlags.put(flag, mainCompilationOnly);
+		for(int i=0; i<vListeners.size(); i++) vListeners.get(i).projectUpdated();
+	}
+
+
+	// ----- show-commands handling -----
+
 	public boolean getShowCommands()
 	{
 		return showCommands;
@@ -356,9 +385,8 @@ public class JNCProject
 		// the source
 		for(Iterator it=lFiles.iterator();       it.hasNext();) fw.write("file=" + it.next() + "\n");
 		for(Iterator it=lDirectories.iterator(); it.hasNext();) fw.write("dir=" +  it.next() + "\n");
-		for(Iterator<File> it=hmJars.keySet().iterator(); it.hasNext(); )
+		for(File jarFile : getJars())
 		{
-			File jarFile = it.next();
 			fw.write("jar=" + jarFile  + "," + hmJars.get(jarFile) + "\n");
 		}
 
@@ -380,7 +408,10 @@ public class JNCProject
 		fw.write("hideConsole=" + hideConsole + "\n");
 
 		// advanced settings
-		fw.write("gcjFlags=" + gcjFlags + "\n");
+		for(String flag : getGcjFlags())
+		{
+			fw.write("gcjFlag=" + flag  + "," + hmGcjFlags.get(flag) + "\n");
+		}
 		fw.write("showCommands=" + showCommands + "\n");
 		fw.write("excludeGui=" + excludeGui + "\n");
 		fw.write("excludeJce=" + excludeJce + "\n");
@@ -437,7 +468,13 @@ public class JNCProject
 			else if(sa[0].equals("iconFile"))            project.iconFile = new File(sa[1]);
 			else if(sa[0].equals("useIcon"))             project.useIcon = sa[1].equals("true");
 			else if(sa[0].equals("hideConsole"))         project.hideConsole = sa[1].equals("true");
-			else if(sa[0].equals("gcjFlags"))            project.gcjFlags = sa[1];
+			else if(sa[0].equals("gcjFlag"))
+			{
+				int index = sa[1].lastIndexOf(',');
+				if(index < 0) throw new IOException("Not a JNC project file!");
+				project.hmGcjFlags.put(sa[1].substring(0, index),
+						sa[1].substring(index+1).equals("true"));
+			}
 			else if(sa[0].equals("showCommands"))        project.showCommands = sa[1].equals("true");
 			else if(sa[0].equals("excludeGui"))          project.excludeGui = sa[1].equals("true");
 			else if(sa[0].equals("excludeJce"))          project.excludeJce = sa[1].equals("true");

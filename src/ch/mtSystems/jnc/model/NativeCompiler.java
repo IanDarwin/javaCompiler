@@ -188,8 +188,10 @@ public class NativeCompiler
 		alCmd.add("-c"); alCmd.add(sourceFile.toString());
 		alCmd.add("-o"); alCmd.add(objectFile.toString());
 
-		String flags = project.getGcjFlags(" ");
-		if(flags != null) alCmd.add(flags);
+		for(String flag : project.getGcjFlags())
+		{
+			if(!project.getFlagMainCompilationOnly(flag)) alCmd.add(flag);
+		}
 
 		File[] faJars = project.getJars();
 		for(File f : faJars)
@@ -212,8 +214,10 @@ public class NativeCompiler
 		alCmd.add("-c"); alCmd.add(propertiesFile.toString());
 		alCmd.add("-o"); alCmd.add(objectFile.toString());
 
-		String flags = project.getGcjFlags(" ");
-		if(flags != null) alCmd.add(flags);
+		for(String flag : project.getGcjFlags())
+		{
+			if(!project.getFlagMainCompilationOnly(flag)) alCmd.add(flag);
+		}
 
 		String[] saCmd = alCmd.toArray(new String[0]);
 		return runCmd(saCmd, "processing " + propertiesFile.getName(), true);
@@ -332,8 +336,7 @@ public class NativeCompiler
 		if(!project.getDisableOptimisation()) alCmd.add("-O2");
 
 		// Advanced settings
-		String flags = project.getGcjFlags(" ");
-		if(flags != null) alCmd.add(flags);
+		for(String flag : project.getGcjFlags()) alCmd.add(flag);
 		if(project.getExcludeGui()) alCmd.add("-ljncNoGui");
 		if(project.getExcludeJce()) alCmd.add("-ljncNoJce");
 		if(project.getAddGnuRegex()) alCmd.add("-ljncRegex");

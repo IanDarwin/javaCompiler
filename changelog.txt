@@ -1,5 +1,6 @@
 since 1.0.1
 -----------
+revised custom flags: now as a list with an option "main compilation only"
 fixed the call to upx that it uses "\" in paths on Windows
 fixed an error that occured when nothing was imported from a jar
 replaced java.text with the one from SUN, needed for Swing

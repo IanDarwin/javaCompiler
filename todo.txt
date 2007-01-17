@@ -1,7 +1,6 @@
 GIF broken (sun.awt.image doesn't like -O1 and -O2 (no optimization and -O3 works))
 AWT/Swing apps don't always start respectively die immediately again
 
-custom flags: list and option if for both (main and jar compilation) or main only
 jar archives: order if one depends on another? archives import left-to-right or right-to-left
 
 rename awt.jar to gui.jar
