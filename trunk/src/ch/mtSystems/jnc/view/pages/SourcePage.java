@@ -24,7 +24,6 @@ import java.io.File;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
-import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Font;
@@ -115,24 +114,11 @@ public class SourcePage extends WizzardPage implements SelectionListener, Dispos
 		groupJars.setText("Archives (.jar)");
 
 		tJars = new Table(groupJars, SWT.BORDER|SWT.MULTI|SWT.CHECK);
+		tJars.addSelectionListener(this);
 		GridData gdJars = new GridData(GridData.FILL_BOTH);
 		gdJars.verticalSpan = 2;
 		gdJars.heightHint = 200;
 		tJars.setLayoutData(gdJars);
-
-		tJars.addSelectionListener(new SelectionAdapter()
-		{
-			public void widgetSelected(SelectionEvent e)
-			{
-				if((e.detail & SWT.CHECK) == SWT.CHECK)
-				{
-					TableItem item = (TableItem)e.item;
-					File f = new File(item.getText());
-					AppController.getAppController().getCurrentProject().
-							setCompileCompleteJar(f, item.getChecked());
-				}
-			}
-		});
 
 		bAddJars = new Button(groupJars, SWT.NONE);
 		bAddJars.setLayoutData(new GridData(SWT.CENTER, SWT.BOTTOM, false, true));
@@ -196,6 +182,15 @@ public class SourcePage extends WizzardPage implements SelectionListener, Dispos
 			AppController.curDir = f;
 
 			addSource(1, new File[] { f });
+		} else if(e.getSource() == tJars)
+		{
+			if((e.detail & SWT.CHECK) == SWT.CHECK)
+			{
+				TableItem item = (TableItem)e.item;
+				File f = new File(item.getText());
+				AppController.getAppController().getCurrentProject().
+						setCompileCompleteJar(f, item.getChecked());
+			}
 		} else if(e.getSource() == bAddJars)
 		{
 			FileDialog fileDialog = new FileDialog(JNC.getContentComposite().getShell(), SWT.OPEN|SWT.MULTI);
@@ -248,12 +243,11 @@ public class SourcePage extends WizzardPage implements SelectionListener, Dispos
 		File[] faDirs = project.getDirectories();
 		for(int i=0; i<faDirs.length; i++) (new TableItem(tDirs, SWT.NONE)).setText(faDirs[i].toString());
 
-		File[] faJars = project.getJars();
-		for(int i=0; i<faJars.length; i++)
+		for(File jarFile : project.getJars())
 		{
 			TableItem item = new TableItem(tJars, SWT.NONE);
-			item.setText(faJars[i].toString());
-			item.setChecked(project.getCompileCompleteJar(faJars[i]));
+			item.setText(jarFile.toString());
+			item.setChecked(project.getCompileCompleteJar(jarFile));
 		}
 
 		JNC.getNextButton().setEnabled(tFiles.getItemCount() > 0 ||

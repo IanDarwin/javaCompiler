@@ -22,32 +22,34 @@ package ch.mtSystems.jnc.view.pages;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
-import org.eclipse.swt.events.ModifyEvent;
-import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.FontData;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.Text;
+import org.eclipse.swt.widgets.Table;
+import org.eclipse.swt.widgets.TableItem;
 
 import ch.mtSystems.jnc.control.AppController;
 import ch.mtSystems.jnc.model.JNCProject;
 import ch.mtSystems.jnc.view.JNC;
+import ch.mtSystems.jnc.view.dialogs.InputDialog;
 import ch.mtSystems.jnc.view.utilities.LayoutUtilities;
 
 
-public class AdvancedSettingsPage extends WizzardPage implements ModifyListener, SelectionListener, DisposeListener
+public class AdvancedSettingsPage extends WizzardPage implements SelectionListener, DisposeListener
 {
-	private Text tGcjFlags;
-	private Button bShowCommands;
-	private Button bExcludeGui, bExcludeJce, bAddGnuRegex, bDontCacheJars;
+	private static Image imgAdd = JNC.loadImage("flagAdd.png");
+	private static Image imgRemove = JNC.loadImage("flagRemove.png");
 
-	private boolean ignoreEvents = false;
+	private Table tGcjFlags;
+	private Button bAddFlag, bRemoveFlag, bShowCommands;
+	private Button bExcludeGui, bExcludeJce, bAddGnuRegex, bDontCacheJars;
 
 
 	public AdvancedSettingsPage()
@@ -60,21 +62,34 @@ public class AdvancedSettingsPage extends WizzardPage implements ModifyListener,
 
 
 		Group groupGcjFlags = new Group(JNC.getContentComposite(), SWT.SHADOW_ETCHED_IN);
-		groupGcjFlags.setLayout(LayoutUtilities.createGridLayout(1, 3));
+		groupGcjFlags.setLayout(LayoutUtilities.createGridLayout(2, 3));
 		groupGcjFlags.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		groupGcjFlags.setText("Custom GCJ flags");
 
-		tGcjFlags = new Text(groupGcjFlags, SWT.BORDER|SWT.WRAP|SWT.V_SCROLL);
-		tGcjFlags.addModifyListener(this);
-
+		tGcjFlags = new Table(groupGcjFlags, SWT.BORDER|SWT.MULTI|SWT.CHECK);
+		tGcjFlags.addSelectionListener(this);
 		GridData gdFlags = new GridData(GridData.FILL_HORIZONTAL);
+		gdFlags.verticalSpan = 2;
 		gdFlags.heightHint = 55;
 		tGcjFlags.setLayoutData(gdFlags);
 
+		bAddFlag = new Button(groupGcjFlags, SWT.NONE);
+		bAddFlag.setLayoutData(new GridData(SWT.CENTER, SWT.BOTTOM, false, true));
+		bAddFlag.setImage(imgAdd);
+		bAddFlag.addSelectionListener(this);
+
+		bRemoveFlag = new Button(groupGcjFlags, SWT.NONE);
+		bRemoveFlag.setImage(imgRemove);
+		bRemoveFlag.addSelectionListener(this);
+
+		Label lBoxInfo = new Label(groupGcjFlags, SWT.NONE);
+		lBoxInfo.setLayoutData(LayoutUtilities.createGridData(GridData.FILL_HORIZONTAL, 2, 1));
+		lBoxInfo.setText("Checkbox: Flag for main compilation only (not for JAR compilations).");
+
 		bShowCommands = new Button(groupGcjFlags, SWT.CHECK);
+		bShowCommands.setLayoutData(LayoutUtilities.createGridData(GridData.FILL_HORIZONTAL, 2, 1));
 		bShowCommands.setText("Show used commands");
 		bShowCommands.addSelectionListener(this);
-
 
 		Group groupClassLibrary = new Group(JNC.getContentComposite(), SWT.SHADOW_ETCHED_IN);
 		groupClassLibrary.setLayout(LayoutUtilities.createGridLayout(1, 3));
@@ -112,30 +127,44 @@ public class AdvancedSettingsPage extends WizzardPage implements ModifyListener,
 		updateData();
 	}
 
-	// --------------- ModifyListener ---------------
-
-	public void modifyText(ModifyEvent e)
-	{
-		if(ignoreEvents) return;
-
-		JNCProject project = AppController.getAppController().getCurrentProject();
-		if(e.getSource() == tGcjFlags)
-		{
-			project.setGcjFlags(tGcjFlags.getText());
-		}
-	}
-
 
 	// --------------- SelectionListener ---------------
 
 	public void widgetSelected(SelectionEvent e)
-	{	
+	{
 		if(e.getSource() == JNC.getNextButton())
 		{
 			AppController.getAppController().loadPage(AppController.PAGE_COMPILATION);
 		} else if(e.getSource() == JNC.getPreviousButton())
 		{
 			AppController.getAppController().loadPage(AppController.PAGE_BASIC_SETTINGS);
+		} else if(e.getSource() == tGcjFlags)
+		{
+			if((e.detail & SWT.CHECK) == SWT.CHECK)
+			{
+				TableItem item = (TableItem)e.item;
+				AppController.getAppController().getCurrentProject().
+						setFlagMainCompilationOnly(item.getText(), item.getChecked());
+			}
+		} else if(e.getSource() == bAddFlag)
+		{
+			InputDialog inputDialog = new InputDialog(JNC.getContentComposite().getShell());
+			inputDialog.setTitle("New GCJ flag");
+			inputDialog.setMessage("GCJ flag to add:");
+			String flag = inputDialog.open();
+			if(flag == null) return;
+			
+			AppController.getAppController().getCurrentProject().addGcjFlags(flag, false);
+			(new TableItem(tGcjFlags, SWT.NONE)).setText(flag);
+		} else if(e.getSource() == bRemoveFlag)
+		{
+			int[] selIndices = tGcjFlags.getSelectionIndices();
+			for(int i=selIndices.length-1; i>=0; i--)
+			{
+				String flag = tGcjFlags.getItem(selIndices[i]).getText();
+				AppController.getAppController().getCurrentProject().removeGcjFlag(flag);
+				tGcjFlags.remove(selIndices[i]);
+			}
 		} else if(e.getSource() == bShowCommands)
 		{
 			JNCProject project = AppController.getAppController().getCurrentProject();
@@ -176,17 +205,18 @@ public class AdvancedSettingsPage extends WizzardPage implements ModifyListener,
 	private void updateData()
 	{
 		JNCProject project = AppController.getAppController().getCurrentProject();
-		ignoreEvents = true;
 
-		String flags = project.getGcjFlags(Text.DELIMITER); 
-		if(flags != null) tGcjFlags.setText(flags);
+		for(String flag : project.getGcjFlags())
+		{
+			TableItem item = new TableItem(tGcjFlags, SWT.NONE);
+			item.setText(flag);
+			item.setChecked(project.getFlagMainCompilationOnly(flag));
+		}
 
 		bShowCommands.setSelection(project.getShowCommands());
 		bExcludeGui.setSelection(project.getExcludeGui());
 		bExcludeJce.setSelection(project.getExcludeJce());
 		bAddGnuRegex.setSelection(project.getAddGnuRegex());
 		bDontCacheJars.setSelection(project.getDontCacheJars());
-		
-		ignoreEvents = false;
 	}
 }
