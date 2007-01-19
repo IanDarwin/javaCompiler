@@ -1,6 +1,7 @@
 since 1.0.1
 -----------
 revised custom flags: now as a list with an option "main compilation only"
-fixed the call to upx that it uses "\" in paths on Windows
+moved upx one dir down in order to make it work on Windows2000
+	(CreateProcess() has problems with short names: http://support.microsoft.com/kb/201318)
 fixed an error that occured when nothing was imported from a jar
 replaced java.text with the one from SUN, needed for Swing
