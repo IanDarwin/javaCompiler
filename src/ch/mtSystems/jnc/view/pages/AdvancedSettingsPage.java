@@ -97,7 +97,7 @@ public class AdvancedSettingsPage extends WizzardPage implements SelectionListen
 		groupClassLibrary.setText("Class Library");
 		
 		bExcludeGui = new Button(groupClassLibrary, SWT.CHECK);
-		bExcludeGui.setText("Exclude GUI (java.applet, java.awt, javax.swing, javax.print, javax.imageio)");
+		bExcludeGui.setText("Exclude GUI (java.applet, java.awt, java.text, javax.imageio, javax.print, javax.swing)");
 		bExcludeGui.addSelectionListener(this);
 		
 		bExcludeJce = new Button(groupClassLibrary, SWT.CHECK);
