@@ -47,6 +47,7 @@ public class InputDialog extends Dialog implements SelectionListener, ModifyList
 	private Text inputText;
 
 	private String title, message, initialText, ret;
+	private int textFieldLength = 250;
 
 
 	/**
@@ -131,9 +132,12 @@ public class InputDialog extends Dialog implements SelectionListener, ModifyList
 		if(message != null) lMessage.setText(message);
 
 		inputText = new Text(shell, SWT.BORDER);
-		inputText.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		inputText.addSelectionListener(this);
 		inputText.addModifyListener(this);
+		
+		GridData gdInputText = new GridData(GridData.FILL_HORIZONTAL);
+		gdInputText.widthHint = textFieldLength;
+		inputText.setLayoutData(gdInputText);
 
 		Composite buttonComposite = new Composite(shell, SWT.NONE);
 		buttonComposite.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_CENTER));
