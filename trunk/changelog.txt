@@ -1,5 +1,6 @@
 since 1.0.1
 -----------
+update to gcj 4.3
 revised custom flags: now as a list with an option "main compilation only"
 moved upx one dir down in order to make it work on Windows2000
 	(CreateProcess() has problems with short names: http://support.microsoft.com/kb/201318)

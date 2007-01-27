@@ -29,6 +29,7 @@ import java.io.InputStreamReader;
 import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
@@ -94,62 +95,70 @@ public class NativeCompiler
 		outDir = FileUtilities.createTempDir("JNCTemp", ".out");
 		try
 		{
-			copyGuiData(os);
+			adaptJavaLibPath(os);
 			if(!compileJars(os)) return false;
-			return finalCompile(os);
+			if(!finalCompile(os)) return false;
+			copyGuiData(os);
 		} finally
 		{
 			FileUtilities.deleteDirRecursively(outDir);
 		}
+
+		return true;
 	}
 	
+	private void adaptJavaLibPath(String os)
+	{
+		if(project.getExcludeGui()) return;
+
+		if(javaLibPath == null)
+		{
+			javaLibPath = "lib"; 
+		} else
+		{
+			String sep = (os.equals("win")) ? ";" : ":";
+			javaLibPath = "lib" + sep + javaLibPath;
+		}
+	}
+
 	private void copyGuiData(String os) throws Exception
 	{
 		if(project.getExcludeGui()) return;
-		
-		if(os.equals("win"))
-		{
-			// create the directories
-			if(javaLibPath == null)
-			{
-				javaLibPath = "lib";
-				logger.log("java.library.path has to be set if AWT/Swing is used. \"lib\" will be used.", true);
-			}
-			File baseDir = project.getWindowsFile().getParentFile();
-			File dllDir = new File(baseDir, javaLibPath);
-			File fontDir = new File(baseDir, "lib/fonts");
-			if(!dllDir.exists() && !dllDir.mkdirs()) throw new Exception("Unable to create \"" + dllDir + "\"");
-			if(!fontDir.exists() && !fontDir.mkdirs()) throw new Exception("Unable to create \"" + fontDir + "\"");
 
-			// copy awt.dll, fontmanager.dll and LucidaBrightDemiItalic.ttf
-			File awtPath = new File(compilerPath, "share/awt");
-			File awtDllSource = new File(awtPath, "awt.dll");
-			File fontmanagerDllSource = new File(awtPath, "fontmanager.dll");
-			File fontFileSource = new File(awtPath, "LucidaBrightDemiItalic.ttf");
+		boolean filesAdded = false;
+		List<File> dirList = new LinkedList<File>();
+		dirList.add(new File("libs/gui-" + os + "/lib"));
+		dirList.add(new File(project.getWindowsFile().getParentFile(), "lib"));
 
-			File awtDllTarget = new File(dllDir, awtDllSource.getName());
-			File fontmanagerDllTarget = new File(dllDir, fontmanagerDllSource.getName());
-			File fontFileTarget = new File(fontDir, fontFileSource.getName());
-			
-			if(!awtDllTarget.exists())
-			{
-				if(!awtDllSource.exists()) throw new Exception("\"" + awtDllSource + "\" doesn't exist!");
-				FileUtilities.copyFile(awtDllSource, awtDllTarget);
-			}
-			if(!fontmanagerDllTarget.exists())
-			{
-				if(!fontmanagerDllSource.exists()) throw new Exception("\"" + fontmanagerDllSource + "\" doesn't exist!");
-				FileUtilities.copyFile(fontmanagerDllSource, fontmanagerDllTarget);
-			}
-			if(!fontFileTarget.exists())
-			{
-				if(!fontFileSource.exists()) throw new Exception("\"" + fontFileSource + "\" doesn't exist!");
-				FileUtilities.copyFile(fontFileSource, fontFileTarget);
-			}
-		} else
+		while(!dirList.isEmpty())
 		{
-			// TODO what to copy for linux?
+			File curSrcDir = dirList.remove(0);
+			File curOutDir = dirList.remove(0);
+
+			if(!curOutDir.exists() && !curOutDir.mkdirs()) throw new Exception("Unable to create \"" + curOutDir + "\"");
+			for(File fSrc : curSrcDir.listFiles())
+			{
+				File fOut = new File(curOutDir, fSrc.getName());
+
+				if(fSrc.isDirectory())
+				{
+					dirList.add(fSrc);
+					dirList.add(fOut);
+				} else
+				{
+					if(fOut.exists()) continue;
+					FileUtilities.copyFile(fSrc, fOut);
+					filesAdded = true;
+				}
+			}
 		}
+
+		if(!filesAdded) return;
+
+		logger.log("\nPlease note:", false);
+		logger.log("Files required by AWT/Swing have been copied to the \"lib\" directory.", true);
+		logger.log("Your application might need all, a couple or even none of them.", true);
+		logger.log("Feel free to delete the ones which aren't required.", true);
 	}
 
 	private boolean compileJars(String os) throws Exception
@@ -184,7 +193,7 @@ public class NativeCompiler
 		alCmd.add((new File(compilerPath, "bin/gcj")).toString());
 		if(!project.getUseCni()) alCmd.add("-fjni");
 		if(!project.getDisableOptimisation()) alCmd.add("-O2");
-		alCmd.add("-I" + (new File(compilerPath, "share/awt/gui.jar")).toString());
+		alCmd.add("-Ilibs/gui/gui.jar");
 		alCmd.add("-c"); alCmd.add(sourceFile.toString());
 		alCmd.add("-o"); alCmd.add(objectFile.toString());
 
@@ -323,7 +332,9 @@ public class NativeCompiler
 				// TODO linux properties for AWT?
 			}
 		}
-		alCmd.add("-I" + (new File(compilerPath, "share/awt/gui.jar")).toString());
+
+		alCmd.add("-Llibs");
+		alCmd.add("-Ilibs/gui/gui.jar");
 
 		// Executable settings
 		alCmd.add("-o" + outFile);

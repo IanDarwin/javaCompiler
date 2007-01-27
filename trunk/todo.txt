@@ -1,7 +1,14 @@
-GIF broken (sun.awt.image doesn't like -O1 and -O2 (no optimization and -O3 works))
-AWT/Swing apps don't always start respectively die immediately again
+1.1
+	- gui 1.4 for Linux and Windows
+	- GIF broken (sun.awt.image doesn't like -O1 and -O2 (no optimization and -O3 works))
+	- AWT/Swing apps don't always start respectively die immediately again
+	- jar archives: order if one depends on another? archives import left-to-right or right-to-left
 
-jar archives: order if one depends on another? archives import left-to-right or right-to-left
+FreshMeat and co...
 
-rename awt.jar to gui.jar
-copy complete lib and bin
+1.2
+	- dwarf exception handling
+	- excluding libs (show pulled in libs)
+	- upx with progress bar
+	- upx quality setting: best (very good compression, very slow), 9 (good compression, slow), ... , 1 (bad compression, fast)
+	- "cancel" compilation
