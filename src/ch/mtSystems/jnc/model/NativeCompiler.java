@@ -127,7 +127,7 @@ public class NativeCompiler
 
 		boolean filesAdded = false;
 		List<File> dirList = new LinkedList<File>();
-		dirList.add(new File("libs/gui-" + os + "/lib"));
+		dirList.add(new File("libs/" + os + "/gui/lib"));
 		dirList.add(new File(project.getWindowsFile().getParentFile(), "lib"));
 
 		while(!dirList.isEmpty())
@@ -193,7 +193,7 @@ public class NativeCompiler
 		alCmd.add((new File(compilerPath, "bin/gcj")).toString());
 		if(!project.getUseCni()) alCmd.add("-fjni");
 		if(!project.getDisableOptimisation()) alCmd.add("-O2");
-		alCmd.add("-Ilibs/gui/gui.jar");
+		alCmd.add("-Ilibs/" + os + "/gui/gui.jar");
 		alCmd.add("-c"); alCmd.add(sourceFile.toString());
 		alCmd.add("-o"); alCmd.add(objectFile.toString());
 
@@ -333,8 +333,8 @@ public class NativeCompiler
 			}
 		}
 
-		alCmd.add("-Llibs");
-		alCmd.add("-Ilibs/gui/gui.jar");
+		alCmd.add("-Llibs/" + os );
+		alCmd.add("-Ilibs/" + os + "/gui/gui.jar");
 
 		// Executable settings
 		alCmd.add("-o" + outFile);
