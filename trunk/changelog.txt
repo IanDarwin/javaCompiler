@@ -1,5 +1,7 @@
 since 1.0.1
 -----------
+added more GUI files and adapt java.library.path for them
+fixed gif images
 update to gcj 4.3
 revised custom flags: now as a list with an option "main compilation only"
 moved upx one dir down in order to make it work on Windows2000

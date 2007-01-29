@@ -1,7 +1,8 @@
 1.1
-	- gui 1.4 for Linux and Windows
-	- GIF broken (sun.awt.image doesn't like -O1 and -O2 (no optimization and -O3 works))
-	- AWT/Swing apps don't always start respectively die immediately again
+	- GUI Windows: no jvm.dll, java.dll, verify.dll -> util.dll
+	- GUI Windows: automatic javax.swing, not manual
+	- GUI Windows: AWT/Swing apps don't always start respectively die immediately again
+	- GUI Linux
 	- jar archives: order if one depends on another? archives import left-to-right or right-to-left
 
 FreshMeat and co...
@@ -9,6 +10,7 @@ FreshMeat and co...
 1.2
 	- dwarf exception handling
 	- excluding libs (show pulled in libs)
+	- GUI 1.5
 	- upx with progress bar
 	- upx quality setting: best (very good compression, very slow), 9 (good compression, slow), ... , 1 (bad compression, fast)
 	- "cancel" compilation
