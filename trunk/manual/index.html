@@ -1,0 +1,192 @@
+<html>
+	
+	<head>
+		<title>JavaNativeCompiler (JNC) v1.1 Manual</title>
+	</head>
+	
+	<body>
+		<h1>JavaNativeCompiler (JNC) v1.0 Manual</h1>
+
+		Version from 2007, February 05.<br><br>
+
+		The latest versions of the manuals can be viewed
+		<a href="http://jnc.mtSystems.ch/manuals/">here</a>.<br>
+		Please also read the FAQ on the <a href="http://jnc.mtSystems.ch">homepage</a>
+		if you have any further questions...<br><br>
+		
+		<h2>Table of contents</h2>
+		<ul>
+			<li><a href="#0">Create/Open a project</a></li>
+			<li><a href="#1">Step 1 of 4: Source</a></li>
+			<li><a href="#2">Step 2 of 4: Basic settings (required)</a></li>
+			<li><a href="#3">Step 3 of 4: Advanced settings (optional)</a></li>
+			<li><a href="#4">Step 4 of 4: Compilation</a></li>
+		</ul>
+		
+		<hr>
+		
+		
+		<a name="0"></a>
+		<h2>Create/Open a project</h2>
+		Here you can open a saved project or create a new one. Nothing fancy...
+		
+		<a name="1"></a>
+		<h2>Step 1 of 4: Source</h2>
+		Here you can specify the source of your application.<br>
+		You can add:
+		<ul>
+				<li>Single .java or .class files</li>
+				<li>Directories (subdirectories will be included) from which all
+					.java and .class files will be used</li>
+				<li>Jars</li>
+		</ul>
+			
+		Each jar has an additional checkbox. It specifies if the whole jar
+		or only needed (referenced) classes should be included into the final binary.
+		Including only the needed classes will - who would have guessed that -
+		result in smaller binaries. But there is a price tag attached to that:
+		If a class is never referenced and only loaded
+		by reflection, it will not be in the executable and thus a ClassNotFoundException
+		will be thrown at runtime. To force the inclusion of such classes,
+		you have to add a reference to them into your code.<br><br>
+		
+		An example to illustrate the problem and to show how to solve it:<br>
+		SWT does not reference the handlers for the various image types.
+		Looking at the source shows that the classes PNGFileFormat, JPEGFileFormat,
+		WinICOFileFormat, ... from the package org.eclipse.swt.internal.image are
+		loaded by Class.forName() when a user creates an image.
+		Thus, references to the needed image handlers have to be added in the
+		own application:
+
+<pre>static
+{
+	org.eclipse.swt.internal.image.PNGFileFormat.class.getName();
+	org.eclipse.swt.internal.image.JPEGFileFormat.class.getName();
+	org.eclipse.swt.internal.image.WinICOFileFormat.class.getName();
+}</pre>
+
+	In the case of SWT, this is not yet enough. These classes are protected, not public.
+	So just create a dummy class in the org.eclipse.swt.internal.image package and add
+	the initializer to that class...
+
+	<a name="2"></a>
+	<h2>Step 2 of 4: Basic settings (required)</h2>
+
+	<table border="1">
+	<tr>
+		<th>Setting</th>
+		<th>Description</th>
+	</tr>
+	<tr>
+		<td>Main class*</td>
+		<td>You have to specify the class of your application that contains the main() method.
+			This the same as when calling "java foo.bar.MyMainClass".</td>
+		</tr>
+		<tr>
+			<td>java.library.path</td>
+			<td>You might want to specify the java.library.path.</td>
+		</tr>
+		<tr>
+			<td>Use CNI instead of JNI</td>
+			<td>Check this box if you use native code by CNI instead of JNI.</td>
+		</tr>
+		<tr>
+			<td>Windows*</td>
+			<td>Specify if a binary for Windows has to be created.
+				If yes, you have to provide a location for it.</td>
+		</tr>
+		<tr>
+			<td>Icon</td>
+			<td>On Windows, you can set an icon for you executables. It will be
+				visible in the Windows Explorer.</td>
+		</tr>
+		<tr>
+			<td>Hide console</td>
+			<td>On Windows, a console will be opened when executing the compiled application.
+				While this is needed for console applications, it is mostly
+				unnecessary for GUI applications. It can be hidden with this option.</td>
+		</tr>
+		<tr>
+			<td>Linux*</td>
+			<td>Specify if a binary for Linux has to be created.
+				If yes, you have to provide a location for it.</td>
+		</tr>
+		<tr>
+			<td>Mac</td>
+			<td>Not yet supported...</td>
+		</tr>
+		<tr>
+			<td>Omit stripping</td>
+			<td>Symbols of the binary will be stripped by default. This won't need additional time and the binary
+				will be much smaller. You can turn it of with this option.</td>
+		</tr>
+		<tr>
+			<td>Omit packing</td>
+			<td>The binaries will be packed by default. This needs a lot of additional time but will result
+				in much smaller binaries. You can turn it off with this option.</td>
+		</tr>
+		<tr>
+			<td>Disable optimization</td>
+			<td>The code to compile will be optimized by default. That needs some additional time but will result in
+				smaller and faster binaries. You can turn it off with this option.</td>
+		</tr>
+	</table>
+	
+	* Required
+
+	<a name="3"></a>
+	<h2>Step 3 of 4: Advanced settings (optional)</h2>
+	
+	<table border="1">
+		<tr>
+			<th>Setting</th>
+			<th>Description</th>
+		</tr>
+		<tr>
+			<td>Custom GCJ flags</td>
+			<td>Here you can specify additional flags for GCJ. Multiple flags are
+				separated by spaces or newlines.</td>
+		</tr>
+		<tr>
+			<td>Show used commands</td>
+			<td>If checked, the used commands for compiling the application will
+				be shown during compilation.</td>
+		</tr>
+		<tr>
+			<td>Exclude GUI</td>
+			<td>You can exclude the GUI part of the class library. It gets pulled
+				into the binary by default. This will result in much smaller binaries
+				but you have to ensure that you do not use any of these classes. Else
+				you end up with compilation errors.</td>
+		</tr>
+		<tr>
+			<td>Exclude JCE</td>
+			<td>You can exclude the "Java Cryptography Extension" of the class library.
+				It gets pulled into the binary by default. This will result in smaller
+				binaries but you have to ensure that you do not use any of these classes.
+				Else you end up with compilation errors.</td>
+		</tr>
+		<tr>
+			<td>Add GNU regex</td>
+			<td>This is needed if there are invalid regular expressions in the compiled code.<br>
+				Without it, you will get this runtime error:<br>
+				java.util.MissingResourceException: Bundle gnu/java/util/regexp/MessagesBundle not found</td>
+		</tr>
+		<tr>
+			<td>Don't cache compiled jars</td>
+			<td>By default, compiled jars will be saved in the same directory as the jar. By doing so,
+				it can be reused in later compilations (what is a real time saver). You can turn it off with this option.</td>
+		</tr>
+	</table>
+
+	<a name="4"></a>
+	<h2>Step 4 of 4: Compilation</h2>
+	
+	Here you can finally hit the "compile" button :-)<br>
+	If you check "Beep when done", it will beep once if the compilation
+	succeeds and twice if it fails.
+</table>
+	
+	
+	</body>
+</html>

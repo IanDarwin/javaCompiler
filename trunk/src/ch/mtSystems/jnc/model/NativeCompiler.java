@@ -320,16 +320,17 @@ public class NativeCompiler
 
 		if(!project.getExcludeGui())
 		{
+			alCmd.add("-Dsun.java2d.fontpath=");
+			alCmd.add("-Djava.home=.");
+
 			if(os.equals("win"))
 			{
 				alCmd.add("-Djava.awt.graphicsenv=sun.awt.Win32GraphicsEnvironment");
-				alCmd.add("-Dsun.java2d.fontpath=");
-				alCmd.add("-Djava.home=.");
 				alCmd.add("-Dawt.toolkit=sun.awt.windows.WToolkit");
 				alCmd.add("-Dsun.io.unicode.encoding=UnicodeLittle");
 			} else
 			{
-				// TODO linux properties for AWT?
+				alCmd.add("-Djava.awt.graphicsenv=sun.awt.X11GraphicsEnvironment");
 			}
 		}
 
