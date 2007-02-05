@@ -1,16 +1,25 @@
 1.1
-	- GUI Windows: no jvm.dll, java.dll, verify.dll -> util.dll
-	- GUI Windows: automatic javax.swing, not manual
-	- GUI Windows: AWT/Swing apps don't always start respectively die immediately again
-	- GUI Linux
-	- jar archives: order if one depends on another? archives import left-to-right or right-to-left
+	- GUI Linux: no jvm.dll, java.dll, verify.dll -> libutil.so
+	- Manual: Ok for version 1.1?
+	- Compile lin and win: lib directory problem
+	- Optimization and packing expensive. Into manual or gui?
 
 FreshMeat and co...
 
+Regression between rev 121200 (used for v1.1) and 121400:
+  AWT/Swing doesn't start anymore.
+    SunGraphicsEnvironment does: noType1Font = NativeFontWrapper.getType1FontVar();
+    which crashes and for some reason doesn't call the jni method
+
 1.2
+	- Flags for GCJ: possibility to edit them and the order has to be kept
+	- Jar archives: order if one depends on another? archives import left-to-right or right-to-left
+	- Excluding libs (show pulled in libs)
+
+	- "cancel" compilation
+
 	- dwarf exception handling
-	- excluding libs (show pulled in libs)
 	- GUI 1.5
 	- upx with progress bar
 	- upx quality setting: best (very good compression, very slow), 9 (good compression, slow), ... , 1 (bad compression, fast)
-	- "cancel" compilation
+	- shared compilation, not only static
