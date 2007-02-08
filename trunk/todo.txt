@@ -1,17 +1,12 @@
 1.1
-	- GUI Linux: no jvm.dll, java.dll, verify.dll -> libutil.so
-	- Manual: Ok for version 1.1?
-	- Compile lin and win: lib directory problem
-	- Optimization and packing expensive. Into manual or gui?
+	- GUI Windows: fix Test 09
 
 FreshMeat and co...
 
-Regression between rev 121200 (used for v1.1) and 121400:
-  AWT/Swing doesn't start anymore.
-    SunGraphicsEnvironment does: noType1Font = NativeFontWrapper.getType1FontVar();
-    which crashes and for some reason doesn't call the jni method
-
 1.2
+	- Way slower since 4.3?
+	- GUI: load util before all dependant libraries (not only before awt)
+	- GUI Linux: make LD_LIBRARY_PATH unnecessary (m_image, maybe others)
 	- Flags for GCJ: possibility to edit them and the order has to be kept
 	- Jar archives: order if one depends on another? archives import left-to-right or right-to-left
 	- Excluding libs (show pulled in libs)

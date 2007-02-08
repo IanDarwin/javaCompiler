@@ -60,7 +60,7 @@ import ch.mtSystems.jnc.view.utilities.LayoutUtilities;
 
 public class JNC implements SelectionListener, IAppControllerListener
 {
-	public final static String VERSION = "1.0.2a";
+	public final static String VERSION = "1.1";
 
 	private static Shell shell;
 	private SashForm sash;
@@ -76,7 +76,7 @@ public class JNC implements SelectionListener, IAppControllerListener
 	public JNC(File projectFile)
 	{
 		shell = new Shell(Display.getDefault());
-		shell.setText("JavaNativeCompiler (JNC) v" + VERSION);
+		shell.setText("JNC (JavaNativeCompiler) v" + VERSION);
 		shell.setLayout(new GridLayout());
 
 		sash = new SashForm(shell, SWT.VERTICAL);
