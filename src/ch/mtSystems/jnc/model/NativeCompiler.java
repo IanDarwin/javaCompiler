@@ -49,6 +49,7 @@ public class NativeCompiler
 	
 	private File compilerPath;
 	private String javaLibPath;
+	private boolean guiFilesAdded;
 	private boolean suppressCommandLogging = false;
 
 
@@ -63,8 +64,26 @@ public class NativeCompiler
 	{
 		try
 		{
+			guiFilesAdded = false;
+
 			if(project.getCompileWindows() && !compile("win")) { beep(true); return false; }
 			if(project.getCompileLinux() && !compile("lin")) { beep(true); return false; }
+
+			if(guiFilesAdded)
+			{
+				logger.log("\n-> You seem to compile an AWT/Swing application. AWT/Swing requires some", false);
+				logger.log("libraries at runtime which have been copied into the \"lib\" directory.", false);
+				logger.log("Your application might need all, a couple or even none of them. Feel", false);
+				logger.log("free to delete the ones which aren't required.", false);
+
+				if(project.getCompileWindows() && project.getCompileLinux() &&
+					project.getLinuxFile().getParentFile().equals(project.getWindowsFile().getParentFile()))
+				{
+					logger.log("-> Please note that, since you compiled the Windows and Linux binary", false);
+					logger.log("into the same folder, the required files are now mixed in the same \"lib\"", false);
+					logger.log("directory.", false);
+				}
+			}
 
 			beep(false);
 			return true;
@@ -125,10 +144,11 @@ public class NativeCompiler
 	{
 		if(project.getExcludeGui()) return;
 
-		boolean filesAdded = false;
 		List<File> dirList = new LinkedList<File>();
 		dirList.add(new File("libs/" + os + "/gui/lib"));
-		dirList.add(new File(project.getWindowsFile().getParentFile(), "lib"));
+		dirList.add(os.equals("win") ?
+			new File(project.getWindowsFile().getParentFile(), "lib") :
+			new File(project.getLinuxFile().getParentFile(), "lib"));
 
 		while(!dirList.isEmpty())
 		{
@@ -148,17 +168,10 @@ public class NativeCompiler
 				{
 					if(fOut.exists()) continue;
 					FileUtilities.copyFile(fSrc, fOut);
-					filesAdded = true;
+					guiFilesAdded = true;
 				}
 			}
 		}
-
-		if(!filesAdded) return;
-
-		logger.log("\nPlease note:", false);
-		logger.log("Files required by AWT/Swing have been copied to the \"lib\" directory.", true);
-		logger.log("Your application might need all, a couple or even none of them.", true);
-		logger.log("Feel free to delete the ones which aren't required.", true);
 	}
 
 	private boolean compileJars(String os) throws Exception
@@ -309,6 +322,10 @@ public class NativeCompiler
 	private boolean finalCompile(String os) throws Exception
 	{
 		File outFile = (os.equals("win")) ? project.getWindowsFile() : project.getLinuxFile();
+		if(!outFile.getParentFile().exists() && !outFile.getParentFile().mkdirs())
+		{
+			throw new Exception("Creating the directory \"" + outFile.getParentFile() + "\" failed!");
+		}
 
 		LinkedList<String> alCmd = new LinkedList<String>();
 		alCmd.add((new File(compilerPath, "bin/gcj")).toString());

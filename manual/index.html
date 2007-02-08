@@ -1,19 +1,19 @@
 <html>
-	
-	<head>
-		<title>JavaNativeCompiler (JNC) v1.1 Manual</title>
-	</head>
-	
-	<body>
-		<h1>JavaNativeCompiler (JNC) v1.0 Manual</h1>
 
-		Version from 2007, February 05.<br><br>
+	<head>
+		<title>JNC (JavaNativeCompiler) v1.1 Manual</title>
+	</head>
+
+	<body>
+		<h1>JNC (JavaNativeCompiler) v1.1 Manual</h1>
+
+		Version from 2007, February 07.<br><br>
 
 		The latest versions of the manuals can be viewed
 		<a href="http://jnc.mtSystems.ch/manuals/">here</a>.<br>
 		Please also read the FAQ on the <a href="http://jnc.mtSystems.ch">homepage</a>
 		if you have any further questions...<br><br>
-		
+
 		<h2>Table of contents</h2>
 		<ul>
 			<li><a href="#0">Create/Open a project</a></li>
@@ -22,14 +22,14 @@
 			<li><a href="#3">Step 3 of 4: Advanced settings (optional)</a></li>
 			<li><a href="#4">Step 4 of 4: Compilation</a></li>
 		</ul>
-		
+
 		<hr>
-		
-		
+
+
 		<a name="0"></a>
 		<h2>Create/Open a project</h2>
 		Here you can open a saved project or create a new one. Nothing fancy...
-		
+
 		<a name="1"></a>
 		<h2>Step 1 of 4: Source</h2>
 		Here you can specify the source of your application.<br>
@@ -40,7 +40,7 @@
 					.java and .class files will be used</li>
 				<li>Jars</li>
 		</ul>
-			
+
 		Each jar has an additional checkbox. It specifies if the whole jar
 		or only needed (referenced) classes should be included into the final binary.
 		Including only the needed classes will - who would have guessed that -
@@ -49,7 +49,7 @@
 		by reflection, it will not be in the executable and thus a ClassNotFoundException
 		will be thrown at runtime. To force the inclusion of such classes,
 		you have to add a reference to them into your code.<br><br>
-		
+
 		An example to illustrate the problem and to show how to solve it:<br>
 		SWT does not reference the handlers for the various image types.
 		Looking at the source shows that the classes PNGFileFormat, JPEGFileFormat,
@@ -127,16 +127,17 @@
 		</tr>
 		<tr>
 			<td>Disable optimization</td>
-			<td>The code to compile will be optimized by default. That needs some additional time but will result in
-				smaller and faster binaries. You can turn it off with this option.</td>
+			<td>The code to compile will be optimized by default. This needs - depending on how large your program is -
+			a lot of additional time and a lot of RAM. In return, the compiled binary will be smaller and faster.
+			You can turn it off with this option.</td>
 		</tr>
 	</table>
-	
+
 	* Required
 
 	<a name="3"></a>
 	<h2>Step 3 of 4: Advanced settings (optional)</h2>
-	
+
 	<table border="1">
 		<tr>
 			<th>Setting</th>
@@ -181,12 +182,12 @@
 
 	<a name="4"></a>
 	<h2>Step 4 of 4: Compilation</h2>
-	
+
 	Here you can finally hit the "compile" button :-)<br>
 	If you check "Beep when done", it will beep once if the compilation
 	succeeds and twice if it fails.
 </table>
-	
-	
+
+
 	</body>
 </html>

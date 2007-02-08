@@ -67,7 +67,7 @@ public class IntroductionPage extends WizzardPage implements SelectionListener, 
 		FontData fd = lTitle.getFont().getFontData()[0];
 		fd.setHeight(fd.getHeight()*2);
 		lTitle.setFont(new Font(Display.getDefault(), fd));
-		lTitle.setText("JavaNativeCompiler (JNC)");
+		lTitle.setText("JNC (JavaNativeCompiler)");
 
 		Label lMotto = new Label(textComposite, SWT.WRAP);
 		final GridData data = LayoutUtilities.createGridData(-1, 2, 1, -1, -1);
