@@ -1,0 +1,1 @@
+Manually added java.text.MessageFormat.MessageFormat(String s) for SWT exclusion
