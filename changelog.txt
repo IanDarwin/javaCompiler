@@ -1,12 +1,3 @@
-since 1.0.1
------------
-fixed the problem that AWT/Swing apps didn't always start on Windows
-fixed GUI for Linux (jni.cc fixlet; check for NULL objects)
-added more GUI files and adapt java.library.path instead of use the provided by the user
-fixed gif images (jint was used instead of jboolean)
-update to gcj 4.3
-revised custom flags: now as a list with an option "main compilation only"
-moved upx one dir down in order to make it work on Windows2000
-	(CreateProcess() has problems with short names: http://support.microsoft.com/kb/201318)
-fixed an error that occured when nothing was imported from a jar
-fixed swing (replaced java.text with the one from SUN, merged javax.swing.plaf.metal to javax.swing (no more manual import))
+since 1.1
+---------
+changed the upx call so that it works on Linux too

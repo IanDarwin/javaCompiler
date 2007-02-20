@@ -441,7 +441,13 @@ public class NativeCompiler
 
 		if(!project.getOmitPacking())
 		{
-			String[] saCmdUpx = { "upx", "--best", "-q", outFile.toString() };
+			String[] saCmdUpx =
+				{
+					(new File("upx")).getAbsolutePath(),
+					"--best",
+					"-q",
+					outFile.toString()
+				};
 			if(!runCmd(saCmdUpx, "packing binary", false)) return false;
 		}
 
