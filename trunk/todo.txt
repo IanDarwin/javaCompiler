@@ -1,27 +1,17 @@
-GCJ
-- read http://gcc.gnu.org/contribute.html#standards
-- merge patches, commit or delete already commited
-- Make backup / merge d: and linux laptop with external hd
-- lin-lin doesn't work with "--with-sysroot". probably a regression (linux/limits.h and linux/errno.h not found)
-- findirect-dispatch broken with jars?
 - automated mingw gcj tester (http://gcc.gnu.org/wiki/CompileFarm)
-
-1.2
-	- GUI Windows: fix Test 09 (ImageConverter)
-	- GUI Windows: FileEncrypter sample has sometimes issues (e.g. the need of pressing the button twice)
-	- GUI Windows: LittleUniverse has sometimes issues (only grey on startup)
-	- GUI Linux: focus problems with AWT editor. sometimes impossible to edit the text
-	- GCJ Way slower since 4.3?
-	- Flags for GCJ: possibility to edit them and the order has to be kept
-	- Jar archives: order if one depends on another? archives import left-to-right or right-to-left
-	- Excluding libs (show pulled in libs)
-	- beep on by default?
-
-	- "cancel" compilation
-
-	- dwarf exception handling
-	- GUI 1.5
-	- upx with progress bar
-	- upx quality setting: best (very good compression, very slow), 9 (good compression, slow), ... , 1 (bad compression, fast)
-	- shared compilation, not only static
-	- Support for MAC
+- GUI
+	Win: GUI apps still seldom just exit after start
+	Win: DND example sometimes failes while dragging. On Linux too?
+	Lin: focus problems with AWT editor. sometimes impossible to edit the text
+- GCJ Way slower since 4.3?
+- findirect-dispatch broken with jars? mingw only?
+- Flags for GCJ: possibility to edit them and the order has to be kept
+- Jar archives: order if one depends on another? archives import left-to-right or right-to-left
+- Excluding libs (show pulled in libs)
+- "cancel" compilation
+- dwarf exception handling
+- GUI 1.5
+- upx with progress bar
+- upx quality setting: best (very good compression, very slow), 9 (good compression, slow), ... , 1 (bad compression, fast)
+- shared compilation, not only static
+- Support for MAC
