@@ -1,5 +1,6 @@
 - automated mingw gcj tester (http://gcc.gnu.org/wiki/CompileFarm)
 - GUI
+	Both: Date test fails because of java.text.
 	Win: GUI apps still seldom just exit after start
 	Win: DND example sometimes failes while dragging. On Linux too?
 	Lin: focus problems with AWT editor. sometimes impossible to edit the text
