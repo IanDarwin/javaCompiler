@@ -1,4 +1,5 @@
 - automated mingw gcj tester (http://gcc.gnu.org/wiki/CompileFarm)
+- http://gcc.gnu.org/bugzilla/show_bug.cgi?id=30937
 - GUI
 	Both: Date test fails because of java.text.
 	Win: GUI apps still seldom just exit after start
