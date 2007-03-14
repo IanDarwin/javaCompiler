@@ -1,5 +1,9 @@
-- automated mingw gcj tester (http://gcc.gnu.org/wiki/CompileFarm)
+- Readd gcjh (gjavah?). Needed for CNI...
+- Automated mingw gcj tester (http://gcc.gnu.org/wiki/CompileFarm)
 - http://gcc.gnu.org/bugzilla/show_bug.cgi?id=30937
+- if adding jar archives and do NOT check the checkbox I'll get
+	> following error during compilation: "can't run command: <PATH_TO_GCC>/ar"..
+	> it does not work if PATH_TO_GCC contains spaces e.g. "Program Files"
 - GUI
 	Both: Date test fails because of java.text.
 	Win: GUI apps still seldom just exit after start
