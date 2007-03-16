@@ -1,3 +1,4 @@
+- Win32 Threads broken (thread race)
 - Readd gcjh (gjavah?). Needed for CNI...
 - Automated mingw gcj tester (http://gcc.gnu.org/wiki/CompileFarm)
 - http://gcc.gnu.org/bugzilla/show_bug.cgi?id=30937
@@ -6,11 +7,10 @@
 	> it does not work if PATH_TO_GCC contains spaces e.g. "Program Files"
 - GUI
 	Both: Date test fails because of java.text.
-	Win: GUI apps still seldom just exit after start
+	Win: GUI apps still seldom just exit after start (only because win32 thread problem or other reason?)
 	Win: DND example sometimes failes while dragging. On Linux too?
 	Lin: focus problems with AWT editor. sometimes impossible to edit the text
 - GCJ Way slower since 4.3?
-- findirect-dispatch broken with jars? mingw only?
 - Flags for GCJ: possibility to edit them and the order has to be kept
 - Jar archives: order if one depends on another? archives import left-to-right or right-to-left
 - Excluding libs (show pulled in libs)
