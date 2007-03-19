@@ -1,3 +1,4 @@
+- indirect dispatch broken on target=Linux. Set use_libgcj_bc=no in configure.host.
 - Win32 Threads broken (thread race)
 - Readd gcjh (gjavah?). Needed for CNI...
 - Automated mingw gcj tester (http://gcc.gnu.org/wiki/CompileFarm)
