@@ -1,3 +1,5 @@
+- JNC on Vista: space problems?
+  PATH=...\gcc-122233-win\bin:...\gcc-122233-win\libexec\gcc\i686-pc-mingw32\4.3.0;%PATH% 
 - indirect dispatch broken on target=Linux. Set use_libgcj_bc=no in configure.host.
 - Win32 Threads broken (thread race)
 - Readd gcjh (gjavah?). Needed for CNI...
