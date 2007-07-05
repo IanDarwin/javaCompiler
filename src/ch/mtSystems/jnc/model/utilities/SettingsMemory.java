@@ -87,8 +87,16 @@ public class SettingsMemory
 		save();
 	}
 
-	public String getLicense() { return license; }
-	
+	/**
+	 * Returns the license the user has configured.
+	 * 
+	 * @return null or the license string (length > 0).
+	 */
+	public String getLicense()
+	{
+		return license;
+	}
+
 	public void setLicense(String license)
 	{
 		this.license = (license == null || license.length() == 0) ? null : license;

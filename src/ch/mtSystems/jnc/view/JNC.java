@@ -50,7 +50,6 @@ import ch.mtSystems.jnc.control.IAppControllerListener;
 import ch.mtSystems.jnc.model.ICompilationProgressLogger;
 import ch.mtSystems.jnc.model.NativeCompiler;
 import ch.mtSystems.jnc.model.JNCProject;
-import ch.mtSystems.jnc.model.utilities.LicenseChecker;
 import ch.mtSystems.jnc.model.utilities.SettingsMemory;
 import ch.mtSystems.jnc.view.dialogs.SettingsDialog;
 import ch.mtSystems.jnc.view.pages.CreateProjectPage;
@@ -402,8 +401,7 @@ public class JNC implements SelectionListener, IAppControllerListener
 	
 	private static void checkLicense()
 	{
-		String license = SettingsMemory.getSettingsMemory().getLicense(); 
-		if(!LicenseChecker.isLicenseValid(license))
+		if(SettingsMemory.getSettingsMemory().getLicense() == null)
 		{
 			Shell shell = new Shell(Display.getDefault());
 
