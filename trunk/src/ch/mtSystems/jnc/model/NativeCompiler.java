@@ -37,7 +37,6 @@ import org.eclipse.swt.widgets.Display;
 
 import ch.mtSystems.jnc.model.utilities.ClassUtilities;
 import ch.mtSystems.jnc.model.utilities.FileUtilities;
-import ch.mtSystems.jnc.model.utilities.LicenseChecker;
 import ch.mtSystems.jnc.model.utilities.SettingsMemory;
 
 
@@ -374,7 +373,7 @@ public class NativeCompiler
 		if(os.equals("win"))
 		{
 			String license = SettingsMemory.getSettingsMemory().getLicense(); 
-			alCmd.add((LicenseChecker.isLicenseValid(license)) ? "-Djnc.license=" + license : "-ljncTrial");
+			alCmd.add((license != null) ? "-Djnc.license=" + license : "-ljncTrial");
 		}
 
 		HashSet<File> hsClasspath = new HashSet<File>(); 
