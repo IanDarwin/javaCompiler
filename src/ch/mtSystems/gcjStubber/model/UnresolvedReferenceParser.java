@@ -32,7 +32,7 @@ public class UnresolvedReferenceParser
 {
 	private static final boolean DEBUG = false;
 	private static final Pattern UNDEFINED_REFERENCE_PATTERN = Pattern.compile("undefined reference to `(.*?)'");
-	private static final Pattern METHOD_PATTERN = Pattern.compile("(.*?) (.*?)\\((.*?)\\)");
+	private static final Pattern METHOD_PATTERN = Pattern.compile("((?:.*? )+)(.*?)\\((.*?)\\)"); // return type could be "long long", so "(.*?) (.*?)\\((.*?)\\)" is not sufficent. 
 	private static final Pattern CONSTRUCTOR_PATTERN = Pattern.compile("(\\S*?)\\((.*?)\\)");
 	private static final Pattern FIELDNAME_PATTERN = Pattern.compile("\\S+");
 
@@ -96,7 +96,7 @@ public class UnresolvedReferenceParser
 				String longClassName = m.group(2).substring(0, lastPoint);
 				String methodName = m.group(2).substring(lastPoint+1);
 				String[] argTypes = (m.group(3).length() > 0) ? m.group(3).split(", ") : new String[0];
-				getMissingClass(longClassName).addMethod(methodName, argTypes);
+				getMissingClass(longClassName).addMissingMethod(methodName, argTypes);
 			} else
 			{
 				m = CONSTRUCTOR_PATTERN.matcher(reference);
@@ -116,7 +116,7 @@ public class UnresolvedReferenceParser
 						} else
 						{
 							String[] argTypes = m.group(2).split(", ");
-							getMissingClass(longClassName).addConstructor(argTypes);
+							getMissingClass(longClassName).addMissingConstructor(argTypes);
 						}
 					} else
 					{
@@ -132,7 +132,7 @@ public class UnresolvedReferenceParser
 
 					if(excludedClasses.contains(longClassName) && FIELDNAME_PATTERN.matcher(fieldName).matches())
 					{
-						getMissingClass(longClassName).addField(fieldName);
+						getMissingClass(longClassName).addMissingField(fieldName);
 					} else
 					{
 						System.err.println("  #################### NOT RECOGNIZED 2 ####################");

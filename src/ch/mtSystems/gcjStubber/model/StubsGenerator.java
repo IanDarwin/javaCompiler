@@ -51,7 +51,9 @@ public class StubsGenerator
 
 		helloWorldDotJava = new File(stubsDir, "HelloWorld.java");
 	}
-	
+
+
+	// --------------- public methods ---------------
 	
 	public void addListener(StubsGeneratorListener listener)
 	{
@@ -99,6 +101,10 @@ public class StubsGenerator
 			Arrays.sort(dirContent);
 			for(int i=0; i<dirContent.length && !stop; i++)
 			{
+				//if(!dirContent[i].getName().equals("ber.o")) continue;
+				//if(i < 15) continue;
+
+				log((i+1) + "/" + dirContent.length + ": Handling \"" + dirContent[i].getName() + "\"... ");
 				if(!createStubForObject(dirContent[i])) return;
 				for(StubsGeneratorListener l : listeners) l.progress(i+1, dirContent.length);
 			}
@@ -219,7 +225,7 @@ public class StubsGenerator
 	
 			if(commandExecutor.getOutput().length != 0 || commandExecutor.getError().length != 0)
 			{
-				log("Failed:\n");
+				log("Failed (1):\n");
 				for(String s : commandExecutor.getOutput()) log("   [stdout] " + s + "\n");
 				for(String s : commandExecutor.getError()) log("   [stderr] " + s + "\n");
 				return false;
@@ -275,7 +281,7 @@ public class StubsGenerator
 			commandExecutor.execute();
 			if(commandExecutor.getOutput().length != 0 || commandExecutor.getError().length != 0)
 			{
-				log("Failed:\n");
+				log("Failed (2):\n");
 				for(String s : commandExecutor.getOutput()) log("   [stdout] " + s + "\n");
 				for(String s : commandExecutor.getError()) log("   [stderr] " + s + "\n");
 				return false;
@@ -288,7 +294,7 @@ public class StubsGenerator
 					!commandExecutor.getOutput()[0].equals("HelloWorld") ||
 					commandExecutor.getError().length != 0)
 			{
-				log("Failed:\n");
+				log("Failed (3):\n");
 				for(String s : commandExecutor.getOutput()) log("   [stdout] " + s + "\n");
 				for(String s : commandExecutor.getError()) log("   [stderr] " + s + "\n");
 				return false;
@@ -359,8 +365,6 @@ public class StubsGenerator
 	
 	private boolean createStubForObject(File fObj)
 	{
-		log("Handling \"" + fObj.getName() + "\"... ");
-
 		File fObjTmp = new File(fObj.getParentFile(), fObj.getName()+".bak");
 		boolean renameBack = false;
 
@@ -426,7 +430,7 @@ public class StubsGenerator
 			commandExecutor.execute();
 			if(commandExecutor.getOutput().length != 0 || commandExecutor.getError().length != 0)
 			{
-				log("Unexpected output on stub compilation:\n");
+				log("Unexpected output on compilation with stub:\n");
 				for(String s : commandExecutor.getOutput()) log("   [stdout] " + s + "\n");
 				for(String s : commandExecutor.getError()) log("   [stderr] " + s + "\n");
 				return false;
@@ -439,16 +443,17 @@ public class StubsGenerator
 					!commandExecutor.getOutput()[0].equals("HelloWorld") ||
 					commandExecutor.getError().length != 0)
 			{
-				log("Failed:\n");
-				for(String s : commandExecutor.getOutput()) log("   [stdout] " + s + "\n");
-				for(String s : commandExecutor.getError()) log("   [stderr] " + s + "\n");
-				return false;
+				log("Phase1 Failed\n");
+				//for(String s : commandExecutor.getOutput()) log("   [stdout] " + s + "\n");
+				//for(String s : commandExecutor.getError()) log("   [stderr] " + s + "\n");
+				return true; //TODO: Phase 2 and 3, report output and error output
 			}
 
 			log("Ok\n");
 			return true;
 		} catch(Exception ex)
 		{
+			ex.printStackTrace();
 			log("Exception occured:\n   " + ex.getMessage() + "\n");
 			return false;
 		} finally

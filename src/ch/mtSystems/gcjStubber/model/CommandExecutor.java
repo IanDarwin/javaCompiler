@@ -50,6 +50,8 @@ public class CommandExecutor
 	}
 
 
+	// --------------- public methods ---------------
+
 	public void execute() throws Exception
 	{
 		Process p = Runtime.getRuntime().exec(cmd, null, workingDir);
@@ -71,6 +73,9 @@ public class CommandExecutor
 	{
 		return errorList.toArray(new String[0]);
 	}
+
+
+	// --------------- private methods ---------------
 
 	private Thread log(final InputStream inputStream, final List<String> saveList) throws Exception
 	{

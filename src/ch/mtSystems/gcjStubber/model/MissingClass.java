@@ -31,7 +31,8 @@ import org.apache.bcel.generic.Type;
 
 
 public class MissingClass
-{	
+{
+	private String simpleClassName;
 	private JavaClass jc;
 	private Set<Field> fieldSet = new HashSet<Field>();
 	private Set<Method> methodSet = new HashSet<Method>(); // constructors and methods
@@ -41,27 +42,51 @@ public class MissingClass
 	{
 		String fileName = className.replaceAll("\\.", "/") + ".class";
 		jc = (new ClassParser(libgcjDotJar.toString(), fileName)).parse();
+
+		simpleClassName = jc.getClassName();
+		simpleClassName = simpleClassName.substring(simpleClassName.lastIndexOf('.')+1);
 	}
 
+
+	// --------------- public methods ---------------
+
+	public JavaClass getJavaClass()
+	{
+		return jc;
+	}
 	
 	public String getClassName()
 	{
 		return jc.getClassName();
 	}
-
+	
 	public String getSimpleClassName()
 	{
-		String className = jc.getClassName();
-		return className.substring(className.lastIndexOf('.')+1);
+		return simpleClassName;
 	}
 	
-	public void addConstructor(String[] argTypes) throws Exception
+	public void addMissingConstructor(String[] argTypes) throws Exception
 	{
-		addMethod("<init>", argTypes);
+		addMissingMethod("<init>", argTypes);
 	}
 	
-	public void addMethod(String methodName, String[] argTypes) throws Exception
+	public void addMissingMethod(String methodName, String[] argTypes) throws Exception
 	{
+		// fix some namings first
+		for(int i=0; i<argTypes.length; i++)
+		{
+			if(argTypes[i].equals("bool"))
+			{
+				argTypes[i] = "boolean";
+			} else if(argTypes[i].equals("long long"))
+			{
+				argTypes[i] = "long";
+			} else if(argTypes[i].equals("wchar_t[]"))
+			{
+				argTypes[i] = "char[]";
+			}
+		}
+
 		mainLoop:
 		for(Method m : jc.getMethods())
 		{
@@ -79,11 +104,41 @@ public class MissingClass
 			return;
 		}
 
-		throw new Exception("Method \"" + methodName + "\" not found in class \"" + getSimpleClassName() + "\"!");
+		// method not found!
+		StringBuffer sb = new StringBuffer();
+		sb.append("Method \"" + methodName + "(");
+		for(int i=0; i<argTypes.length; i++)
+		{
+			if(i > 0) sb.append(", ");
+			sb.append(argTypes[i]);
+		}
+		sb.append(")\" not found in class \"" + getClassName() + "\". Candidates are:\n");
+		
+		for(Method m : jc.getMethods())
+		{
+			sb.append("   - " + m.getName() + "(");
+			Type[] ta = m.getArgumentTypes();
+			for(int i=0; i<ta.length; i++)
+			{
+				if(i > 0) sb.append(", ");
+				sb.append(ta[i].toString());
+			}
+			sb.append(")\n");
+		}
+	
+		throw new Exception(sb.toString());
 	}
 	
-	public void addField(String fieldName) throws Exception
+	public Set<Method> getMissingMethods()
 	{
+		return methodSet;
+	}
+	
+	public void addMissingField(String fieldName) throws Exception
+	{
+		//TODO: why are these wrong in the linker output???
+		if(fieldName.equals("END_OF_SEQU_ENCE")) fieldName = "END_OF_SEQUENCE";
+		
 		for(Field f : jc.getFields())
 		{
 			if(!f.getName().equals(fieldName)) continue;
@@ -91,112 +146,15 @@ public class MissingClass
 			return;
 		}
 
-		throw new Exception("Field \"" + fieldName + "\" not found in class \"" + getSimpleClassName() + "\"!");
-	}
-	
-	public String toString()
-	{
+		// field not found!
 		StringBuffer sb = new StringBuffer();
-
-		// package
-		sb.append("package ");
-		sb.append(jc.getPackageName());
-		sb.append(";\n\n");
-		
-		// class declaration
-		if(jc.isPublic()) sb.append("public ");
-		if(jc.isProtected()) sb.append("protected ");
-		if(jc.isPrivate()) sb.append("private ");
-		if(jc.isAbstract()) sb.append("abstract ");
-		if(jc.isFinal()) sb.append("final ");
-		if(jc.isClass()) sb.append("class ");
-		if(jc.isInterface()) sb.append("interface ");
-		sb.append(getSimpleClassName());
-		sb.append("\n");
-
-		// start the class
-		sb.append("{\n");
-
-		// fields
-		for(Field f : fieldSet)
-		{
-			sb.append("  ");
-			sb.append(f);
-			sb.append(" = ");
-			sb.append(createDummyValue(f.getType()));
-			sb.append(";\n");
-		}
-		if(fieldSet.size() > 0) sb.append("\n");
-		
-		// constructors
-		if(jc.isClass())
-		{
-			sb.append("  public ");
-			sb.append(getSimpleClassName());
-			sb.append("()\n");
-			sb.append("  { }\n");
-
-			for(Method m : methodSet)
-			{
-				if(!m.getName().equals("<init>")) continue;
-
-				sb.append("  ");
-
-				// note: bug in bcel, constructors have a "void" return type.
-				sb.append(methodToString(m).replace("void <init>", getSimpleClassName()));
-
-				sb.append("  { }\n");
-			}
-
-			sb.append("\n");
-		} 
-
-		// methods
-		for(Method m : methodSet)
-		{
-			if(m.getName().equals("<init>")) continue;
-
-			sb.append("  ");
-			sb.append(methodToString(m));
-			sb.append(" {");
-			String dummyReturn = createDummyValue(m.getReturnType());
-			if(dummyReturn != null)
-			{
-				sb.append(" return ");
-				sb.append(dummyReturn);
-				sb.append(";");
-			}
-			sb.append(" }\n");
-		}
-
-		// finish the class
-		sb.append("}\n");
-
-		return sb.toString();
-	}
-
-
-	// --------------- private methods ---------------
-
-	private String createDummyValue(Type t)
-	{
-		if(t.equals(Type.VOID))    return null;
-		if(t.equals(Type.BOOLEAN)) return "true";
-		if(t.equals(Type.BYTE))    return "(byte)23";
-		if(t.equals(Type.CHAR))    return "'2'";
-		if(t.equals(Type.DOUBLE))  return "23";
-		if(t.equals(Type.FLOAT))   return "23";
-		if(t.equals(Type.INT))     return "23";
-		if(t.equals(Type.LONG))    return "23";
-		if(t.equals(Type.SHORT))   return "(short)23";
-		return "(" + t.toString().replaceAll("\\$", ".") + ")null";
+		sb.append("Field \"" + fieldName + "\" not found in class \"" + getClassName() + "\". Candidates are:\n");
+		for(Field f : jc.getFields()) sb.append("   - " + f.getName() + "\n");
+		throw new Exception(sb.toString());
 	}
 	
-	private String methodToString(Method m)
+	public Set<Field> getMissingFields()
 	{
-		return m.toString().
-			replaceAll("\\)\\s*?throws.*", ")"). // cut exceptions
-			replaceAll("transient\\s+(.*?\\()", "$1"). // cut "transient"
-			replaceAll("native\\s+(.*?\\()", "$1"); // cut "native"
+		return fieldSet;
 	}
 }
