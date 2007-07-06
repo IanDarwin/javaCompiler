@@ -101,10 +101,16 @@ public class StubsGenerator
 			Arrays.sort(dirContent);
 			for(int i=0; i<dirContent.length && !stop; i++)
 			{
-				//if(i < 20) continue;
+				//if(i != 512) continue;
 
 				log((i+1) + "/" + dirContent.length + ": Handling \"" + dirContent[i].getName() + "\"... ");
-				if(!createStubForObject(dirContent[i])) return;
+				if(!dirContent[i].getName().startsWith("gui_"))
+				{
+					if(!createStubForObject(dirContent[i])) return;
+				} else
+				{
+					log("Todo\n");
+				}
 				for(StubsGeneratorListener l : listeners) l.progress(i+1, dirContent.length);
 			}
 		} finally
@@ -142,6 +148,8 @@ public class StubsGenerator
 	 */
 	private boolean checkGcj()
 	{
+		boolean linux = System.getProperty("os.name").equals("Linux");
+
 		libgcjDotSpec = new File(gcjDir, "lib/libgcj.spec");
 		if(!libgcjDotSpec.exists())
 		{
@@ -163,24 +171,27 @@ public class StubsGenerator
 			return false;
 		}
 
-		cmdGcj = new File(gcjDir, "bin/gcj.exe");
+		String name = linux ? "gcj" : "gcj.exe";
+		cmdGcj = new File(gcjDir, "bin/" + name);
 		if(!cmdGcj.exists())
 		{
-			log("Invalid:\n   gcj.exe not found!\n");
+			log("Invalid:\n   " + name + " not found!\n");
 			return false;
 		}
 		
-		cmdAr = new File(gcjDir, "bin/ar.exe");
+		name = linux ? "ar" : "ar.exe";
+		cmdAr = new File(gcjDir, "bin/" + name);
 		if(!cmdAr.exists())
 		{
-			log("Invalid:\n   ar.exe not found!\n");
+			log("Invalid:\n   " + name + " not found!\n");
 			return false;
 		}
-		
-		cmdNm = new File(gcjDir, "bin/nm.exe");
+
+		name = linux ? "nm" : "nm.exe";
+		cmdNm = new File(gcjDir, "bin/" + name);
 		if(!cmdNm.exists())
 		{
-			log("Invalid:\n   nm.exe not found!\n");
+			log("Invalid:\n   " + name + " not found!\n");
 			return false;
 		}
 
@@ -272,7 +283,10 @@ public class StubsGenerator
 			cmd.add("--main=HelloWorld");
 			cmd.add("-o" + helloWorldDotExe.toString());
 			cmd.add(helloWorldDotJava.toString());
-			cmd.add("*.o");
+
+			//cmd.add("*.o");
+			for(File f : stubsDir.listFiles(new ObjectFileFilter())) cmd.add(f.toString());
+
 			for(String arg : compilationArguments) cmd.add(arg);
 			
 			// compile
@@ -317,6 +331,7 @@ public class StubsGenerator
 			br.close();
 			
 			FileWriter fileWriter = new FileWriter(libgcjDotSpec);
+			boolean replaced = false;
 			for(int i=0; i<lines.size(); i++)
 			{
 				String line = lines.get(i);
@@ -330,10 +345,10 @@ public class StubsGenerator
 						fileWriter.write(line);
 						fileWriter.write("\n");
 
-						fileWriter.write(line.substring(0, index));
-						fileWriter.write(line.substring(index+5));
+						fileWriter.write(line.replaceAll("-lgcj", ""));
 						fileWriter.write("\n");
 
+						replaced = true;
 						continue;
 					}
 				} else
@@ -344,6 +359,7 @@ public class StubsGenerator
 						fileWriter.write("\n");
 
 						i++;
+						replaced = true;
 						continue;
 					}
 				}
@@ -353,6 +369,12 @@ public class StubsGenerator
 			}
 			fileWriter.flush();
 			fileWriter.close();
+
+			if(!replaced)
+			{
+				log("Library entry not found!");
+				return false;
+			}
 
 			return true;
 		} catch(Exception ex)
@@ -391,7 +413,10 @@ public class StubsGenerator
 			cmd.add("--main=HelloWorld");
 			cmd.add("-o" + helloWorldDotExe.toString());
 			cmd.add(helloWorldDotJava.toString());
-			cmd.add("*.o");
+			
+			//cmd.add("*.o");
+			for(File f : stubsDir.listFiles(new ObjectFileFilter())) cmd.add(f.toString());
+
 			for(String arg : compilationArguments) cmd.add(arg);
 
 			CommandExecutor commandExecutor = new CommandExecutor(cmd.toArray(new String[0]), stubsDir);
@@ -432,7 +457,7 @@ public class StubsGenerator
 				log("Unexpected output on compilation with stub:\n");
 				for(String s : commandExecutor.getOutput()) log("   [stdout] " + s + "\n");
 				for(String s : commandExecutor.getError()) log("   [stderr] " + s + "\n");
-				return false;
+				return true;
 			}
 
 			// check if the compiled exe works

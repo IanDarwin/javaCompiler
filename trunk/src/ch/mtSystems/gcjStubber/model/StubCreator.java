@@ -31,6 +31,7 @@ import java.util.Set;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
+import org.apache.bcel.classfile.Field;
 import org.apache.bcel.classfile.Method;
 import org.apache.bcel.generic.Type;
 
@@ -77,7 +78,8 @@ public abstract class StubCreator
 				fileWriter.flush();
 				fileWriter.close();
 			}
-			
+			finalizeStub(missingClasses);
+
 			// compile all .java to .class files
 			List<String> cmd = new LinkedList<String>();
 			cmd.add(cmdGcj.toString());
@@ -158,6 +160,33 @@ public abstract class StubCreator
 
 	protected abstract void dumpClass(MissingClass missingClass, FileWriter fileWriter) throws Exception;
 
+	protected abstract void finalizeStub(MissingClass[] missingClasses);
+	
+	protected String fieldToString(Field field)
+	{
+		StringBuffer sb = new StringBuffer();
+
+		// access modifier
+		if(field.isPublic()) sb.append("public ");
+		if(field.isProtected()) sb.append("protected ");
+		if(field.isPrivate()) sb.append("private ");
+		if(field.isAbstract()) sb.append("abstract ");
+		if(field.isFinal()) sb.append("final ");
+		if(field.isStatic()) sb.append("static ");
+
+		// type and name
+		sb.append(field.getType());
+		sb.append(" ");
+		sb.append(field.getName());
+		
+		// default initialization
+		sb.append(" = ");
+		sb.append(createDummyValue(field.getType()));
+		sb.append(";");
+
+		return sb.toString();
+	}
+	
 	protected String methodToString(Method method)
 	{
 		StringBuffer sb = new StringBuffer();
@@ -171,7 +200,7 @@ public abstract class StubCreator
 		if(method.isStatic()) sb.append("static ");
 
 		// return value and name
-		sb.append(method.getReturnType().toString().replaceAll("\\$", "."));
+		sb.append(method.getReturnType());
 		sb.append(" ");
 		sb.append(method.getName());
 
@@ -181,7 +210,7 @@ public abstract class StubCreator
 		for(int i=0; i<argumentTypes.length; i++)
 		{
 			if(i > 0) sb.append(", ");
-			sb.append(argumentTypes[i].toString().replaceAll("\\$", "."));
+			sb.append(argumentTypes[i]);
 			sb.append(" arg");
 			sb.append(i);
 		}
@@ -212,7 +241,7 @@ public abstract class StubCreator
 		if(type.equals(Type.INT))     return "23";
 		if(type.equals(Type.LONG))    return "23";
 		if(type.equals(Type.SHORT))   return "(short)23";
-		return "(" + type.toString().replaceAll("\\$", ".") + ")null";
+		return "(" + type + ")null";
 	}
 
 

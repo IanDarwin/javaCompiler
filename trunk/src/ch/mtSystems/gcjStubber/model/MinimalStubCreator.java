@@ -67,10 +67,8 @@ public class MinimalStubCreator extends StubCreator
 		for(Field f : fieldSet)
 		{
 			fileWriter.write("  ");
-			fileWriter.write(f.toString());
-			fileWriter.write(" = ");
-			fileWriter.write(createDummyValue(f.getType()));
-			fileWriter.write(";\n");
+			fileWriter.write(fieldToString(f));
+			fileWriter.write("\n");
 		}
 		if(fieldSet.size() > 0) fileWriter.write("\n");
 		
@@ -107,5 +105,36 @@ public class MinimalStubCreator extends StubCreator
 
 		// finish the class
 		fileWriter.write("}\n");
+	}
+	
+	protected void finalizeStub(MissingClass[] missingClasses)
+	{
+		/*List<String> createdClasses = new LinkedList<String>();
+		for(MissingClass missingClass : missingClasses) createdClasses.add(missingClass.getClassName());
+
+		for(MissingClass missingClass : missingClasses)
+		{
+			for(Field field : missingClass.getMissingFields())
+			{
+				if(!createdClasses.contains(field.getType().toString()))
+				{
+					System.out.println(field.getType().toString() + " missing");
+				}
+			}
+			for(Method method : missingClass.getMissingMethods())
+			{
+				if(!createdClasses.contains(method.getReturnType().toString()))
+				{
+					System.out.println(method.getReturnType().toString() + " missing");
+				}
+				for(Type argType : method.getArgumentTypes())
+				{
+					if(!createdClasses.contains(argType.toString()))
+					{
+						System.out.println(argType.toString() + " missing");
+					}
+				}
+			}
+		}*/
 	}
 }
