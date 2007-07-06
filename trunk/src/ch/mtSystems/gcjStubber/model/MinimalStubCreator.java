@@ -20,144 +20,92 @@
 package ch.mtSystems.gcjStubber.model;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.FileWriter;
-import java.io.InputStream;
-import java.util.LinkedHashSet;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Set;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipOutputStream;
 
-import ch.mtSystems.jnc.model.utilities.FileUtilities;
+import org.apache.bcel.classfile.Field;
+import org.apache.bcel.classfile.JavaClass;
+import org.apache.bcel.classfile.Method;
 
 
-public class MinimalStubCreator
+public class MinimalStubCreator extends StubCreator
 {
-	private MissingClass[] missingClasses;
-	private File jar;
-	private File object;
-	private File cmdGcj;
-	private File tmpDir;
-	
-	
 	public MinimalStubCreator(MissingClass[] missingClasses, File jar, File object,
 			File cmdGcj, File tmpDir)
 	{
-		this.missingClasses = missingClasses;
-		this.jar = jar;
-		this.object = object;
-		this.cmdGcj = cmdGcj;
-		this.tmpDir = tmpDir;
+		super(missingClasses, jar, object, cmdGcj, tmpDir);
 	}
 
 
-	public void create() throws Exception
+	// --------------- overwritten methods ---------------
+
+	protected void dumpClass(MissingClass missingClass, FileWriter fileWriter) throws Exception
 	{
-		// create all .java files
-		for(MissingClass missingClass : missingClasses)
+		JavaClass jc = missingClass.getJavaClass();
+
+		// package
+		fileWriter.write("package ");
+		fileWriter.write(jc.getPackageName());
+		fileWriter.write(";\n\n");
+		
+		// class declaration
+		if(jc.isPublic()) fileWriter.write("public ");
+		if(jc.isProtected()) fileWriter.write("protected ");
+		if(jc.isPrivate()) fileWriter.write("private ");
+		if(jc.isAbstract()) fileWriter.write("abstract ");
+		if(jc.isFinal()) fileWriter.write("final ");
+		if(jc.isClass()) fileWriter.write("class ");
+		if(jc.isInterface()) fileWriter.write("interface ");
+		fileWriter.write(missingClass.getSimpleClassName());
+		fileWriter.write("\n");
+
+		// start the class
+		fileWriter.write("{\n");
+
+		// fields
+		Set<Field> fieldSet = missingClass.getMissingFields();
+		for(Field f : fieldSet)
 		{
-			File sourceFile = new File(tmpDir, missingClass.getClassName().replaceAll("\\.", "/") + ".java");
-			if(!sourceFile.getParentFile().exists() && !sourceFile.getParentFile().mkdirs())
-			{
-				throw new Exception("Can't create directory: \"" + sourceFile.getParentFile() + "\"!");
-			}
+			fileWriter.write("  ");
+			fileWriter.write(f.toString());
+			fileWriter.write(" = ");
+			fileWriter.write(createDummyValue(f.getType()));
+			fileWriter.write(";\n");
+		}
+		if(fieldSet.size() > 0) fileWriter.write("\n");
+		
+		// constructors
+		if(jc.isClass())
+		{
+			// always add the default constructor (otherwise it's not available if there's another)
+			fileWriter.write("  public ");
+			fileWriter.write(missingClass.getSimpleClassName());
+			fileWriter.write("() { }\n");
 			
-			FileWriter fileWriter = new FileWriter(sourceFile);
-			fileWriter.write(missingClass.toString());
-			fileWriter.flush();
-			fileWriter.close();
-		}
-		
-		// compile all .java to .class files
-		List<String> cmd = new LinkedList<String>();
-		cmd.add(cmdGcj.toString());
-		cmd.add("-s");
-		cmd.add("-w");
-		cmd.add("-O2");
-		cmd.add("-C");
-		for(File f : listFiles(tmpDir)) cmd.add(f.toString());
-
-		CommandExecutor commandExecutor = new CommandExecutor(cmd.toArray(new String[0]), tmpDir);
-		commandExecutor.execute();
-		if(commandExecutor.getOutput().length > 0 || commandExecutor.getError().length > 0)
-		{
-			StringBuffer sb = new StringBuffer("Compiling java source files failed:\n");
-			for(String s : commandExecutor.getOutput()) { sb.append("   [stdout] "); sb.append(s); sb.append("\n"); }
-			for(String s : commandExecutor.getError()) { sb.append("   [stderr] "); sb.append(s); sb.append("\n"); }
-			throw new Exception(sb.toString());
-		}
-
-		// create a jar from the .class files
-		ZipOutputStream outputStream = new ZipOutputStream(new FileOutputStream(jar));
-		byte[] buffer = new byte[2048];
-
-		for(File f : listFiles(tmpDir))
-		{
-			if(!f.getName().endsWith(".class")) continue;
-
-			String entryName = f.toString().substring(tmpDir.toString().length()+1).replaceAll("\\\\", "/");
-			ZipEntry zipEntry = new ZipEntry(entryName);
-			outputStream.putNextEntry(zipEntry);
-
-			InputStream inputStream = new FileInputStream(f);
-			while(true)
+			for(Method m : missingClass.getMissingMethods())
 			{
-				int len = inputStream.read(buffer);
-				if(len < 0) break;
-				outputStream.write(buffer, 0, len);
+				if(!m.getName().equals("<init>")) continue;
+
+				// note: bug in bcel, constructors have a "void" return type.
+				fileWriter.write("  ");
+				fileWriter.write(methodToString(m).replace("void <init>", missingClass.getSimpleClassName()));
+				fileWriter.write("\n");
 			}
-			inputStream.close();
 
-			outputStream.closeEntry();
-		}
-		outputStream.flush();
-		outputStream.close();
-		
-		// compile the jar to an object
-		cmd.clear();
-		cmd.add(cmdGcj.toString());
-		cmd.add("-s");
-		cmd.add("-O2");
-		cmd.add("-c");
-		cmd.add(jar.toString());
-		cmd.add("-o");
-		cmd.add(object.toString());
+			fileWriter.write("\n");
+		} 
 
-		commandExecutor = new CommandExecutor(cmd.toArray(new String[0]), tmpDir);
-		commandExecutor.execute();
-		if(commandExecutor.getOutput().length > 0 || commandExecutor.getError().length > 0)
+		// methods
+		for(Method m : missingClass.getMissingMethods())
 		{
-			StringBuffer sb = new StringBuffer("Compiling the jar failed:\n");
-			for(String s : commandExecutor.getOutput()) { sb.append("   [stdout] "); sb.append(s); sb.append("\n"); }
-			for(String s : commandExecutor.getError()) { sb.append("   [stderr] "); sb.append(s); sb.append("\n"); }
-			throw new Exception(sb.toString());
+			if(m.getName().equals("<init>")) continue;
+
+			fileWriter.write("  ");
+			fileWriter.write(methodToString(m));
+			fileWriter.write("\n");
 		}
 
-		// clean up tmp dir
-		File ret = FileUtilities.deleteDirRecursively(tmpDir);
-		if(ret != null) throw new Exception("Unable to clean up tmp dir (" + ret + ")!");
-	}
-	
-	private static File[] listFiles(File dir)
-	{
-		if(!dir.exists()) return new File[0];
-
-		Set<File> fileSet = new LinkedHashSet<File>();
-		List<File> dirList = new LinkedList<File>();
-		dirList.add(dir);
-
-		while(!dirList.isEmpty())
-		{
-			for(File f : dirList.remove(0).listFiles())
-			{
-				if(f.isDirectory()) dirList.add(f);
-				else                fileSet.add(f);
-			}
-		}
-
-		return fileSet.toArray(new File[0]);
+		// finish the class
+		fileWriter.write("}\n");
 	}
 }

@@ -48,6 +48,8 @@ public class ClassesInObjectLister
 	}
 
 
+	// --------------- public methods ---------------
+
 	public Set<String> getClassesInObject(File fObject) throws Exception
 	{
 		classesInObject.clear();
@@ -68,6 +70,9 @@ public class ClassesInObjectLister
 		if(ex != null) throw ex;
 		return classesInObject;
 	}
+
+
+	// --------------- private methods ---------------
 
 	private Thread check(final InputStream inputStream, final boolean parse)
 	{
