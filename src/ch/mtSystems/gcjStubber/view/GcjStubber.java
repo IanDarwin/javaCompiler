@@ -90,7 +90,7 @@ public class GcjStubber implements SelectionListener, StubsGeneratorListener
 			DirectoryDialog dirDialog = new DirectoryDialog(shell);
 			String ret = dirDialog.open();
 			if(ret == null || ret.length() == 0) return;
-			
+
 			if(se.getSource() == bOpenGcjDir)
 			{
 				tGcjDir.setText(ret);
@@ -98,7 +98,7 @@ public class GcjStubber implements SelectionListener, StubsGeneratorListener
 			{
 				tStubDir.setText(ret);
 			}
-			
+
 			if(tGcjDir.getText().length() > 0 && tStubDir.getText().length() > 0) bStart.setEnabled(true);
 		} else if(se.getSource() == bStart)
 		{
@@ -255,7 +255,7 @@ public class GcjStubber implements SelectionListener, StubsGeneratorListener
 		progressBar.setSelection(0);
 		
 		// log
-		tLog = new Text(parentComposite, SWT.BORDER|SWT.MULTI|SWT.V_SCROLL|SWT.READ_ONLY);
+		tLog = new Text(parentComposite, SWT.BORDER|SWT.MULTI|SWT.V_SCROLL|SWT.H_SCROLL|SWT.READ_ONLY);
 		tLog.setLayoutData(new GridData(GridData.FILL_BOTH));
 		tLog.setBackground(Display.getDefault().getSystemColor(SWT.COLOR_WHITE));
 	}

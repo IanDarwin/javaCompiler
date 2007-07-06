@@ -78,12 +78,24 @@ public class MissingClass
 			if(argTypes[i].equals("bool"))
 			{
 				argTypes[i] = "boolean";
+			} else if(argTypes[i].equals("bool[]"))
+			{
+				argTypes[i] = "boolean[]";
 			} else if(argTypes[i].equals("long long"))
 			{
 				argTypes[i] = "long";
+			} else if(argTypes[i].equals("long long[]"))
+			{
+				argTypes[i] = "long[]";
+			} else if(argTypes[i].equals("wchar_t"))
+			{
+				argTypes[i] = "char";
 			} else if(argTypes[i].equals("wchar_t[]"))
 			{
 				argTypes[i] = "char[]";
+			} else if(argTypes[i].equals("gnu.java.lang.String"))
+			{
+				argTypes[i] = "java.lang.String";
 			}
 		}
 
@@ -97,14 +109,44 @@ public class MissingClass
 
 			for(int i=0; i<argTypes.length; i++)
 			{
-				if(!argTypes[i].toString().equals(ta[i].toString())) continue mainLoop;
+				boolean equalType = argTypes[i].toString().equals(ta[i].toString());
+				if(!equalType) continue mainLoop;
 			}
 
 			methodSet.add(m);
 			return;
 		}
 
-		// method not found!
+		// method not found; additionally try replacing char[]/char with byte[]/byte.
+		// the linker sometimes mixes these up
+		mainLoop:
+		for(Method m : jc.getMethods())
+		{
+			if(!m.getName().equals(methodName)) continue;
+
+			Type[] ta = m.getArgumentTypes();
+			if(ta.length != argTypes.length) continue;
+
+			for(int i=0; i<argTypes.length; i++)
+			{
+				boolean equalType = argTypes[i].toString().equals(ta[i].toString());
+				boolean charSearching = argTypes[i].toString().equals("char");
+				boolean charArraySearching = argTypes[i].toString().equals("char[]");
+				boolean byteProvided = ta[i].toString().equals("byte");
+				boolean byteArrayProvided = ta[i].toString().equals("byte[]");
+
+				if(!equalType && !(charSearching && byteProvided) &&
+						!(charArraySearching && byteArrayProvided)) continue mainLoop;
+			}
+
+			//System.err.println("Matched " + methodName + "(" + join(argTypes, ", ") +
+			//			") to " + methodName + "(" + join(m.getArgumentTypes(), ", ") + ")");
+
+			methodSet.add(m);
+			return;
+		}
+
+		// method definitely not found!
 		StringBuffer sb = new StringBuffer();
 		sb.append("Method \"" + methodName + "(");
 		for(int i=0; i<argTypes.length; i++)
@@ -113,7 +155,7 @@ public class MissingClass
 			sb.append(argTypes[i]);
 		}
 		sb.append(")\" not found in class \"" + getClassName() + "\". Candidates are:\n");
-		
+
 		for(Method m : jc.getMethods())
 		{
 			sb.append("   - " + m.getName() + "(");
@@ -156,5 +198,19 @@ public class MissingClass
 	public Set<Field> getMissingFields()
 	{
 		return fieldSet;
+	}
+
+
+	// --------------- private methods ---------------
+	
+	private String join(Object[] array, String connector)
+	{
+		StringBuffer sb = new StringBuffer();
+		for(int i=0; i<array.length; i++)
+		{
+			if(i > 0) sb.append(connector);
+			sb.append(array[i]);
+		}
+		return sb.toString();
 	}
 }

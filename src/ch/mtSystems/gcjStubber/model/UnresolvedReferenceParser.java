@@ -122,23 +122,21 @@ public class UnresolvedReferenceParser
 						}
 					} else
 					{
-						System.err.println("  #################### NOT RECOGNIZED 1 ####################");
-						System.err.println("  ## " + reference);
+						System.err.println("Not recognized (1): " + reference);
 					}
 				} else
 				{
 					// should be a field...
 					int lastPoint = reference.lastIndexOf('.');
-					String longClassName = reference.substring(0, lastPoint);
-					String fieldName = reference.substring(lastPoint+1);
+					String longClassName = (lastPoint > -1) ? reference.substring(0, lastPoint) : null;
+					String fieldName = (lastPoint > -1) ? reference.substring(lastPoint+1) : null;
 
-					if(excludedClasses.contains(longClassName) && FIELDNAME_PATTERN.matcher(fieldName).matches())
+					if(lastPoint > -1 && excludedClasses.contains(longClassName) && FIELDNAME_PATTERN.matcher(fieldName).matches())
 					{
 						getMissingClass(longClassName).addMissingField(fieldName);
 					} else
 					{
-						System.err.println("  #################### NOT RECOGNIZED 2 ####################");
-						System.err.println("  ## " + reference);
+						System.err.println("Not recognized (2): " + reference);
 					}
 				}
 			}
