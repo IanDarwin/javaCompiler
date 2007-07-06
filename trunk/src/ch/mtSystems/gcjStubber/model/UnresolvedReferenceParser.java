@@ -58,6 +58,8 @@ public class UnresolvedReferenceParser
 		Set<String> duplicateSet = new HashSet<String>();
 		for(String line: errorMsg)
 		{
+			//System.out.println(line);
+			
 			Matcher m1 = UNDEFINED_REFERENCE_PATTERN.matcher(line);
 			while(m1.find())
 			{

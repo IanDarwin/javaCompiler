@@ -101,8 +101,7 @@ public class StubsGenerator
 			Arrays.sort(dirContent);
 			for(int i=0; i<dirContent.length && !stop; i++)
 			{
-				//if(!dirContent[i].getName().equals("ber.o")) continue;
-				//if(i < 15) continue;
+				//if(i < 20) continue;
 
 				log((i+1) + "/" + dirContent.length + ": Handling \"" + dirContent[i].getName() + "\"... ");
 				if(!createStubForObject(dirContent[i])) return;
@@ -454,8 +453,8 @@ public class StubsGenerator
 		} catch(Exception ex)
 		{
 			ex.printStackTrace();
-			log("Exception occured:\n   " + ex.getMessage() + "\n");
-			return false;
+			log("Failed with exception:\n   " + ex.getMessage() + "\n");
+			return true;
 		} finally
 		{
 			// add the current object back to the compilation
