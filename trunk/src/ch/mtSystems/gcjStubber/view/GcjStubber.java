@@ -47,8 +47,6 @@ public class GcjStubber implements SelectionListener, StubsGeneratorListener
 	private ProgressBar progressBar;
 
 	private Text tGcjArguments;
-	
-	private StubsGenerator stubsGenerator;
 
 
 	public GcjStubber(String[] args)
@@ -62,6 +60,8 @@ public class GcjStubber implements SelectionListener, StubsGeneratorListener
 		tabFolder.setLayoutData(new GridData(GridData.FILL_BOTH));
 		createMainTab(tabFolder);
 		createAdvancedTab(tabFolder);
+		new PhaseStatisticsTab(tabFolder);
+		new ObjectStatisticsTab(tabFolder);
 		
 		for(int i=0; i<args.length; i++)
 		{
@@ -78,6 +78,7 @@ public class GcjStubber implements SelectionListener, StubsGeneratorListener
 			}
 		}
 		if(tGcjDir.getText().length() > 0 && tStubDir.getText().length() > 0) bStart.setEnabled(true);
+		StubsGenerator.getStubsGenerator().addListener(this);
 	}
 
 
@@ -102,28 +103,22 @@ public class GcjStubber implements SelectionListener, StubsGeneratorListener
 			if(tGcjDir.getText().length() > 0 && tStubDir.getText().length() > 0) bStart.setEnabled(true);
 		} else if(se.getSource() == bStart)
 		{
-			bOpenGcjDir.setEnabled(false);
-			bOpenStubDir.setEnabled(false);
-			bStart.setEnabled(false);
-			bStop.setEnabled(true);
-			tLog.setText("");
-			progressBar.setSelection(0);
-
-			String[] args = (tGcjArguments.getText().length() == 0) ? new String[0] : tGcjArguments.getText().split("\r\n");
-			stubsGenerator = new StubsGenerator(new File(tGcjDir.getText()),
-					new File(tStubDir.getText()), args);
-			stubsGenerator.addListener(this);
+			final File gcjDir = new File(tGcjDir.getText());
+			final File stubsDir = new File(tStubDir.getText());
+			final String[] args = (tGcjArguments.getText().length() == 0) ?
+					new String[0] :
+					tGcjArguments.getText().split("\r\n");
 
 			new Thread()
 			{
 				public void run()
 				{
-					stubsGenerator.createStubs();
+					StubsGenerator.getStubsGenerator().createStubs(gcjDir, stubsDir, args);
 				}
 			}.start();
 		} else if(se.getSource() == bStop)
 		{
-			stubsGenerator.stopCreatingStubs();
+			StubsGenerator.getStubsGenerator().stopCreatingStubs();
 			bStop.setEnabled(false);
 		}
 	}
@@ -133,28 +128,45 @@ public class GcjStubber implements SelectionListener, StubsGeneratorListener
 
 	// --------------- StubsGeneratorListener ---------------
 
-	public void log(final String line)
+	public void started()
+	{
+		Display.getDefault().syncExec(new Runnable()
+		{
+			public void run()
+			{
+				bOpenGcjDir.setEnabled(false);
+				bOpenStubDir.setEnabled(false);
+				bStart.setEnabled(false);
+				bStop.setEnabled(true);
+				tLog.setText("");
+				progressBar.setSelection(0);
+			}
+		});
+	}
+
+	public void actionDone(final String msg)
 	{
 		Display.getDefault().syncExec(new Runnable()
 				{
 					public void run()
 					{
-						tLog.append(line);				
+						tLog.append(msg);				
 					}
 				});
 	}
 
-	public void progress(final int cur, final int total)
+	public void processed(String objectName, int phaseProcessed, int phaseResult,
+			String phaseResultMsg, final int objectIndex, final int totalCount)
 	{
 		Display.getDefault().syncExec(new Runnable()
-				{
-					public void run()
-					{
-						progressBar.setSelection(progressBar.getMaximum() * cur / total);				
-					}
-				});
+		{
+			public void run()
+			{
+				progressBar.setSelection(progressBar.getMaximum() * objectIndex / totalCount);				
+			}
+		});
 	}
-	
+
 	public void done()
 	{
 		Display.getDefault().syncExec(new Runnable()

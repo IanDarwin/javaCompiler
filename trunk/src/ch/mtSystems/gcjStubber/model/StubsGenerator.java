@@ -41,16 +41,6 @@ public class StubsGenerator
 	private File helloWorldDotJava;
 	private File libgcjDotSpec, libgcjDotA, libgcjDotJar;
 	private File cmdGcj, cmdAr, cmdNm;
-	
-	
-	public StubsGenerator(File gcjDir, File stubsDir, String[] compilationArguments)
-	{
-		this.gcjDir = gcjDir;
-		this.stubsDir = stubsDir;
-		this.compilationArguments = compilationArguments;
-
-		helloWorldDotJava = new File(stubsDir, "HelloWorld.java");
-	}
 
 
 	// --------------- public methods ---------------
@@ -65,8 +55,15 @@ public class StubsGenerator
 		listeners.remove(listener);
 	}
 
-	public void createStubs()
+	public void createStubs(File gcjDir, File stubsDir, String[] compilationArguments)
 	{
+		this.gcjDir = gcjDir;
+		this.stubsDir = stubsDir;
+		this.compilationArguments = compilationArguments;
+
+		helloWorldDotJava = new File(stubsDir, "HelloWorld.java");
+
+		for(StubsGeneratorListener l : listeners) l.started();
 		boolean restoreLibgcjDotSpec = false;
 
 		try
@@ -103,15 +100,8 @@ public class StubsGenerator
 			{
 				//if(i != 512) continue;
 
-				log((i+1) + "/" + dirContent.length + ": Handling \"" + dirContent[i].getName() + "\"... ");
-				if(!dirContent[i].getName().startsWith("gui_"))
-				{
-					if(!createStubForObject(dirContent[i])) return;
-				} else
-				{
-					log("Todo\n");
-				}
-				for(StubsGeneratorListener l : listeners) l.progress(i+1, dirContent.length);
+				log((i+1) + "/" + dirContent.length + ": Handling \"" + dirContent[i].getName() + "\"...\n");
+				if(!createStubForObject(dirContent[i], (i+1), dirContent.length)) return;
 			}
 		} finally
 		{
@@ -122,6 +112,7 @@ public class StubsGenerator
 			}
 
 			for(StubsGeneratorListener l : listeners) l.done();
+			stop = false;
 		}
 	}
 	
@@ -138,7 +129,7 @@ public class StubsGenerator
 	 */
 	private void log(String line)
 	{
-		for(StubsGeneratorListener l : listeners) l.log(line);
+		for(StubsGeneratorListener l : listeners) l.actionDone(line);
 	}
 	
 	/**
@@ -283,10 +274,7 @@ public class StubsGenerator
 			cmd.add("--main=HelloWorld");
 			cmd.add("-o" + helloWorldDotExe.toString());
 			cmd.add(helloWorldDotJava.toString());
-
-			//cmd.add("*.o");
 			for(File f : stubsDir.listFiles(new ObjectFileFilter())) cmd.add(f.toString());
-
 			for(String arg : compilationArguments) cmd.add(arg);
 			
 			// compile
@@ -384,7 +372,7 @@ public class StubsGenerator
 		}
 	}
 	
-	private boolean createStubForObject(File fObj)
+	private boolean createStubForObject(File fObj, int objectIndex, int totalCount)
 	{
 		File fObjTmp = new File(fObj.getParentFile(), fObj.getName()+".bak");
 		boolean renameBack = false;
@@ -396,7 +384,10 @@ public class StubsGenerator
 			Set<String> classesInObject = lister.getClassesInObject(fObj);
 			if(classesInObject.size() == 0)
 			{
-				log("Skipped, no Java classes.\n");
+				for(StubsGeneratorListener l : listeners)
+				{
+					l.processed(fObj.getName(), 0, 0, null, objectIndex, totalCount);
+				}
 				return true;
 			}
 			
@@ -413,26 +404,25 @@ public class StubsGenerator
 			cmd.add("--main=HelloWorld");
 			cmd.add("-o" + helloWorldDotExe.toString());
 			cmd.add(helloWorldDotJava.toString());
-			
-			//cmd.add("*.o");
 			for(File f : stubsDir.listFiles(new ObjectFileFilter())) cmd.add(f.toString());
-
 			for(String arg : compilationArguments) cmd.add(arg);
 
 			CommandExecutor commandExecutor = new CommandExecutor(cmd.toArray(new String[0]), stubsDir);
 			commandExecutor.execute();
 			if(commandExecutor.getOutput().length != 0)
 			{
-				log("Unexpected stdout on first compilation:\n");
+				log("   Unexpected stdout on first compilation:\n");
 				for(String s : commandExecutor.getOutput()) log("   " + s + "\n");
 				return false;
 			}
-			
+
 			String[] saError = commandExecutor.getError();
 			if(saError.length == 0)
 			{
-				log("Skipped, won't be pulled in.\n");
-				if(!helloWorldDotExe.delete()) throw new Exception("Unable to delete HelloWorld!");
+				for(StubsGeneratorListener l : listeners)
+				{
+					l.processed(fObj.getName(), 1, 0, null, objectIndex, totalCount);
+				}
 				return true;
 			}
 
@@ -454,9 +444,15 @@ public class StubsGenerator
 			commandExecutor.execute();
 			if(commandExecutor.getOutput().length != 0 || commandExecutor.getError().length != 0)
 			{
-				log("Unexpected output on compilation with stub:\n");
-				for(String s : commandExecutor.getOutput()) log("   [stdout] " + s + "\n");
-				for(String s : commandExecutor.getError()) log("   [stderr] " + s + "\n");
+				StringBuffer sb = new StringBuffer("Unexpected output on compilation with stub:\n");
+				for(String s : commandExecutor.getOutput()) sb.append("[stdout] " + s + "\n");
+				for(String s : commandExecutor.getError()) sb.append("[stderr] " + s + "\n");
+				sb.deleteCharAt(sb.length()-1);
+				
+				for(StubsGeneratorListener l : listeners)
+				{
+					l.processed(fObj.getName(), 2, 2, sb.toString(), objectIndex, totalCount);
+				}
 				return true;
 			}
 
@@ -467,28 +463,53 @@ public class StubsGenerator
 					!commandExecutor.getOutput()[0].equals("HelloWorld") ||
 					commandExecutor.getError().length != 0)
 			{
-				log("Phase1 Failed\n");
-				//for(String s : commandExecutor.getOutput()) log("   [stdout] " + s + "\n");
-				//for(String s : commandExecutor.getError()) log("   [stderr] " + s + "\n");
-				return true; //TODO: Phase 2 and 3, report output and error output
+				StringBuffer sb = new StringBuffer("Unexpected output on compilation with stub:\n");
+				for(String s : commandExecutor.getOutput()) sb.append("[stdout] " + s + "\n");
+				for(String s : commandExecutor.getError()) sb.append("[stderr] " + s + "\n");
+				if(sb.length() > 0) sb.deleteCharAt(sb.length()-1);
+				
+				for(StubsGeneratorListener l : listeners)
+				{
+					l.processed(fObj.getName(), 2, 1, sb.toString(), objectIndex, totalCount);
+				}
+				return true;
 			}
 
-			log("Ok\n");
+			for(StubsGeneratorListener l : listeners)
+			{
+				l.processed(fObj.getName(), 2, 0, null, objectIndex, totalCount);
+			}
 			return true;
 		} catch(Exception ex)
 		{
 			ex.printStackTrace();
-			log("Failed with exception:\n   " + ex.getMessage() + "\n");
+
+			for(StubsGeneratorListener l : listeners)
+			{
+				// TODO: not always Phase 1
+				l.processed(fObj.getName(), 2, 2, "Failed with exception:" + ex.getMessage(),
+						objectIndex, totalCount);
+			}
 			return true;
 		} finally
 		{
 			// add the current object back to the compilation
 			if(renameBack && !fObjTmp.renameTo(fObj))
 			{
-				log("   Renaming back failed!!!");
+				log("   Renaming \"" + fObjTmp.getName() + "\" back to \"" + fObj.getName() + "\" failed!!!");
 				return false;
 			}
 		}
+	}
+	
+	
+	// --------------- Singleton ---------------
+	
+	private static StubsGenerator stubsGenerator = new StubsGenerator();
+	
+	public static StubsGenerator getStubsGenerator()
+	{
+		return stubsGenerator;
 	}
 }
 
