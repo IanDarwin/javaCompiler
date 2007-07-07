@@ -32,10 +32,12 @@ import org.eclipse.swt.widgets.*;
 
 import ch.mtSystems.gcjStubber.model.StubsGenerator;
 import ch.mtSystems.gcjStubber.model.StubsGeneratorListener;
+import ch.mtSystems.gcjStubber.model.timer.TickListener;
+import ch.mtSystems.gcjStubber.model.timer.Timer;
 import ch.mtSystems.jnc.view.utilities.LayoutUtilities;
 
 
-public class GcjStubber implements SelectionListener, StubsGeneratorListener
+public class GcjStubber implements SelectionListener, TickListener, StubsGeneratorListener
 {
 	public static final String VERSION = "0.1";
 
@@ -45,8 +47,12 @@ public class GcjStubber implements SelectionListener, StubsGeneratorListener
 	private Text tGcjDir, tStubDir, tLog;
 	private Button bStart, bStop;
 	private ProgressBar progressBar;
+	private Label elapsedLabel;
 
 	private Text tGcjArguments;
+	
+	private Timer timer;
+	private int secCount = 0;
 
 
 	public GcjStubber(String[] args)
@@ -144,22 +150,59 @@ public class GcjStubber implements SelectionListener, StubsGeneratorListener
 	public void widgetDefaultSelected(SelectionEvent se) { }
 
 
+	// --------------- TickListener ---------------
+	
+	public void tick()
+	{
+		Display.getDefault().syncExec(new Runnable()
+				{
+					public void run()
+					{
+						secCount++;
+						
+						int s = (secCount % 60);
+						int m = secCount / 60 % 60;
+						int h = secCount / 60 / 60;
+						
+						StringBuffer sb = new StringBuffer();
+						sb.append(h);
+						sb.append(":");
+						if(m < 10) sb.append("0");
+						sb.append(m);
+						sb.append(":");
+						if(s < 10) sb.append("0");
+						sb.append(s);
+
+						elapsedLabel.setText(sb.toString());
+						elapsedLabel.pack(true);
+					}
+				});
+	}
+
+
 	// --------------- StubsGeneratorListener ---------------
 
 	public void started()
 	{
 		Display.getDefault().syncExec(new Runnable()
-		{
-			public void run()
-			{
-				bOpenGcjDir.setEnabled(false);
-				bOpenStubDir.setEnabled(false);
-				bStart.setEnabled(false);
-				bStop.setEnabled(true);
-				tLog.setText("");
-				progressBar.setSelection(0);
-			}
-		});
+				{
+					public void run()
+					{
+						secCount = 0;
+						elapsedLabel.setText("");
+
+						timer = new Timer(1000);
+						timer.addTickListener(GcjStubber.this);
+						timer.start();
+		
+						bOpenGcjDir.setEnabled(false);
+						bOpenStubDir.setEnabled(false);
+						bStart.setEnabled(false);
+						bStop.setEnabled(true);
+						tLog.setText("");
+						progressBar.setSelection(0);
+					}
+				});
 	}
 
 	public void actionDone(final String msg)
@@ -191,6 +234,8 @@ public class GcjStubber implements SelectionListener, StubsGeneratorListener
 				{
 					public void run()
 					{
+						timer.stop();
+
 						bOpenGcjDir.setEnabled(true);
 						bOpenStubDir.setEnabled(true);
 						bStart.setEnabled(true);
@@ -266,6 +311,9 @@ public class GcjStubber implements SelectionListener, StubsGeneratorListener
 		progressBar.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		progressBar.setMaximum(1000);
 		progressBar.setSelection(0);
+
+		(new Label(progressComposite, SWT.NONE)).setText("Elapsed:");
+		elapsedLabel = new Label(progressComposite, SWT.NONE);
 		
 		// log
 		tLog = new Text(parentComposite, SWT.BORDER|SWT.MULTI|SWT.V_SCROLL|SWT.H_SCROLL|SWT.READ_ONLY);
