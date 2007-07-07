@@ -67,7 +67,8 @@ public class UnresolvedReferenceParser
 				String reference = m1.group(1).
 						replaceAll("::", ".").
 						replaceAll("\\*", "").
-						replaceAll("JArray<(.*?)>", "$1[]");
+						replaceAll("JArray<(.*?)>", "$1[]").
+						replaceAll("JArray<(.*?)>", "$1[]"); // two dimensional arrays have nested "JArray"
 				if(DEBUG) System.out.println("  -> [" + reference + "]");
 				
 				if(duplicateSet.add(reference)) handleUndefinedReference(reference);

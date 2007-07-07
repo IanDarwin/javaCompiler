@@ -27,14 +27,15 @@ import org.eclipse.swt.widgets.*;
 
 import ch.mtSystems.gcjStubber.model.StubsGenerator;
 import ch.mtSystems.gcjStubber.model.StubsGeneratorListener;
+import ch.mtSystems.gcjStubber.view.utilities.FixedSash;
 import ch.mtSystems.jnc.view.utilities.LayoutUtilities;
 
 
 public class ObjectStatisticsTab implements SelectionListener, StubsGeneratorListener
 {
-	private Table objectOverview;
-	private Text objectView;
-	private Label totalSavings;
+	private Table objectsTable;
+	private Text logText;
+	private Label savingsLabel;
 
 
 	public ObjectStatisticsTab(TabFolder tabFolder)
@@ -43,39 +44,51 @@ public class ObjectStatisticsTab implements SelectionListener, StubsGeneratorLis
 		tabItem.setText("Object Statistics");
 
 		Composite parentComposite = new Composite(tabFolder, SWT.NONE);
-		parentComposite.setLayout(LayoutUtilities.createGridLayout(3, 3));
+		parentComposite.setLayout(LayoutUtilities.createGridLayout(2, 3));
 		parentComposite.setLayoutData(new GridData(GridData.FILL_BOTH));
 		tabItem.setControl(parentComposite);
 		
+		// Sash
+		Composite leftComposite = new Composite(parentComposite, SWT.NONE);
+		leftComposite.setLayout(LayoutUtilities.createGridLayout(2, 3));
+		leftComposite.setLayoutData(new GridData(GridData.FILL_BOTH));
+		
+		Composite rightComposite = new Composite(parentComposite, SWT.NONE);
+		rightComposite.setLayout(LayoutUtilities.createGridLayout(1, 3));
+		rightComposite.setLayoutData(new GridData(GridData.FILL_BOTH));
+		
+		new FixedSash(leftComposite, rightComposite, parentComposite, true, 300);
+		
 		// table
-		objectOverview = new Table(parentComposite, SWT.BORDER);
-		GridData tableGridData = LayoutUtilities.createGridData(GridData.FILL_VERTICAL, 2, 1);
-		tableGridData.widthHint = 300;
-		objectOverview.setLayoutData(tableGridData);
-		objectOverview.setHeaderVisible(true);
-		objectOverview.addSelectionListener(this);
+		objectsTable = new Table(leftComposite, SWT.BORDER);
+		objectsTable.setLayoutData(LayoutUtilities.createGridData(GridData.FILL_BOTH, 2, 1));
+		objectsTable.setHeaderVisible(true);
+		objectsTable.addSelectionListener(this);
 		
-		TableColumn objectColumn = new TableColumn(objectOverview, SWT.LEFT);
+		TableColumn objectColumn = new TableColumn(objectsTable, SWT.LEFT);
 		objectColumn.setText("Object");
-		objectColumn.setWidth(95);
+		objectColumn.pack();
+		objectColumn.addSelectionListener(this);
 		
-		TableColumn handledColumn = new TableColumn(objectOverview, SWT.LEFT);
+		TableColumn handledColumn = new TableColumn(objectsTable, SWT.LEFT);
 		handledColumn.setText("Handled In");
-		handledColumn.setWidth(95);
+		handledColumn.pack();
+		handledColumn.addSelectionListener(this);
 		
-		TableColumn savingsColumn = new TableColumn(objectOverview, SWT.RIGHT);
+		TableColumn savingsColumn = new TableColumn(objectsTable, SWT.RIGHT);
 		savingsColumn.setText("Savings (bytes)");
-		savingsColumn.setWidth(95);
-		
+		savingsColumn.pack();
+		savingsColumn.addSelectionListener(this);
+
 		// object log
-		objectView = new Text(parentComposite, SWT.BORDER|SWT.MULTI|SWT.V_SCROLL|SWT.H_SCROLL|SWT.READ_ONLY);
-		objectView.setLayoutData(LayoutUtilities.createGridData(GridData.FILL_BOTH, 1, 2));
-		
+		logText = new Text(rightComposite, SWT.BORDER|SWT.MULTI|SWT.V_SCROLL|SWT.H_SCROLL|SWT.READ_ONLY);
+		logText.setLayoutData(LayoutUtilities.createGridData(GridData.FILL_BOTH, 1, 2));
+
 		// total savings
-		(new Label(parentComposite, SWT.NONE)).setText("Savings Total:");
-		totalSavings = new Label(parentComposite, SWT.RIGHT);
-		totalSavings.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_FILL));
-		
+		(new Label(leftComposite, SWT.NONE)).setText("Savings Total:");
+		savingsLabel = new Label(leftComposite, SWT.RIGHT);
+		savingsLabel.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_FILL));
+
 		StubsGenerator.getStubsGenerator().addListener(this);
 	}
 
@@ -83,8 +96,14 @@ public class ObjectStatisticsTab implements SelectionListener, StubsGeneratorLis
 
 	public void widgetSelected(SelectionEvent event)
 	{
-		String text = (String)event.item.getData();
-		objectView.setText((text != null) ? text : "");
+		if(event.getSource() == objectsTable)
+		{
+			String text = (String)event.item.getData();
+			logText.setText((text != null) ? text : "");
+		} else if(event.getSource() instanceof TableColumn)
+		{
+			orderBy(objectsTable.indexOf((TableColumn)event.getSource()));
+		}
 	}
 
 	public void widgetDefaultSelected(SelectionEvent event) { }
@@ -98,11 +117,11 @@ public class ObjectStatisticsTab implements SelectionListener, StubsGeneratorLis
 		{
 			public void run()
 			{
-				objectOverview.removeAll();
-				objectView.setText("");
+				objectsTable.removeAll();
+				logText.setText("");
 				
-				totalSavings.setText("0");
-				totalSavings.setData(0);
+				savingsLabel.setText("0");
+				savingsLabel.setData(0);
 			}
 		});
 	}
@@ -120,7 +139,7 @@ public class ObjectStatisticsTab implements SelectionListener, StubsGeneratorLis
 
 				if(phaseProcessed == 0 || phaseProcessed == 1) // Skipped
 				{
-					TableItem tableItem = new TableItem(objectOverview, SWT.NONE);
+					TableItem tableItem = new TableItem(objectsTable, SWT.NONE);
 					tableItem.setText(0, objectColumnText);
 					tableItem.setText(1, "Skipped");
 				} else if(phaseProcessed == 2 || phaseProcessed == 3 || phaseProcessed == 4) // Phase 1, 2 or 3
@@ -128,11 +147,11 @@ public class ObjectStatisticsTab implements SelectionListener, StubsGeneratorLis
 					TableItem tableItem;
 					if(phaseProcessed == 2)
 					{
-						tableItem = new TableItem(objectOverview, SWT.NONE);
+						tableItem = new TableItem(objectsTable, SWT.NONE);
 						tableItem.setText(0, objectColumnText);
 					} else
 					{
-						for(TableItem curItem : objectOverview.getItems())
+						for(TableItem curItem : objectsTable.getItems())
 						{
 							if(curItem.getText(0).equals(objectColumnText))
 							{
@@ -179,23 +198,77 @@ public class ObjectStatisticsTab implements SelectionListener, StubsGeneratorLis
 	
 	private void increaseSavings(int bytes)
 	{
-		int cur = ((Integer)totalSavings.getData()) + bytes;
-		totalSavings.setData(cur);
+		int cur = ((Integer)savingsLabel.getData()) + bytes;
+		savingsLabel.setData(cur);
 
 		if(cur < 1024)
 		{
-			totalSavings.setText(cur + "bytes");
+			savingsLabel.setText(cur + "bytes");
 			return;
 		}
 
 		cur /= 1024;
 		if(cur < 1024)
 		{
-			totalSavings.setText(cur + "kb");
+			savingsLabel.setText(cur + "kb");
 			return;
 		}
 
 		cur /= 1024;
-		totalSavings.setText(cur + "mb");
+		savingsLabel.setText(cur + "mb");
+	}
+	
+	private void orderBy(int columnIndex)
+	{
+		int n = objectsTable.getItemCount();
+
+		for(int i=0; i < n-1; i++)
+		{
+			for(int j=n-1; j > i; j--)
+			{
+				TableItem cur = objectsTable.getItem(j-1);
+				TableItem next = objectsTable.getItem(j);
+				
+				int curIndex = getIndex(cur.getText(0));
+				int nextIndex = getIndex(next.getText(0));
+	
+				if(columnIndex == 0)
+				{
+					if(curIndex > nextIndex) swap(cur, next);
+				} else if(columnIndex == 1)
+				{
+					int comp = cur.getText(1).compareTo(next.getText(1));
+					if(comp > 0 || (comp == 0 && curIndex > nextIndex)) swap(cur, next);
+				} else if(columnIndex == 2)
+				{
+					int curSize = (cur.getText(2).length() > 0) ? Integer.parseInt(cur.getText(2)) : 0;
+					int nextSize = (next.getText(2).length() > 0) ? Integer.parseInt(next.getText(2)) : 0;
+					if(curSize < nextSize || (curSize == nextSize && curIndex > nextIndex)) swap(cur, next);
+				}
+			}
+		}
+	}
+	
+	private int getIndex(String objectColumnText)
+	{
+		return Integer.parseInt(objectColumnText.substring(1, objectColumnText.indexOf(')')));
+	}
+	
+	private void swap(TableItem a, TableItem b)
+	{
+		String aText0 = a.getText(0);
+		String aText1 = a.getText(1);
+		String aText2 = a.getText(2);
+		Object aData = a.getData();
+		
+		a.setText(0, b.getText(0));
+		a.setText(1, b.getText(1));
+		a.setText(2, b.getText(2));
+		a.setData(b.getData());
+		
+		b.setText(0, aText0);
+		b.setText(1, aText1);
+		b.setText(2, aText2);
+		b.setData(aData);
 	}
 }
