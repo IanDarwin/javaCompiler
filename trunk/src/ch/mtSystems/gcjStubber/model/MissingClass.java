@@ -139,8 +139,8 @@ public class MissingClass
 						!(charArraySearching && byteArrayProvided)) continue mainLoop;
 			}
 
-			//System.err.println("Matched " + methodName + "(" + join(argTypes, ", ") +
-			//			") to " + methodName + "(" + join(m.getArgumentTypes(), ", ") + ")");
+			System.err.println("Matched " + methodName + "(" + join(argTypes, ", ") +
+						") to " + methodName + "(" + join(m.getArgumentTypes(), ", ") + ")");
 
 			methodSet.add(m);
 			return;
@@ -179,7 +179,7 @@ public class MissingClass
 	public void addMissingField(String fieldName) throws Exception
 	{
 		//TODO: why are these wrong in the linker output???
-		if(fieldName.equals("END_OF_SEQU_ENCE")) fieldName = "END_OF_SEQUENCE";
+		//if(fieldName.equals("END_OF_SEQU_ENCE")) fieldName = "END_OF_SEQUENCE";
 		
 		for(Field f : jc.getFields())
 		{

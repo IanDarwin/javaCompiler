@@ -39,6 +39,7 @@ public class StubsGenerator
 	private String[] compilationArguments;
 	
 	private File helloWorldDotJava;
+	private int origHelloWorldDotExeSize;
 	private File libgcjDotSpec, libgcjDotA, libgcjDotJar;
 	private File cmdGcj, cmdAr, cmdNm;
 
@@ -301,6 +302,7 @@ public class StubsGenerator
 				return false;
 			}
 
+			origHelloWorldDotExeSize = (int)helloWorldDotExe.length();
 			return true;
 		} catch(Exception ex)
 		{
@@ -386,7 +388,7 @@ public class StubsGenerator
 			{
 				for(StubsGeneratorListener l : listeners)
 				{
-					l.processed(fObj.getName(), 0, 0, null, objectIndex, totalCount);
+					l.processed(fObj.getName(), 0, -1, null, -1, objectIndex, totalCount);
 				}
 				return true;
 			}
@@ -421,7 +423,7 @@ public class StubsGenerator
 			{
 				for(StubsGeneratorListener l : listeners)
 				{
-					l.processed(fObj.getName(), 1, 0, null, objectIndex, totalCount);
+					l.processed(fObj.getName(), 1, -1, null, -1, objectIndex, totalCount);
 				}
 				return true;
 			}
@@ -451,7 +453,7 @@ public class StubsGenerator
 				
 				for(StubsGeneratorListener l : listeners)
 				{
-					l.processed(fObj.getName(), 2, 2, sb.toString(), objectIndex, totalCount);
+					l.processed(fObj.getName(), 2, 2, sb.toString(), -1, objectIndex, totalCount);
 				}
 				return true;
 			}
@@ -470,25 +472,26 @@ public class StubsGenerator
 				
 				for(StubsGeneratorListener l : listeners)
 				{
-					l.processed(fObj.getName(), 2, 1, sb.toString(), objectIndex, totalCount);
+					l.processed(fObj.getName(), 2, 1, sb.toString(), -1, objectIndex, totalCount);
 				}
 				return true;
 			}
 
+			int saving = origHelloWorldDotExeSize - (int)helloWorldDotExe.length();
 			for(StubsGeneratorListener l : listeners)
 			{
-				l.processed(fObj.getName(), 2, 0, null, objectIndex, totalCount);
+				l.processed(fObj.getName(), 2, 0, null, saving, objectIndex, totalCount);
 			}
 			return true;
 		} catch(Exception ex)
 		{
-			ex.printStackTrace();
+			//ex.printStackTrace();
 
 			for(StubsGeneratorListener l : listeners)
 			{
 				// TODO: not always Phase 1
 				l.processed(fObj.getName(), 2, 2, "Failed with exception:" + ex.getMessage(),
-						objectIndex, totalCount);
+						-1, objectIndex, totalCount);
 			}
 			return true;
 		} finally

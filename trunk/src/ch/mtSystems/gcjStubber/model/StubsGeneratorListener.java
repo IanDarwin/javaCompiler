@@ -38,12 +38,16 @@ public interface StubsGeneratorListener
 	 *                    - 0: Ok
 	 *                    - 1: Failed
 	 *                    - 2: Problem
-	 * @param phaseResultMsg If the phase result is 1 or 2, this contains a problem description.
+	 *                    Only valid if "phaseProcessed" is 2, 3 or 4.
+	 * @param phaseResultMsg A problem description. Only set if "phaseProcessed" is
+	 *                       2, 3 or 4 and if "result" is 1 or 2.
+	 * @param savings The savings of the stub in bytes. Only valid if "phaseProcessed" is
+	 *                       2, 3 or 4 and if "result" is 0.
 	 * @param objectIndex The index of the object (1 ... totalCount)
 	 * @param totalCount The total count of all objects.
 	 */
 	public void processed(String objectName, int phaseProcessed, int phaseResult,
-			String phaseResultMsg, int objectIndex, int totalCount);
+			String phaseResultMsg, int savings, int objectIndex, int totalCount);
 	
 	public void done();
 }
