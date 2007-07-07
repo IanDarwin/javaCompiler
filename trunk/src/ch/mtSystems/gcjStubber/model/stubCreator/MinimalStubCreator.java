@@ -17,7 +17,7 @@
  *   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-package ch.mtSystems.gcjStubber.model;
+package ch.mtSystems.gcjStubber.model.stubCreator;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -26,6 +26,8 @@ import java.util.Set;
 import org.apache.bcel.classfile.Field;
 import org.apache.bcel.classfile.JavaClass;
 import org.apache.bcel.classfile.Method;
+
+import ch.mtSystems.gcjStubber.model.MissingClass;
 
 
 public class MinimalStubCreator extends StubCreator
@@ -105,36 +107,5 @@ public class MinimalStubCreator extends StubCreator
 
 		// finish the class
 		fileWriter.write("}\n");
-	}
-	
-	protected void finalizeStub(MissingClass[] missingClasses)
-	{
-		/*List<String> createdClasses = new LinkedList<String>();
-		for(MissingClass missingClass : missingClasses) createdClasses.add(missingClass.getClassName());
-
-		for(MissingClass missingClass : missingClasses)
-		{
-			for(Field field : missingClass.getMissingFields())
-			{
-				if(!createdClasses.contains(field.getType().toString()))
-				{
-					System.out.println(field.getType().toString() + " missing");
-				}
-			}
-			for(Method method : missingClass.getMissingMethods())
-			{
-				if(!createdClasses.contains(method.getReturnType().toString()))
-				{
-					System.out.println(method.getReturnType().toString() + " missing");
-				}
-				for(Type argType : method.getArgumentTypes())
-				{
-					if(!createdClasses.contains(argType.toString()))
-					{
-						System.out.println(argType.toString() + " missing");
-					}
-				}
-			}
-		}*/
 	}
 }

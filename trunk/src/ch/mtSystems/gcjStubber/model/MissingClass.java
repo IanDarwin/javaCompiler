@@ -41,6 +41,7 @@ public class MissingClass
 	public MissingClass(String className, File libgcjDotJar) throws Exception
 	{
 		String fileName = className.replaceAll("\\.", "/") + ".class";
+		//System.err.println("loading " + fileName);
 		jc = (new ClassParser(libgcjDotJar.toString(), fileName)).parse();
 
 		simpleClassName = jc.getClassName();
