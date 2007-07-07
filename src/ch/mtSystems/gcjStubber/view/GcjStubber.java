@@ -63,6 +63,24 @@ public class GcjStubber implements SelectionListener, StubsGeneratorListener
 		new PhaseStatisticsTab(tabFolder);
 		new ObjectStatisticsTab(tabFolder);
 		
+		// start/stop
+		Composite buttonComposite = new Composite(shell, SWT.NONE);
+		GridLayout buttonCompositeLayout = LayoutUtilities.createGridLayout(2, 3);
+		buttonCompositeLayout.horizontalSpacing = 10;
+		buttonComposite.setLayout(buttonCompositeLayout);
+		buttonComposite.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_CENTER));
+		
+		bStart = new Button(buttonComposite, SWT.NONE);
+		bStart.setText("Start");
+		bStart.addSelectionListener(this);
+		bStart.setEnabled(false);
+		
+		bStop = new Button(buttonComposite, SWT.NONE);
+		bStop.setText("Stop");
+		bStop.addSelectionListener(this);
+		bStop.setEnabled(false);
+		
+		// check if user provided paths and settings on the command line
 		for(int i=0; i<args.length; i++)
 		{
 			if(i == 0)
@@ -156,7 +174,7 @@ public class GcjStubber implements SelectionListener, StubsGeneratorListener
 	}
 
 	public void processed(String objectName, int phaseProcessed, int phaseResult,
-			String phaseResultMsg, final int objectIndex, final int totalCount)
+			String phaseResultMsg, int savings, final int objectIndex, final int totalCount)
 	{
 		Display.getDefault().syncExec(new Runnable()
 		{
@@ -235,23 +253,6 @@ public class GcjStubber implements SelectionListener, StubsGeneratorListener
 		bOpenStubDir = new Button(inputComposite, SWT.NONE);
 		bOpenStubDir.setImage(imgOpen);
 		bOpenStubDir.addSelectionListener(this);
-
-		// start/stop
-		Composite buttonComposite = new Composite(parentComposite, SWT.NONE);
-		GridLayout buttonCompositeLayout = LayoutUtilities.createGridLayout(2, 3);
-		buttonCompositeLayout.horizontalSpacing = 10;
-		buttonComposite.setLayout(buttonCompositeLayout);
-		buttonComposite.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_CENTER));
-		
-		bStart = new Button(buttonComposite, SWT.NONE);
-		bStart.setText("Start");
-		bStart.addSelectionListener(this);
-		bStart.setEnabled(false);
-		
-		bStop = new Button(buttonComposite, SWT.NONE);
-		bStop.setText("Stop");
-		bStop.addSelectionListener(this);
-		bStop.setEnabled(false);
 		
 		(new Label(parentComposite, SWT.SEPARATOR|SWT.HORIZONTAL)).setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		

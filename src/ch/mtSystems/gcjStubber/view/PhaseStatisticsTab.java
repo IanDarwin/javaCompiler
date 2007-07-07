@@ -114,29 +114,30 @@ public class PhaseStatisticsTab implements StubsGeneratorListener
 	// --------------- StubsGeneratorListener ---------------
 
 	public void started()
-	{		Display.getDefault().syncExec(new Runnable()
 	{
-		public void run()
+		Display.getDefault().syncExec(new Runnable()
 		{
-			setCount(phaseStatsNoJavaClasses, 0);
-			setCount(phaseStatsNotPulledIn, 0);
-			setCount(phaseStats1ok, 0);
-			setCount(phaseStats1failed, 0);
-			setCount(phaseStats1problems, 0);
-			setCount(phaseStats2ok, 0);
-			setCount(phaseStats2failed, 0);
-			setCount(phaseStats2problems, 0);
-			setCount(phaseStats3ok, 0);
-			setCount(phaseStats3failed, 0);
-			setCount(phaseStats3problems, 0);
-		}
-	});
+			public void run()
+			{
+				setCount(phaseStatsNoJavaClasses, 0);
+				setCount(phaseStatsNotPulledIn, 0);
+				setCount(phaseStats1ok, 0);
+				setCount(phaseStats1failed, 0);
+				setCount(phaseStats1problems, 0);
+				setCount(phaseStats2ok, 0);
+				setCount(phaseStats2failed, 0);
+				setCount(phaseStats2problems, 0);
+				setCount(phaseStats3ok, 0);
+				setCount(phaseStats3failed, 0);
+				setCount(phaseStats3problems, 0);
+			}
+		});
 	}
 
 	public void actionDone(String msg) { }
 
 	public void processed(String objectName, final int phaseProcessed, final int phaseResult,
-			String phaseResultMsg, int objectIndex, int totalCount)
+			String phaseResultMsg, int savings, int objectIndex, int totalCount)
 	{
 		Display.getDefault().syncExec(new Runnable()
 		{
