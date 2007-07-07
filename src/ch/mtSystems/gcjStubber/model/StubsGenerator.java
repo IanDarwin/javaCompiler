@@ -99,7 +99,7 @@ public class StubsGenerator
 			Arrays.sort(dirContent);
 			for(int i=0; i<dirContent.length && !stop; i++)
 			{
-				//if(i != 512) continue;
+				//if(i != 119) continue;
 
 				log((i+1) + "/" + dirContent.length + ": Handling \"" + dirContent[i].getName() + "\"...\n");
 				if(!createStubForObject(dirContent[i], (i+1), dirContent.length)) return;
@@ -490,7 +490,7 @@ public class StubsGenerator
 			for(StubsGeneratorListener l : listeners)
 			{
 				// TODO: not always Phase 1
-				l.processed(fObj.getName(), 2, 2, "Failed with exception:" + ex.getMessage(),
+				l.processed(fObj.getName(), 2, 2, "Failed with exception: " + ex.getMessage(),
 						-1, objectIndex, totalCount);
 			}
 			return true;

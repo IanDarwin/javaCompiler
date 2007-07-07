@@ -178,9 +178,6 @@ public class MissingClass
 	
 	public void addMissingField(String fieldName) throws Exception
 	{
-		//TODO: why are these wrong in the linker output???
-		//if(fieldName.equals("END_OF_SEQU_ENCE")) fieldName = "END_OF_SEQUENCE";
-		
 		for(Field f : jc.getFields())
 		{
 			if(!f.getName().equals(fieldName)) continue;
@@ -188,7 +185,17 @@ public class MissingClass
 			return;
 		}
 
-		// field not found!
+		// field not found. try without "_". There seems to be a problem sometimes.
+		String fieldNameNoUnderscore = fieldName.replaceAll("_", "");
+		for(Field f : jc.getFields())
+		{
+			if(!f.getName().replaceAll("_", "").equals(fieldNameNoUnderscore)) continue;
+			System.err.println("Matched Field \"" + fieldName + "\" to \"" + f.getName() + "\"");
+			fieldSet.add(f);
+			return;
+		}
+		
+		// field definitely not found!
 		StringBuffer sb = new StringBuffer();
 		sb.append("Field \"" + fieldName + "\" not found in class \"" + getClassName() + "\". Candidates are:\n");
 		for(Field f : jc.getFields()) sb.append("   - " + f.getName() + "\n");
