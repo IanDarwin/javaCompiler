@@ -144,7 +144,7 @@ public class ObjectStatisticsTab implements SelectionListener, StubsGeneratorLis
 					tableItem.setText(1, "Skipped");
 				} else if(phaseProcessed == 2 || phaseProcessed == 3 || phaseProcessed == 4) // Phase 1, 2 or 3
 				{
-					TableItem tableItem;
+					TableItem tableItem = null;
 					if(phaseProcessed == 2)
 					{
 						tableItem = new TableItem(objectsTable, SWT.NONE);
@@ -159,7 +159,7 @@ public class ObjectStatisticsTab implements SelectionListener, StubsGeneratorLis
 								break;
 							}
 						}
-						throw new IllegalArgumentException("TableItem \"" + objectColumnText + "\" not found!");
+						if(tableItem == null) throw new IllegalArgumentException("TableItem \"" + objectColumnText + "\" not found!");
 					}
 					
 					if(phaseResult == 0) // Ok
@@ -241,8 +241,8 @@ public class ObjectStatisticsTab implements SelectionListener, StubsGeneratorLis
 					if(comp > 0 || (comp == 0 && curIndex > nextIndex)) swap(cur, next);
 				} else if(columnIndex == 2)
 				{
-					int curSize = (cur.getText(2).length() > 0) ? Integer.parseInt(cur.getText(2)) : 0;
-					int nextSize = (next.getText(2).length() > 0) ? Integer.parseInt(next.getText(2)) : 0;
+					int curSize = (cur.getText(2).length() > 0) ? Integer.parseInt(cur.getText(2)) : Integer.MIN_VALUE;
+					int nextSize = (next.getText(2).length() > 0) ? Integer.parseInt(next.getText(2)) : Integer.MIN_VALUE;
 					if(curSize < nextSize || (curSize == nextSize && curIndex > nextIndex)) swap(cur, next);
 				}
 			}

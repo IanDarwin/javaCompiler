@@ -17,7 +17,7 @@
  *   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-package ch.mtSystems.gcjStubber.model;
+package ch.mtSystems.gcjStubber.model.stubCreator;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -35,6 +35,8 @@ import org.apache.bcel.classfile.Field;
 import org.apache.bcel.classfile.Method;
 import org.apache.bcel.generic.Type;
 
+import ch.mtSystems.gcjStubber.model.CommandExecutor;
+import ch.mtSystems.gcjStubber.model.MissingClass;
 import ch.mtSystems.jnc.model.utilities.FileUtilities;
 
 
@@ -78,7 +80,6 @@ public abstract class StubCreator
 				fileWriter.flush();
 				fileWriter.close();
 			}
-			finalizeStub(missingClasses);
 
 			// compile all .java to .class files
 			List<String> cmd = new LinkedList<String>();
@@ -159,8 +160,6 @@ public abstract class StubCreator
 	// --------------- protected methods ---------------
 
 	protected abstract void dumpClass(MissingClass missingClass, FileWriter fileWriter) throws Exception;
-
-	protected abstract void finalizeStub(MissingClass[] missingClasses);
 	
 	protected String fieldToString(Field field)
 	{

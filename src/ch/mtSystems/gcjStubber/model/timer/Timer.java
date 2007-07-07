@@ -48,11 +48,14 @@ public class Timer
 		{
 			public void run()
 			{
+				long wakeUpAbsolute = System.currentTimeMillis();
 				while(!stop)
 				{
 					try
 					{
-						Thread.sleep(sleep);
+						wakeUpAbsolute += sleep;
+						long fixedSleep = wakeUpAbsolute - System.currentTimeMillis();
+						if(fixedSleep > 0) Thread.sleep(fixedSleep);
 						for(TickListener l : listeners) l.tick();
 					} catch(InterruptedException ex) { }
 				}
