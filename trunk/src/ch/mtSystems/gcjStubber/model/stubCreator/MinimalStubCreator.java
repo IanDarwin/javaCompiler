@@ -88,7 +88,7 @@ public class MinimalStubCreator extends StubCreator
 
 				// note: bug in bcel, constructors have a "void" return type.
 				fileWriter.write("  ");
-				fileWriter.write(methodToString(m).replace("void <init>", missingClass.getSimpleClassName()));
+				fileWriter.write(methodToString(m, null).replace("void <init>", missingClass.getSimpleClassName()));
 				fileWriter.write("\n");
 			}
 
@@ -101,7 +101,7 @@ public class MinimalStubCreator extends StubCreator
 			if(m.getName().equals("<init>")) continue;
 
 			fileWriter.write("  ");
-			fileWriter.write(methodToString(m));
+			fileWriter.write(methodToString(m, null));
 			fileWriter.write("\n");
 		}
 
