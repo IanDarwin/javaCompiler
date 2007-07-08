@@ -47,16 +47,19 @@ public abstract class StubCreator
 	private File object;
 	private File cmdGcj;
 	private File tmpDir;
+	
+	protected File libgcjDotJar;
 
 
 	public StubCreator(MissingClass[] missingClasses, File jar, File object,
-			File cmdGcj, File tmpDir)
+			File cmdGcj, File tmpDir, File libgcjDotJar)
 	{
 		this.missingClasses = missingClasses;
 		this.jar = jar;
 		this.object = object;
 		this.cmdGcj = cmdGcj;
 		this.tmpDir = tmpDir;
+		this.libgcjDotJar = libgcjDotJar;
 	}
 
 
@@ -209,7 +212,7 @@ public abstract class StubCreator
 		for(int i=0; i<argumentTypes.length; i++)
 		{
 			if(i > 0) sb.append(", ");
-			sb.append(argumentTypes[i]);
+			sb.append(argumentTypes[i].toString().replaceAll("\\$", "."));
 			sb.append(" arg");
 			sb.append(i);
 		}
