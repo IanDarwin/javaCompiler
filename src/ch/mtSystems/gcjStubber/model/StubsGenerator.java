@@ -104,10 +104,6 @@ public class StubsGenerator
 			Arrays.sort(dirContent);
 			for(int i=0; i<dirContent.length && !stop; i++)
 			{
-				/*if(i != 1 && i != 9 && i != 34 && i != 38 && i != 41 && i != 43 &&
-						i != 78 && i != 232 && i != 235 && i != 265 && i != 277 &&
-						i != 333 && i != 439 && i != 452) continue;*/
-
 				log((i+1) + "/" + dirContent.length + ": Handling \"" + dirContent[i].getName() + "\"...\n");
 				if(!createStubForObject(dirContent[i], (i+1), dirContent.length)) return;
 			}
@@ -458,15 +454,15 @@ public class StubsGenerator
 					if(i == 0)
 					{
 						stubCreator = new MinimalStubCreator(missingClasses, stubJar,
-								stubObject, cmdGcj, new File(stubsDir, "tmp"), libgcjDotJar);
+								stubObject, cmdGcj, new File(stubsDir, "tmp"), libgcjDotJar, classesInObject);
 					} else if(i == 1)
 					{
 						stubCreator = new MinimalWithInheritanceStubCreator(missingClasses,
-								stubJar, stubObject, cmdGcj, new File(stubsDir, "tmp"), libgcjDotJar);
+								stubJar, stubObject, cmdGcj, new File(stubsDir, "tmp"), libgcjDotJar, classesInObject);
 					} else if(i == 2)
 					{
 						stubCreator = new FullPublicInterfaceStubCreator(missingClasses,
-								stubJar, stubObject, cmdGcj, new File(stubsDir, "tmp"), libgcjDotJar);
+								stubJar, stubObject, cmdGcj, new File(stubsDir, "tmp"), libgcjDotJar, classesInObject);
 					} else
 					{
 						throw new Exception("Can't be here?!");
