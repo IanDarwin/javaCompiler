@@ -49,7 +49,7 @@ public abstract class StubCreator
 	private File tmpDir;
 
 	private Set<String> excludedClasses;
-	private Set<String> hiddenMissingClasses = new HashSet<String>();
+	private Set<String> hiddenMissingClassNames = new HashSet<String>();
 
 	protected MissingClass[] missingClasses;
 	protected File libgcjDotJar;
@@ -90,16 +90,62 @@ public abstract class StubCreator
 			}
 			
 			// also create all hidden missing classes
-			for(String className : hiddenMissingClasses)
+			Set<MissingClass> hiddenMissingClasses = new LinkedHashSet<MissingClass>();
+			for(String className : hiddenMissingClassNames)
 			{
-				File sourceFile = new File(tmpDir, className.replaceAll("\\.", "/") + ".java");
+				int index = className.indexOf('$');
+				if(index == -1)
+				{
+					hiddenMissingClasses.add(new MissingClass(className, libgcjDotJar));
+				} else
+				{
+					String parentClassName = className.substring(0, index);
+					MissingClass parentClass = null;
+					
+					// check if the parent class already exists in the missing classes
+					for(MissingClass missingClass : missingClasses)
+					{
+						if(missingClass.getClassName().equals(parentClassName))
+						{
+							parentClass = missingClass;
+							hiddenMissingClasses.add(parentClass);
+							break;
+						}
+					}
+
+					if(parentClass == null)
+					{
+						// check if the parent was already added
+						for(MissingClass missingClass : hiddenMissingClasses)
+						{
+							if(missingClass.getClassName().equals(parentClassName))
+							{
+								parentClass = missingClass;
+								break;
+							}
+						}
+					}
+					
+					if(parentClass == null)
+					{
+						parentClass = new MissingClass(parentClassName, libgcjDotJar);
+						hiddenMissingClasses.add(parentClass);
+					}
+					
+					parentClass.addMissingInnerClass(new MissingClass(className, libgcjDotJar));
+				}
+			}
+
+			for(MissingClass missingClass : hiddenMissingClasses)
+			{
+				File sourceFile = new File(tmpDir, missingClass.getClassName().replaceAll("\\.", "/") + ".java");
 				if(!sourceFile.getParentFile().exists() && !sourceFile.getParentFile().mkdirs())
 				{
 					throw new Exception("Can't create directory: \"" + sourceFile.getParentFile() + "\"!");
 				}
 
 				FileWriter fileWriter = new FileWriter(sourceFile);
-				dumpClass(new MissingClass(className, libgcjDotJar), fileWriter, false);
+				dumpClass(missingClass, fileWriter, false);
 				fileWriter.flush();
 				fileWriter.close();
 			}
@@ -232,6 +278,8 @@ public abstract class StubCreator
 		Type[] argumentTypes = method.getArgumentTypes();
 		for(int i=0; i<argumentTypes.length; i++)
 		{
+			ensureCreated(argumentTypes[i].toString());
+
 			if(i > 0) sb.append(", ");
 			sb.append(argumentTypes[i].toString().replaceAll("\\$", "."));
 			sb.append(" arg");
@@ -280,20 +328,36 @@ public abstract class StubCreator
 		boolean excludedClass = false;
 		for(String excludedClassName : excludedClasses)
 		{
-			if(excludedClassName.equals(className))
+			// also supports inner classes:
+			if(className.startsWith(excludedClassName))
 			{
 				excludedClass = true;
 				break;
 			}
 		}
 		if(!excludedClass) return;
-		
-		for(MissingClass missingClass : missingClasses)
+
+		int index = className.indexOf('$');
+		if(index > -1)
 		{
-			if(missingClass.getClassName().equals(className)) return;
+			String parentClassName = className.substring(0, index);
+			for(MissingClass missingClass : missingClasses)
+			{
+				if(missingClass.getClassName().equals(parentClassName))
+				{
+					if(missingClass.getInnerClass(className) != null) return;
+				}
+			}
+			
+		} else
+		{
+			for(MissingClass missingClass : missingClasses)
+			{
+				if(missingClass.getClassName().equals(className)) return;
+			}
 		}
 		
-		hiddenMissingClasses.add(className);
+		hiddenMissingClassNames.add(className);
 	}
 
 
