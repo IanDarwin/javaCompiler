@@ -21,6 +21,7 @@ package ch.mtSystems.gcjStubber.model.stubCreator;
 
 import java.io.File;
 import java.io.FileWriter;
+import java.util.LinkedHashSet;
 import java.util.Set;
 
 import org.apache.bcel.classfile.ClassParser;
@@ -137,7 +138,7 @@ public class MinimalWithInheritanceStubCreator extends StubCreator
 			}
 
 			fileWriter.write("\n");
-		} 
+		}
 
 		// missing methods
 		Set<Method> missingMethods = missingClass.getMissingMethods();
@@ -150,7 +151,7 @@ public class MinimalWithInheritanceStubCreator extends StubCreator
 			fileWriter.write("\n");
 		}
 
-		// implemented abstract methods from superclasses
+		// implemented abstract methods from superclass and interfaces
 		for(Method m : jc.getMethods())
 		{
 			if(m.getName().equals("<init>")) continue; // omit constructor
@@ -173,6 +174,14 @@ public class MinimalWithInheritanceStubCreator extends StubCreator
 	private Method getSuperclassConstructor(JavaClass jc) throws Exception
 	{
 		String superClassName = jc.getSuperclassName();
+		
+		// check if the superclass is part of the stub. if yes, there's always a default constructor
+		for(MissingClass missingClass : missingClasses)
+		{
+			if(missingClass.getClassName().equals(superClassName)) return null;
+		}
+		
+		// otherwise, get a constructor from the real class
 		String fileName = superClassName.replaceAll("\\.", "/") + ".class";
 		JavaClass jcSuper = (new ClassParser(libgcjDotJar.toString(), fileName)).parse();
 
@@ -219,16 +228,23 @@ public class MinimalWithInheritanceStubCreator extends StubCreator
 	
 	private boolean isImplementedAbstractMethod(JavaClass jc, Method m) throws Exception
 	{
-		String superClassName = jc.getSuperclassName();
-		if(superClassName.equals("java.lang.Object")) return false;
+		Set<String> superClassNames = new LinkedHashSet<String>(); // superclass and interfaces
+		superClassNames.add(jc.getSuperclassName());
+		for(String interfaceClassName : jc.getInterfaceNames()) superClassNames.add(interfaceClassName);
 		
-		String fileName = superClassName.replaceAll("\\.", "/") + ".class";
-		JavaClass jcSuper = (new ClassParser(libgcjDotJar.toString(), fileName)).parse();
-		
-		for(Method mSuper : jcSuper.getMethods())
+		for(String superClassName : superClassNames)
 		{
-			if(signatureMatches(m, mSuper)) return true;
+			if(superClassName.equals("java.lang.Object")) continue;
+
+			String fileName = superClassName.replaceAll("\\.", "/") + ".class";
+			JavaClass jcSuper = (new ClassParser(libgcjDotJar.toString(), fileName)).parse();
+			
+			for(Method mSuper : jcSuper.getMethods())
+			{
+				if(signatureMatches(m, mSuper)) return true;
+			}
 		}
+
 		return false;
 	}
 	

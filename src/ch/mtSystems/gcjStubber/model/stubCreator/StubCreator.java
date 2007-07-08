@@ -42,12 +42,12 @@ import ch.mtSystems.jnc.model.utilities.FileUtilities;
 
 public abstract class StubCreator
 {
-	private MissingClass[] missingClasses;
 	private File jar;
 	private File object;
 	private File cmdGcj;
 	private File tmpDir;
-	
+
+	protected MissingClass[] missingClasses;
 	protected File libgcjDotJar;
 
 
@@ -200,6 +200,7 @@ public abstract class StubCreator
 		if(method.isAbstract()) sb.append("abstract ");
 		if(method.isFinal()) sb.append("final ");
 		if(method.isStatic()) sb.append("static ");
+		if(method.isNative()) sb.append("native ");
 
 		// return value and name
 		sb.append(method.getReturnType());
@@ -219,7 +220,10 @@ public abstract class StubCreator
 		sb.append(")");
 
 		// body
-		if(body != null)
+		if(method.isNative())
+		{
+			sb.append(";");
+		} else if(body != null)
 		{
 			sb.append(" { ");
 			sb.append(body);
