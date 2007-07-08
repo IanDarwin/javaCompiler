@@ -22,6 +22,8 @@ package ch.mtSystems.gcjStubber.model.stubCreator;
 import java.io.File;
 import java.io.FileWriter;
 import java.util.LinkedHashSet;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Set;
 
 import org.apache.bcel.classfile.ClassParser;
@@ -73,7 +75,7 @@ public class MinimalWithInheritanceStubCreator extends StubCreator
 		{
 			ensureCreated(jc.getSuperclassName());
 			fileWriter.write("extends ");
-			fileWriter.write(jc.getSuperclassName());
+			fileWriter.write(jc.getSuperclassName().replaceAll("\\$", "."));
 			fileWriter.write(" ");
 	
 			String[] sa = jc.getInterfaceNames();
@@ -85,7 +87,7 @@ public class MinimalWithInheritanceStubCreator extends StubCreator
 					ensureCreated(sa[i]);
 
 					if(i>0) fileWriter.write(", ");
-					fileWriter.write(sa[i]);
+					fileWriter.write(sa[i].replaceAll("\\$", "."));
 				}
 			}
 		}
@@ -147,6 +149,8 @@ public class MinimalWithInheritanceStubCreator extends StubCreator
 			fileWriter.write("\n");
 		}
 
+		List<Method> addedMethods = new LinkedList<Method>();
+		
 		// missing methods
 		Set<Method> missingMethods = missingClass.getMissingMethods();
 		for(Method m : missingMethods)
@@ -156,6 +160,8 @@ public class MinimalWithInheritanceStubCreator extends StubCreator
 			fileWriter.write("  ");
 			fileWriter.write(methodToString(m, null));
 			fileWriter.write("\n");
+
+			addedMethods.add(m);
 		}
 
 		// implemented abstract methods from superclass and interfaces
@@ -166,9 +172,22 @@ public class MinimalWithInheritanceStubCreator extends StubCreator
 			if(!m.isPublic() && !m.isProtected()) continue;   // only handle public and protected methods
 			if(!isImplementedAbstractMethod(jc, m)) continue; // is implemented abstract method?
 
+			boolean alreadyAdded = false;
+			for(Method addedMethod : addedMethods)
+			{
+				if(signatureMatches(addedMethod, m))
+				{
+					alreadyAdded = true;
+					break;
+				}
+			}
+			if(alreadyAdded) continue;
+			
 			fileWriter.write("  ");
 			fileWriter.write(methodToString(m, null));
 			fileWriter.write("\n");
+
+			addedMethods.add(m);
 		}
 
 		// inner classes
@@ -261,7 +280,7 @@ public class MinimalWithInheritanceStubCreator extends StubCreator
 
 		return false;
 	}
-	
+
 	private boolean signatureMatches(Method m1, Method m2)
 	{	
 		if(!m1.getName().equals(m2.getName())) return false;

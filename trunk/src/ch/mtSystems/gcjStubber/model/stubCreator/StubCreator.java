@@ -48,7 +48,7 @@ public abstract class StubCreator
 	private File tmpDir;
 
 	private Set<String> excludedClasses;
-	private Set<MissingClass> hiddenMissingClasses2 = new LinkedHashSet<MissingClass>();
+	private List<MissingClass> hiddenMissingClasses = new LinkedList<MissingClass>();
 
 	protected MissingClass[] missingClasses;
 	protected File libgcjDotJar;
@@ -89,8 +89,10 @@ public abstract class StubCreator
 			}
 			
 			// also create all hidden missing classes
-			for(MissingClass missingClass : hiddenMissingClasses2)
+			for(int i=0; i<hiddenMissingClasses.size(); i++)
 			{
+				MissingClass missingClass = hiddenMissingClasses.get(i);
+
 				File sourceFile = new File(tmpDir, missingClass.getClassName().replaceAll("\\.", "/") + ".java");
 				if(!sourceFile.getParentFile().exists() && !sourceFile.getParentFile().mkdirs())
 				{
@@ -242,7 +244,7 @@ public abstract class StubCreator
 		sb.append(")");
 
 		// body
-		if(method.isNative())
+		if(method.isNative() || method.isAbstract())
 		{
 			sb.append(";");
 		} else if(body != null)
@@ -298,7 +300,7 @@ public abstract class StubCreator
 		int index = className.indexOf('$'); 
 		if(index == -1)
 		{
-			for(MissingClass missingClass : hiddenMissingClasses2)
+			for(MissingClass missingClass : hiddenMissingClasses)
 			{
 				if(missingClass.getClassName().equals(className)) return;
 			}
@@ -308,12 +310,12 @@ public abstract class StubCreator
 				if(missingClass.getClassName().equals(className)) return;
 			}
 
-			hiddenMissingClasses2.add(new MissingClass(className, libgcjDotJar));
+			hiddenMissingClasses.add(new MissingClass(className, libgcjDotJar));
 		} else
 		{
 			String parentClassName = className.substring(0, index);
 
-			for(MissingClass missingClass : hiddenMissingClasses2)
+			for(MissingClass missingClass : hiddenMissingClasses)
 			{
 				if(missingClass.getClassName().equals(parentClassName))
 				{
@@ -329,14 +331,14 @@ public abstract class StubCreator
 				{
 					MissingClass innerClass = missingClass.getInnerClass(className);
 					if(innerClass == null) missingClass.addMissingInnerClass(className, libgcjDotJar);
-					hiddenMissingClasses2.add(missingClass);
+					hiddenMissingClasses.add(missingClass);
 					return;
 				}
 			}
 			
 			MissingClass parentClass = new MissingClass(parentClassName, libgcjDotJar);
 			parentClass.addMissingInnerClass(className, libgcjDotJar);
-			hiddenMissingClasses2.add(parentClass);
+			hiddenMissingClasses.add(parentClass);
 		}
 	}
 
