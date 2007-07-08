@@ -452,68 +452,78 @@ public class StubsGenerator
 			{
 				phaseProcessed = i + 2;
 
-				StubCreator stubCreator;
-				if(i == 0)
+				try
 				{
-					stubCreator = new MinimalStubCreator(missingClasses, stubJar,
-							stubObject, cmdGcj, new File(stubsDir, "tmp"), libgcjDotJar);
-				} else if(i == 1)
-				{
-					stubCreator = new MinimalWithInheritanceStubCreator(missingClasses,
-							stubJar, stubObject, cmdGcj, new File(stubsDir, "tmp"), libgcjDotJar);
-				} else if(i == 2)
-				{
-					stubCreator = new FullPublicInterfaceStubCreator(missingClasses,
-							stubJar, stubObject, cmdGcj, new File(stubsDir, "tmp"), libgcjDotJar);
-				} else
-				{
-					throw new Exception("Can't be here?!");
-				}
-				stubCreator.create();
-
-				// compile again, has to work with the created stub
-				commandExecutor = new CommandExecutor(cmd.toArray(new String[0]), stubsDir);
-				commandExecutor.execute();
-				if(commandExecutor.getOutput().length != 0 || commandExecutor.getError().length != 0)
-				{
-					StringBuffer sb = new StringBuffer("Unexpected output on compilation with stub:\n");
-					for(String s : commandExecutor.getOutput()) sb.append("[stdout] " + s + "\n");
-					for(String s : commandExecutor.getError()) sb.append("[stderr] " + s + "\n");
-					sb.deleteCharAt(sb.length()-1);
-					
-					for(StubsGeneratorListener l : listeners)
+					StubCreator stubCreator;
+					if(i == 0)
 					{
-						l.processed(fObj.getName(), phaseProcessed, 2, sb.toString(), -1, objectIndex, totalCount);
+						stubCreator = new MinimalStubCreator(missingClasses, stubJar,
+								stubObject, cmdGcj, new File(stubsDir, "tmp"), libgcjDotJar);
+					} else if(i == 1)
+					{
+						stubCreator = new MinimalWithInheritanceStubCreator(missingClasses,
+								stubJar, stubObject, cmdGcj, new File(stubsDir, "tmp"), libgcjDotJar);
+					} else if(i == 2)
+					{
+						stubCreator = new FullPublicInterfaceStubCreator(missingClasses,
+								stubJar, stubObject, cmdGcj, new File(stubsDir, "tmp"), libgcjDotJar);
+					} else
+					{
+						throw new Exception("Can't be here?!");
 					}
-					continue;
-				}
+					stubCreator.create();
 	
-				// check if the compiled exe works
-				commandExecutor = new CommandExecutor(helloWorldDotExe.toString(), stubsDir);
-				commandExecutor.execute();
-				if(commandExecutor.getOutput().length != 1 ||
-						!commandExecutor.getOutput()[0].equals("HelloWorld") ||
-						commandExecutor.getError().length != 0)
-				{
-					StringBuffer sb = new StringBuffer("Unexpected HelloWorld output:\n");
-					for(String s : commandExecutor.getOutput()) sb.append("[stdout] " + s + "\n");
-					for(String s : commandExecutor.getError()) sb.append("[stderr] " + s + "\n");
-					if(sb.length() > 0) sb.deleteCharAt(sb.length()-1);
-					
+					// compile again, has to work with the created stub
+					commandExecutor = new CommandExecutor(cmd.toArray(new String[0]), stubsDir);
+					commandExecutor.execute();
+					if(commandExecutor.getOutput().length != 0 || commandExecutor.getError().length != 0)
+					{
+						StringBuffer sb = new StringBuffer("Unexpected output on compilation with stub:\n");
+						for(String s : commandExecutor.getOutput()) sb.append("[stdout] " + s + "\n");
+						for(String s : commandExecutor.getError()) sb.append("[stderr] " + s + "\n");
+						sb.deleteCharAt(sb.length()-1);
+						
+						for(StubsGeneratorListener l : listeners)
+						{
+							l.processed(fObj.getName(), phaseProcessed, 2, sb.toString(), -1, objectIndex, totalCount);
+						}
+						continue;
+					}
+		
+					// check if the compiled exe works
+					commandExecutor = new CommandExecutor(helloWorldDotExe.toString(), stubsDir);
+					commandExecutor.execute();
+					if(commandExecutor.getOutput().length != 1 ||
+							!commandExecutor.getOutput()[0].equals("HelloWorld") ||
+							commandExecutor.getError().length != 0)
+					{
+						StringBuffer sb = new StringBuffer("Unexpected HelloWorld output:\n");
+						for(String s : commandExecutor.getOutput()) sb.append("[stdout] " + s + "\n");
+						for(String s : commandExecutor.getError()) sb.append("[stderr] " + s + "\n");
+						if(sb.length() > 0) sb.deleteCharAt(sb.length()-1);
+						
+						for(StubsGeneratorListener l : listeners)
+						{
+							l.processed(fObj.getName(), phaseProcessed, 1, sb.toString(), -1, objectIndex, totalCount);
+						}
+						continue;
+					}
+	
+					// stub works
+					int saving = origHelloWorldDotExeSize - (int)helloWorldDotExe.length();
 					for(StubsGeneratorListener l : listeners)
 					{
-						l.processed(fObj.getName(), phaseProcessed, 1, sb.toString(), -1, objectIndex, totalCount);
+						l.processed(fObj.getName(), phaseProcessed, 0, null, saving, objectIndex, totalCount);
 					}
-					continue;
-				}
-
-				// stub works
-				int saving = origHelloWorldDotExeSize - (int)helloWorldDotExe.length();
-				for(StubsGeneratorListener l : listeners)
+					return true;
+				} catch(Exception ex)
 				{
-					l.processed(fObj.getName(), phaseProcessed, 0, null, saving, objectIndex, totalCount);
+					for(StubsGeneratorListener l : listeners)
+					{
+						l.processed(fObj.getName(), phaseProcessed, 2, "Failed with exception: " + ex.getMessage(),
+								-1, objectIndex, totalCount);
+					}
 				}
-				return true;
 			}
 
 			return true; // no stubCreator worked
