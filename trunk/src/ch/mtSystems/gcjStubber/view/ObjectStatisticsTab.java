@@ -60,7 +60,7 @@ public class ObjectStatisticsTab implements SelectionListener, StubsGeneratorLis
 		new FixedSash(leftComposite, rightComposite, parentComposite, true, 300);
 		
 		// table
-		objectsTable = new Table(leftComposite, SWT.BORDER);
+		objectsTable = new Table(leftComposite, SWT.BORDER|SWT.FULL_SELECTION);
 		objectsTable.setLayoutData(LayoutUtilities.createGridData(GridData.FILL_BOTH, 2, 1));
 		objectsTable.setHeaderVisible(true);
 		objectsTable.addSelectionListener(this);
