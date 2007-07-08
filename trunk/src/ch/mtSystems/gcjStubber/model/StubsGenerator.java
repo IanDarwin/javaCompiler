@@ -43,7 +43,7 @@ public class StubsGenerator
 	private File gcjDir, stubsDir;
 	private String[] compilationArguments;
 
-	private File helloWorldDotJava;
+	private File helloWorldDotJava, helloWorldDotExe;
 	private int origHelloWorldDotExeSize;
 	private File libgcjDotSpec, libgcjDotA, libgcjDotJar;
 	private File cmdGcj, cmdAr, cmdNm;
@@ -68,6 +68,7 @@ public class StubsGenerator
 		this.compilationArguments = compilationArguments;
 
 		helloWorldDotJava = new File(stubsDir, "HelloWorld.java");
+		helloWorldDotExe = new File(stubsDir, "HelloWorld.exe");
 
 		for(StubsGeneratorListener l : listeners) l.started();
 		boolean restoreLibgcjDotSpec = false;
@@ -275,7 +276,6 @@ public class StubsGenerator
 	{
 		try
 		{
-			File helloWorldDotExe = new File(stubsDir, "HelloWorld.exe");
 			List<String> cmd = new LinkedList<String>();
 			cmd.add(cmdGcj.toString());
 			cmd.add("-s");
@@ -407,7 +407,6 @@ public class StubsGenerator
 			renameBack = true;
 			
 			// try to compile the HelloWorld, will get the "missing references"
-			File helloWorldDotExe = new File(stubsDir, "HelloWorld.exe");
 			List<String> cmd = new LinkedList<String>();
 			cmd.add(cmdGcj.toString());
 			cmd.add("-s");
@@ -552,9 +551,15 @@ public class StubsGenerator
 	
 	private boolean cleanup()
 	{
-		if(!helloWorldDotJava.delete())
+		if(helloWorldDotJava.exists() && !helloWorldDotJava.delete())
 		{
 			log("Deleting \"" + helloWorldDotJava.getName() + "\" failed!\n");
+			return false;
+		}
+		
+		if(helloWorldDotExe.exists() && !helloWorldDotExe.delete())
+		{
+			log("Deleting \"" + helloWorldDotExe.getName() + "\" failed!\n");
 			return false;
 		}
 
