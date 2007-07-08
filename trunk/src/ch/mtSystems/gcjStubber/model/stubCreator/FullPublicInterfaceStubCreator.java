@@ -21,6 +21,7 @@ package ch.mtSystems.gcjStubber.model.stubCreator;
 
 import java.io.File;
 import java.io.FileWriter;
+import java.util.Set;
 
 import ch.mtSystems.gcjStubber.model.MissingClass;
 
@@ -28,9 +29,9 @@ import ch.mtSystems.gcjStubber.model.MissingClass;
 public class FullPublicInterfaceStubCreator extends StubCreator
 {
 	public FullPublicInterfaceStubCreator(MissingClass[] missingClasses,
-			File jar, File object, File cmdGcj, File tmpDir, File libgcjDotJar)
+			File jar, File object, File cmdGcj, File tmpDir, File libgcjDotJar, Set<String> excludedClasses)
 	{
-		super(missingClasses, jar, object, cmdGcj, tmpDir, libgcjDotJar);
+		super(missingClasses, jar, object, cmdGcj, tmpDir, libgcjDotJar, excludedClasses);
 	}
 
 

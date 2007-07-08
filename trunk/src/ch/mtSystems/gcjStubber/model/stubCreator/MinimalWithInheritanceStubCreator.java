@@ -36,9 +36,9 @@ import ch.mtSystems.gcjStubber.model.MissingClass;
 public class MinimalWithInheritanceStubCreator extends StubCreator
 {
 	public MinimalWithInheritanceStubCreator(MissingClass[] missingClasses,
-			File jar, File object, File cmdGcj, File tmpDir, File libgcjDotJar)
+			File jar, File object, File cmdGcj, File tmpDir, File libgcjDotJar, Set<String> excludedClasses)
 	{
-		super(missingClasses, jar, object, cmdGcj, tmpDir, libgcjDotJar);
+		super(missingClasses, jar, object, cmdGcj, tmpDir, libgcjDotJar, excludedClasses);
 	}
 
 
@@ -67,10 +67,11 @@ public class MinimalWithInheritanceStubCreator extends StubCreator
 		if(jc.isInterface()) fileWriter.write("interface ");
 		fileWriter.write(missingClass.getSimpleClassName());
 		fileWriter.write(" ");
-		
+
 		// inheritance
 		if(jc.isClass())
 		{
+			ensureCreated(jc.getSuperclassName());
 			fileWriter.write("extends ");
 			fileWriter.write(jc.getSuperclassName());
 			fileWriter.write(" ");
@@ -81,6 +82,8 @@ public class MinimalWithInheritanceStubCreator extends StubCreator
 				fileWriter.write("implements ");
 				for(int i=0; i<sa.length; i++)
 				{
+					ensureCreated(sa[i]);
+
 					if(i>0) fileWriter.write(", ");
 					fileWriter.write(sa[i]);
 				}

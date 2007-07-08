@@ -33,9 +33,9 @@ import ch.mtSystems.gcjStubber.model.MissingClass;
 public class MinimalStubCreator extends StubCreator
 {
 	public MinimalStubCreator(MissingClass[] missingClasses, File jar, File object,
-			File cmdGcj, File tmpDir, File libgcjDotJar)
+			File cmdGcj, File tmpDir, File libgcjDotJar, Set<String> excludedClasses)
 	{
-		super(missingClasses, jar, object, cmdGcj, tmpDir, libgcjDotJar);
+		super(missingClasses, jar, object, cmdGcj, tmpDir, libgcjDotJar, excludedClasses);
 	}
 
 

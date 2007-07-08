@@ -24,6 +24,7 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.InputStream;
+import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -47,12 +48,15 @@ public abstract class StubCreator
 	private File cmdGcj;
 	private File tmpDir;
 
+	private Set<String> excludedClasses;
+	private Set<String> hiddenMissingClasses = new HashSet<String>();
+
 	protected MissingClass[] missingClasses;
 	protected File libgcjDotJar;
 
 
 	public StubCreator(MissingClass[] missingClasses, File jar, File object,
-			File cmdGcj, File tmpDir, File libgcjDotJar)
+			File cmdGcj, File tmpDir, File libgcjDotJar, Set<String> excludedClasses)
 	{
 		this.missingClasses = missingClasses;
 		this.jar = jar;
@@ -60,6 +64,7 @@ public abstract class StubCreator
 		this.cmdGcj = cmdGcj;
 		this.tmpDir = tmpDir;
 		this.libgcjDotJar = libgcjDotJar;
+		this.excludedClasses = excludedClasses;
 	}
 
 
@@ -80,6 +85,21 @@ public abstract class StubCreator
 				
 				FileWriter fileWriter = new FileWriter(sourceFile);
 				dumpClass(missingClass, fileWriter, false);
+				fileWriter.flush();
+				fileWriter.close();
+			}
+			
+			// also create all hidden missing classes
+			for(String className : hiddenMissingClasses)
+			{
+				File sourceFile = new File(tmpDir, className.replaceAll("\\.", "/") + ".java");
+				if(!sourceFile.getParentFile().exists() && !sourceFile.getParentFile().mkdirs())
+				{
+					throw new Exception("Can't create directory: \"" + sourceFile.getParentFile() + "\"!");
+				}
+
+				FileWriter fileWriter = new FileWriter(sourceFile);
+				dumpClass(new MissingClass(className, libgcjDotJar), fileWriter, false);
 				fileWriter.flush();
 				fileWriter.close();
 			}
@@ -253,6 +273,27 @@ public abstract class StubCreator
 		if(type.equals(Type.LONG))    return "23";
 		if(type.equals(Type.SHORT))   return "(short)23";
 		return "(" + type.toString().replaceAll("\\$", ".") + ")null";
+	}
+
+	protected void ensureCreated(String className)
+	{
+		boolean excludedClass = false;
+		for(String excludedClassName : excludedClasses)
+		{
+			if(excludedClassName.equals(className))
+			{
+				excludedClass = true;
+				break;
+			}
+		}
+		if(!excludedClass) return;
+		
+		for(MissingClass missingClass : missingClasses)
+		{
+			if(missingClass.getClassName().equals(className)) return;
+		}
+		
+		hiddenMissingClasses.add(className);
 	}
 
 
