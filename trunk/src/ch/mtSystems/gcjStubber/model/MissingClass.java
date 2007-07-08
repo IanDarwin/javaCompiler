@@ -68,10 +68,30 @@ public class MissingClass
 	{
 		return simpleClassName;
 	}
-	
-	public void addMissingInnerClass(MissingClass innerClass)
+
+	public MissingClass addMissingInnerClass(String innerClassName, File libgcjDotJar) throws Exception
 	{
-		innerClassSet.add(innerClass);
+		int endIndex = innerClassName.indexOf('$', getClassName().length()+1);
+		if(endIndex == -1)
+		{
+			MissingClass innerClass = new MissingClass(innerClassName, libgcjDotJar);
+			innerClassSet.add(innerClass);
+			return innerClass;
+		} else
+		{
+			String myInnerClassName = innerClassName.substring(0, endIndex);
+			for(MissingClass innerClass : innerClassSet)
+			{
+				if(innerClass.getClassName().equals(myInnerClassName))
+				{
+					return innerClass.addMissingInnerClass(innerClassName, libgcjDotJar);
+				}
+			}
+
+			MissingClass innerClass = new MissingClass(innerClassName.substring(0, endIndex), libgcjDotJar);
+			innerClassSet.add(innerClass);
+			return innerClass.addMissingInnerClass(innerClassName, libgcjDotJar);
+		} 
 	}
 	
 	public Set<MissingClass> getInnerClasses()
@@ -79,12 +99,27 @@ public class MissingClass
 		return innerClassSet;
 	}
 	
-	public MissingClass getInnerClass(String className)
+	public MissingClass getInnerClass(String innerClassName)
 	{
-		for(MissingClass innerClass : innerClassSet)
+		int endIndex = innerClassName.indexOf('$', getClassName().length()+1);
+		if(endIndex == -1)
 		{
-			if(innerClass.getClassName().equals(className)) return innerClass;
+			for(MissingClass innerClass : innerClassSet)
+			{
+				if(innerClass.getClassName().equals(innerClassName)) return innerClass;
+			}
+		} else
+		{
+			String myInnerClassName = innerClassName.substring(0, endIndex);
+			for(MissingClass innerClass : innerClassSet)
+			{
+				if(innerClass.getClassName().equals(myInnerClassName))
+				{
+					return innerClass.getInnerClass(innerClassName);
+				}
+			}
 		}
+
 		return null;
 	}
 	
@@ -162,8 +197,8 @@ public class MissingClass
 						!(charArraySearching && byteArrayProvided)) continue mainLoop;
 			}
 
-			System.err.println("Matched " + methodName + "(" + join(argTypes, ", ") +
-						") to " + methodName + "(" + join(m.getArgumentTypes(), ", ") + ")");
+			//System.err.println("Matched " + methodName + "(" + join(argTypes, ", ") +
+			//			") to " + methodName + "(" + join(m.getArgumentTypes(), ", ") + ")");
 
 			methodSet.add(m);
 			return;
@@ -213,7 +248,7 @@ public class MissingClass
 		for(Field f : jc.getFields())
 		{
 			if(!f.getName().replaceAll("_", "").equals(fieldNameNoUnderscore)) continue;
-			System.err.println("Matched Field \"" + fieldName + "\" to \"" + f.getName() + "\"");
+			//System.err.println("Matched Field \"" + fieldName + "\" to \"" + f.getName() + "\"");
 			fieldSet.add(f);
 			return;
 		}
@@ -233,7 +268,7 @@ public class MissingClass
 
 	// --------------- private methods ---------------
 	
-	private String join(Object[] array, String connector)
+	/*private String join(Object[] array, String connector)
 	{
 		StringBuffer sb = new StringBuffer();
 		for(int i=0; i<array.length; i++)
@@ -242,5 +277,5 @@ public class MissingClass
 			sb.append(array[i]);
 		}
 		return sb.toString();
-	}
+	}*/
 }
