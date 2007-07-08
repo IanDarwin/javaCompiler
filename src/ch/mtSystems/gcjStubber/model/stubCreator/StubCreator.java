@@ -24,7 +24,6 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.InputStream;
-import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -49,7 +48,7 @@ public abstract class StubCreator
 	private File tmpDir;
 
 	private Set<String> excludedClasses;
-	private Set<String> hiddenMissingClassNames = new HashSet<String>();
+	private Set<MissingClass> hiddenMissingClasses2 = new LinkedHashSet<MissingClass>();
 
 	protected MissingClass[] missingClasses;
 	protected File libgcjDotJar;
@@ -90,53 +89,7 @@ public abstract class StubCreator
 			}
 			
 			// also create all hidden missing classes
-			Set<MissingClass> hiddenMissingClasses = new LinkedHashSet<MissingClass>();
-			for(String className : hiddenMissingClassNames)
-			{
-				int index = className.indexOf('$');
-				if(index == -1)
-				{
-					hiddenMissingClasses.add(new MissingClass(className, libgcjDotJar));
-				} else
-				{
-					String parentClassName = className.substring(0, index);
-					MissingClass parentClass = null;
-					
-					// check if the parent class already exists in the missing classes
-					for(MissingClass missingClass : missingClasses)
-					{
-						if(missingClass.getClassName().equals(parentClassName))
-						{
-							parentClass = missingClass;
-							hiddenMissingClasses.add(parentClass);
-							break;
-						}
-					}
-
-					if(parentClass == null)
-					{
-						// check if the parent was already added
-						for(MissingClass missingClass : hiddenMissingClasses)
-						{
-							if(missingClass.getClassName().equals(parentClassName))
-							{
-								parentClass = missingClass;
-								break;
-							}
-						}
-					}
-					
-					if(parentClass == null)
-					{
-						parentClass = new MissingClass(parentClassName, libgcjDotJar);
-						hiddenMissingClasses.add(parentClass);
-					}
-					
-					parentClass.addMissingInnerClass(new MissingClass(className, libgcjDotJar));
-				}
-			}
-
-			for(MissingClass missingClass : hiddenMissingClasses)
+			for(MissingClass missingClass : hiddenMissingClasses2)
 			{
 				File sourceFile = new File(tmpDir, missingClass.getClassName().replaceAll("\\.", "/") + ".java");
 				if(!sourceFile.getParentFile().exists() && !sourceFile.getParentFile().mkdirs())
@@ -255,7 +208,7 @@ public abstract class StubCreator
 		return sb.toString();
 	}
 	
-	protected String methodToString(Method method, String body)
+	protected String methodToString(Method method, String body) throws Exception
 	{
 		StringBuffer sb = new StringBuffer();
 
@@ -269,7 +222,8 @@ public abstract class StubCreator
 		if(method.isNative()) sb.append("native ");
 
 		// return value and name
-		sb.append(method.getReturnType());
+		ensureCreated(method.getReturnType().toString());
+		sb.append(method.getReturnType().toString().replaceAll("\\$", "."));
 		sb.append(" ");
 		sb.append(method.getName());
 
@@ -323,8 +277,11 @@ public abstract class StubCreator
 		return "(" + type.toString().replaceAll("\\$", ".") + ")null";
 	}
 
-	protected void ensureCreated(String className)
+	protected void ensureCreated(String className) throws Exception
 	{
+		// convert array types to standard classes
+		if(className.endsWith("[]")) className = className.substring(0, className.length()-2);
+
 		boolean excludedClass = false;
 		for(String excludedClassName : excludedClasses)
 		{
@@ -337,27 +294,50 @@ public abstract class StubCreator
 		}
 		if(!excludedClass) return;
 
-		int index = className.indexOf('$');
-		if(index > -1)
+		// check that the class doesn't exist yet (in missingClasses or hiddenMissingClasses)
+		int index = className.indexOf('$'); 
+		if(index == -1)
 		{
-			String parentClassName = className.substring(0, index);
-			for(MissingClass missingClass : missingClasses)
+			for(MissingClass missingClass : hiddenMissingClasses2)
 			{
-				if(missingClass.getClassName().equals(parentClassName))
-				{
-					if(missingClass.getInnerClass(className) != null) return;
-				}
+				if(missingClass.getClassName().equals(className)) return;
 			}
-			
-		} else
-		{
+
 			for(MissingClass missingClass : missingClasses)
 			{
 				if(missingClass.getClassName().equals(className)) return;
 			}
+
+			hiddenMissingClasses2.add(new MissingClass(className, libgcjDotJar));
+		} else
+		{
+			String parentClassName = className.substring(0, index);
+
+			for(MissingClass missingClass : hiddenMissingClasses2)
+			{
+				if(missingClass.getClassName().equals(parentClassName))
+				{
+					MissingClass innerClass = missingClass.getInnerClass(className);
+					if(innerClass == null) missingClass.addMissingInnerClass(className, libgcjDotJar);
+					return;
+				}
+			}
+
+			for(MissingClass missingClass : missingClasses)
+			{
+				if(missingClass.getClassName().equals(parentClassName))
+				{
+					MissingClass innerClass = missingClass.getInnerClass(className);
+					if(innerClass == null) missingClass.addMissingInnerClass(className, libgcjDotJar);
+					hiddenMissingClasses2.add(missingClass);
+					return;
+				}
+			}
+			
+			MissingClass parentClass = new MissingClass(parentClassName, libgcjDotJar);
+			parentClass.addMissingInnerClass(className, libgcjDotJar);
+			hiddenMissingClasses2.add(parentClass);
 		}
-		
-		hiddenMissingClassNames.add(className);
 	}
 
 

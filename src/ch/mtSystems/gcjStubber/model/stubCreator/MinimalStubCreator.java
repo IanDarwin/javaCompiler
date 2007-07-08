@@ -97,7 +97,7 @@ public class MinimalStubCreator extends StubCreator
 			}
 
 			fileWriter.write("\n");
-		} 
+		}
 
 		// methods
 		for(Method m : missingClass.getMissingMethods())

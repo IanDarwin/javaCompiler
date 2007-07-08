@@ -151,11 +151,7 @@ public class UnresolvedReferenceParser
 		{
 			MissingClass parentClass = getMissingClass(className.substring(0, index));
 			MissingClass innerClass = parentClass.getInnerClass(className);
-			if(innerClass == null)
-			{
-				innerClass = new MissingClass(className, libgcjDotJar);
-				parentClass.addMissingInnerClass(innerClass);
-			}
+			if(innerClass == null) innerClass = parentClass.addMissingInnerClass(className, libgcjDotJar);
 			return innerClass;
 		}
 

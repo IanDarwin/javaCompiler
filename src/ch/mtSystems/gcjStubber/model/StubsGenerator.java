@@ -107,6 +107,10 @@ public class StubsGenerator
 				log((i+1) + "/" + dirContent.length + ": Handling \"" + dirContent[i].getName() + "\"...\n");
 				if(!createStubForObject(dirContent[i], (i+1), dirContent.length)) return;
 			}
+
+			log("Cleaning up... ");
+			if(!cleanup()) return;
+			log("Ok\n");
 		} finally
 		{
 			if(restoreLibgcjDotSpec)
@@ -514,6 +518,8 @@ public class StubsGenerator
 					return true;
 				} catch(Exception ex)
 				{
+					//ex.printStackTrace();
+
 					for(StubsGeneratorListener l : listeners)
 					{
 						l.processed(fObj.getName(), phaseProcessed, 2, "Failed with exception: " + ex.getMessage(),
@@ -544,7 +550,26 @@ public class StubsGenerator
 		}
 	}
 	
-	
+	private boolean cleanup()
+	{
+		if(!helloWorldDotJava.delete())
+		{
+			log("Deleting \"" + helloWorldDotJava.getName() + "\" failed!\n");
+			return false;
+		}
+
+		for(File f : stubsDir.listFiles(new ObjectFileFilter()))
+		{
+			if(!f.delete())
+			{
+				log("Deleting \"" + f.getName() + "\" failed!\n");
+				return false;
+			}
+		}
+		return true;
+	}
+
+
 	// --------------- Singleton ---------------
 	
 	private static StubsGenerator stubsGenerator = new StubsGenerator();
