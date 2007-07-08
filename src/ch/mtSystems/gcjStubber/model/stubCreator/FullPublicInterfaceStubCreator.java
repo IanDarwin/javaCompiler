@@ -36,7 +36,7 @@ public class FullPublicInterfaceStubCreator extends StubCreator
 
 	// --------------- overwritten methods ---------------
 
-	protected void dumpClass(MissingClass missingClass, FileWriter fileWriter) throws Exception
+	protected void dumpClass(MissingClass missingClass, FileWriter fileWriter, boolean isInnerClass) throws Exception
 	{
 	}
 }

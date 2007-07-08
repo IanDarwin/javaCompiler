@@ -44,19 +44,23 @@ public class MinimalWithInheritanceStubCreator extends StubCreator
 
 	// --------------- overwritten methods ---------------
 
-	protected void dumpClass(MissingClass missingClass, FileWriter fileWriter) throws Exception
+	protected void dumpClass(MissingClass missingClass, FileWriter fileWriter, boolean isInnerClass) throws Exception
 	{
 		JavaClass jc = missingClass.getJavaClass();
 
 		// package
-		fileWriter.write("package ");
-		fileWriter.write(jc.getPackageName());
-		fileWriter.write(";\n\n");
-
+		if(!isInnerClass)
+		{
+			fileWriter.write("package ");
+			fileWriter.write(jc.getPackageName());
+			fileWriter.write(";\n\n");
+		}
+		
 		// class declaration
 		if(jc.isPublic()) fileWriter.write("public ");
 		if(jc.isProtected()) fileWriter.write("protected ");
 		if(jc.isPrivate()) fileWriter.write("private ");
+		if(jc.isStatic() || isInnerClass) fileWriter.write("static "); // bcel bug: isStatic (inner classes) wrong! 
 		if(jc.isAbstract()) fileWriter.write("abstract ");
 		if(jc.isFinal()) fileWriter.write("final ");
 		if(jc.isClass()) fileWriter.write("class ");
@@ -162,6 +166,13 @@ public class MinimalWithInheritanceStubCreator extends StubCreator
 			fileWriter.write("  ");
 			fileWriter.write(methodToString(m, null));
 			fileWriter.write("\n");
+		}
+
+		// inner classes
+		fileWriter.write("\n");
+		for(MissingClass innerClass : missingClass.getInnerClasses())
+		{
+			dumpClass(innerClass, fileWriter, true);
 		}
 
 		// finish the class

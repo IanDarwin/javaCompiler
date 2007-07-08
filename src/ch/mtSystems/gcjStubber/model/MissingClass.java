@@ -34,6 +34,8 @@ public class MissingClass
 {
 	private String simpleClassName;
 	private JavaClass jc;
+	
+	private Set<MissingClass> innerClassSet = new HashSet<MissingClass>();
 	private Set<Field> fieldSet = new HashSet<Field>();
 	private Set<Method> methodSet = new HashSet<Method>(); // constructors and methods
 
@@ -45,7 +47,8 @@ public class MissingClass
 		jc = (new ClassParser(libgcjDotJar.toString(), fileName)).parse();
 
 		simpleClassName = jc.getClassName();
-		simpleClassName = simpleClassName.substring(simpleClassName.lastIndexOf('.')+1);
+		int index = Math.max(simpleClassName.lastIndexOf('.'), simpleClassName.lastIndexOf('$'));
+		simpleClassName = simpleClassName.substring(index+1);
 	}
 
 
@@ -55,7 +58,7 @@ public class MissingClass
 	{
 		return jc;
 	}
-	
+
 	public String getClassName()
 	{
 		return jc.getClassName();
@@ -64,6 +67,25 @@ public class MissingClass
 	public String getSimpleClassName()
 	{
 		return simpleClassName;
+	}
+	
+	public void addMissingInnerClass(MissingClass innerClass)
+	{
+		innerClassSet.add(innerClass);
+	}
+	
+	public Set<MissingClass> getInnerClasses()
+	{
+		return innerClassSet;
+	}
+	
+	public MissingClass getInnerClass(String className)
+	{
+		for(MissingClass innerClass : innerClassSet)
+		{
+			if(innerClass.getClassName().equals(className)) return innerClass;
+		}
+		return null;
 	}
 	
 	public void addMissingConstructor(String[] argTypes) throws Exception
