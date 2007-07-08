@@ -21,10 +21,10 @@ package ch.mtSystems.gcjStubber.model.stubCreator;
 
 import java.io.File;
 import java.io.FileWriter;
-import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
+import java.util.regex.Pattern;
 
 import org.apache.bcel.classfile.ClassParser;
 import org.apache.bcel.classfile.Field;
@@ -62,7 +62,7 @@ public class MinimalWithInheritanceStubCreator extends StubCreator
 		if(jc.isPublic()) fileWriter.write("public ");
 		if(jc.isProtected()) fileWriter.write("protected ");
 		if(jc.isPrivate()) fileWriter.write("private ");
-		if(jc.isStatic() || isInnerClass) fileWriter.write("static "); // bcel bug: isStatic (inner classes) wrong! 
+		if(jc.isStatic() || (isInnerClass && isStatic(jc))) fileWriter.write("static "); 
 		if(jc.isAbstract()) fileWriter.write("abstract ");
 		if(jc.isFinal()) fileWriter.write("final ");
 		if(jc.isClass()) fileWriter.write("class ");
@@ -211,7 +211,7 @@ public class MinimalWithInheritanceStubCreator extends StubCreator
 		// check if the superclass is part of the stub. if yes, there's always a default constructor
 		for(MissingClass missingClass : missingClasses)
 		{
-			if(missingClass.getClassName().equals(superClassName)) return null;
+			if(superClassName.startsWith(missingClass.getClassName())) return null;
 		}
 		
 		// otherwise, get a constructor from the real class
@@ -261,16 +261,21 @@ public class MinimalWithInheritanceStubCreator extends StubCreator
 	
 	private boolean isImplementedAbstractMethod(JavaClass jc, Method m) throws Exception
 	{
-		Set<String> superClassNames = new LinkedHashSet<String>(); // superclass and interfaces
+		List<String> superClassNames = new LinkedList<String>(); // superclass and interfaces
+		
 		superClassNames.add(jc.getSuperclassName());
 		for(String interfaceClassName : jc.getInterfaceNames()) superClassNames.add(interfaceClassName);
 		
-		for(String superClassName : superClassNames)
+		while(!superClassNames.isEmpty())
 		{
+			String superClassName = superClassNames.remove(0);
 			if(superClassName.equals("java.lang.Object")) continue;
 
 			String fileName = superClassName.replaceAll("\\.", "/") + ".class";
 			JavaClass jcSuper = (new ClassParser(libgcjDotJar.toString(), fileName)).parse();
+			
+			superClassNames.add(jcSuper.getSuperclassName());
+			for(String interfaceClassName : jcSuper.getInterfaceNames()) superClassNames.add(interfaceClassName);
 			
 			for(Method mSuper : jcSuper.getMethods())
 			{
@@ -296,5 +301,11 @@ public class MinimalWithInheritanceStubCreator extends StubCreator
 		}
 
 		return true;
+	}
+
+	private boolean isStatic(JavaClass jc)
+	{
+		Pattern p = Pattern.compile("InnerClass:.*static.*" + jc.getClassName().replaceAll("\\$", "\\\\\\$"));
+		return p.matcher(jc.toString()).find();
 	}
 }
