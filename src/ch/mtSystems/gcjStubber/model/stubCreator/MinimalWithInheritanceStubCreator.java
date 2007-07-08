@@ -112,18 +112,27 @@ public class MinimalWithInheritanceStubCreator extends StubCreator
 		// constructors
 		if(jc.isClass())
 		{
+			// get superclass constructor
+			Method superClassConstructor = getSuperclassConstructor(jc);
+			String superClassConstructorCall = createSuperclassConstructorCall(superClassConstructor);
+
 			// always add the default constructor (otherwise it's not available if there's another)
 			fileWriter.write("  public ");
 			fileWriter.write(missingClass.getSimpleClassName());
-			fileWriter.write("() { }\n");
+			fileWriter.write("() { ");
+			if(superClassConstructorCall != null) fileWriter.write(superClassConstructorCall);
+			fileWriter.write(" }\n");
 			
 			for(Method m : missingClass.getMissingMethods())
 			{
 				if(!m.getName().equals("<init>")) continue;
 
 				// note: bug in bcel, constructors have a "void" return type.
+				String method = methodToString(m, superClassConstructorCall);
+				method = method.replace("void <init>", missingClass.getSimpleClassName());
+
 				fileWriter.write("  ");
-				fileWriter.write(methodToString(m).replace("void <init>", missingClass.getSimpleClassName()));
+				fileWriter.write(method);
 				fileWriter.write("\n");
 			}
 
@@ -137,7 +146,7 @@ public class MinimalWithInheritanceStubCreator extends StubCreator
 			if(m.getName().equals("<init>")) continue;
 
 			fileWriter.write("  ");
-			fileWriter.write(methodToString(m));
+			fileWriter.write(methodToString(m, null));
 			fileWriter.write("\n");
 		}
 
@@ -150,7 +159,7 @@ public class MinimalWithInheritanceStubCreator extends StubCreator
 			if(!isImplementedAbstractMethod(jc, m)) continue; // is implemented abstract method?
 
 			fileWriter.write("  ");
-			fileWriter.write(methodToString(m));
+			fileWriter.write(methodToString(m, null));
 			fileWriter.write("\n");
 		}
 
@@ -160,6 +169,53 @@ public class MinimalWithInheritanceStubCreator extends StubCreator
 
 
 	// --------------- private methods ---------------
+
+	private Method getSuperclassConstructor(JavaClass jc) throws Exception
+	{
+		String superClassName = jc.getSuperclassName();
+		String fileName = superClassName.replaceAll("\\.", "/") + ".class";
+		JavaClass jcSuper = (new ClassParser(libgcjDotJar.toString(), fileName)).parse();
+
+		// search default constructor
+		for(Method m : jcSuper.getMethods())
+		{
+			if(m.isPrivate() || !m.getName().equals("<init>")) continue;
+			if(!jcSuper.getPackageName().equals(jc.getPackageName()) &&
+					!m.isPublic() && !m.isProtected()) continue;
+			if(m.getArgumentTypes().length > 0) continue;
+
+			return null;
+		}
+
+		// otherwise, take a random one
+		for(Method m : jcSuper.getMethods())
+		{
+			if(m.isPrivate() || !m.getName().equals("<init>")) continue;
+			if(!jcSuper.getPackageName().equals(jc.getPackageName()) &&
+					!m.isPublic() && !m.isProtected()) continue;
+
+			return m;
+		}
+
+		throw new Exception("Not possible! Classes always have at least one constructor!");
+	}
+	
+	private String createSuperclassConstructorCall(Method superClassConstructor)
+	{
+		if(superClassConstructor == null) return null;
+
+		StringBuffer sb = new StringBuffer("super(");
+		Type[] ta = superClassConstructor.getArgumentTypes();
+
+		for(int i=0; i<ta.length; i++)
+		{
+			if(i > 0) sb.append(", ");
+			sb.append(createDummyValue(ta[i]));
+		}
+
+		sb.append(");");
+		return sb.toString();
+	}
 	
 	private boolean isImplementedAbstractMethod(JavaClass jc, Method m) throws Exception
 	{

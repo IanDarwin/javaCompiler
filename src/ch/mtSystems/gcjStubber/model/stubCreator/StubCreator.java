@@ -189,7 +189,7 @@ public abstract class StubCreator
 		return sb.toString();
 	}
 	
-	protected String methodToString(Method method)
+	protected String methodToString(Method method, String body)
 	{
 		StringBuffer sb = new StringBuffer();
 
@@ -219,7 +219,12 @@ public abstract class StubCreator
 		sb.append(")");
 
 		// body
-		if(method.getReturnType().equals(Type.VOID))
+		if(body != null)
+		{
+			sb.append(" { ");
+			sb.append(body);
+			sb.append(" }");
+		} else if(method.getReturnType().equals(Type.VOID))
 		{
 			sb.append(" { }");
 		} else
