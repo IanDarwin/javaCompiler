@@ -456,15 +456,15 @@ public class StubsGenerator
 				if(i == 0)
 				{
 					stubCreator = new MinimalStubCreator(missingClasses, stubJar,
-							stubObject, cmdGcj, new File(stubsDir, "tmp"));
+							stubObject, cmdGcj, new File(stubsDir, "tmp"), libgcjDotJar);
 				} else if(i == 1)
 				{
 					stubCreator = new MinimalWithInheritanceStubCreator(missingClasses,
-							stubJar, stubObject, cmdGcj, new File(stubsDir, "tmp"));
+							stubJar, stubObject, cmdGcj, new File(stubsDir, "tmp"), libgcjDotJar);
 				} else if(i == 2)
 				{
 					stubCreator = new FullPublicInterfaceStubCreator(missingClasses,
-							stubJar, stubObject, cmdGcj, new File(stubsDir, "tmp"));
+							stubJar, stubObject, cmdGcj, new File(stubsDir, "tmp"), libgcjDotJar);
 				} else
 				{
 					throw new Exception("Can't be here?!");

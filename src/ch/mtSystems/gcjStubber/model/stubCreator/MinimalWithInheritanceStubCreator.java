@@ -23,9 +23,11 @@ import java.io.File;
 import java.io.FileWriter;
 import java.util.Set;
 
+import org.apache.bcel.classfile.ClassParser;
 import org.apache.bcel.classfile.Field;
 import org.apache.bcel.classfile.JavaClass;
 import org.apache.bcel.classfile.Method;
+import org.apache.bcel.generic.Type;
 
 import ch.mtSystems.gcjStubber.model.MissingClass;
 
@@ -33,9 +35,9 @@ import ch.mtSystems.gcjStubber.model.MissingClass;
 public class MinimalWithInheritanceStubCreator extends StubCreator
 {
 	public MinimalWithInheritanceStubCreator(MissingClass[] missingClasses,
-			File jar, File object, File cmdGcj, File tmpDir)
+			File jar, File object, File cmdGcj, File tmpDir, File libgcjDotJar)
 	{
-		super(missingClasses, jar, object, cmdGcj, tmpDir);
+		super(missingClasses, jar, object, cmdGcj, tmpDir, libgcjDotJar);
 	}
 
 
@@ -49,7 +51,7 @@ public class MinimalWithInheritanceStubCreator extends StubCreator
 		fileWriter.write("package ");
 		fileWriter.write(jc.getPackageName());
 		fileWriter.write(";\n\n");
-		
+
 		// class declaration
 		if(jc.isPublic()) fileWriter.write("public ");
 		if(jc.isProtected()) fileWriter.write("protected ");
@@ -128,8 +130,9 @@ public class MinimalWithInheritanceStubCreator extends StubCreator
 			fileWriter.write("\n");
 		} 
 
-		// methods
-		for(Method m : missingClass.getMissingMethods())
+		// missing methods
+		Set<Method> missingMethods = missingClass.getMissingMethods();
+		for(Method m : missingMethods)
 		{
 			if(m.getName().equals("<init>")) continue;
 
@@ -138,7 +141,55 @@ public class MinimalWithInheritanceStubCreator extends StubCreator
 			fileWriter.write("\n");
 		}
 
+		// implemented abstract methods from superclasses
+		for(Method m : jc.getMethods())
+		{
+			if(m.getName().equals("<init>")) continue; // omit constructor
+			if(missingMethods.contains(m)) continue;   // omit missing method, already added
+			if(!m.isPublic() && !m.isProtected()) continue;   // only handle public and protected methods
+			if(!isImplementedAbstractMethod(jc, m)) continue; // is implemented abstract method?
+
+			fileWriter.write("  ");
+			fileWriter.write(methodToString(m));
+			fileWriter.write("\n");
+		}
+
 		// finish the class
 		fileWriter.write("}\n");
+	}
+
+
+	// --------------- private methods ---------------
+	
+	private boolean isImplementedAbstractMethod(JavaClass jc, Method m) throws Exception
+	{
+		String superClassName = jc.getSuperclassName();
+		if(superClassName.equals("java.lang.Object")) return false;
+		
+		String fileName = superClassName.replaceAll("\\.", "/") + ".class";
+		JavaClass jcSuper = (new ClassParser(libgcjDotJar.toString(), fileName)).parse();
+		
+		for(Method mSuper : jcSuper.getMethods())
+		{
+			if(signatureMatches(m, mSuper)) return true;
+		}
+		return false;
+	}
+	
+	private boolean signatureMatches(Method m1, Method m2)
+	{	
+		if(!m1.getName().equals(m2.getName())) return false;
+
+		Type[] ta1 = m1.getArgumentTypes();
+		Type[] ta2 = m2.getArgumentTypes();
+		if(ta1.length != ta2.length) return false;
+
+		for(int i=0; i<ta1.length; i++)
+		{
+			boolean equalType = ta1[i].toString().equals(ta2[i].toString());
+			if(!equalType) return false;
+		}
+
+		return true;
 	}
 }
