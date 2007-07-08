@@ -79,7 +79,7 @@ public abstract class StubCreator
 				}
 				
 				FileWriter fileWriter = new FileWriter(sourceFile);
-				dumpClass(missingClass, fileWriter);
+				dumpClass(missingClass, fileWriter, false);
 				fileWriter.flush();
 				fileWriter.close();
 			}
@@ -162,7 +162,7 @@ public abstract class StubCreator
 
 	// --------------- protected methods ---------------
 
-	protected abstract void dumpClass(MissingClass missingClass, FileWriter fileWriter) throws Exception;
+	protected abstract void dumpClass(MissingClass missingClass, FileWriter fileWriter, boolean isInnerClass) throws Exception;
 	
 	protected String fieldToString(Field field)
 	{
@@ -177,7 +177,7 @@ public abstract class StubCreator
 		if(field.isStatic()) sb.append("static ");
 
 		// type and name
-		sb.append(field.getType());
+		sb.append(field.getType().toString().replaceAll("\\$", "."));
 		sb.append(" ");
 		sb.append(field.getName());
 		
@@ -252,7 +252,7 @@ public abstract class StubCreator
 		if(type.equals(Type.INT))     return "23";
 		if(type.equals(Type.LONG))    return "23";
 		if(type.equals(Type.SHORT))   return "(short)23";
-		return "(" + type + ")null";
+		return "(" + type.toString().replaceAll("\\$", ".") + ")null";
 	}
 
 
