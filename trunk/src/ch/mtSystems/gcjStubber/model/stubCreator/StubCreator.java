@@ -185,8 +185,9 @@ public abstract class StubCreator
 
 	protected abstract void dumpClass(MissingClass missingClass, FileWriter fileWriter, boolean isInnerClass) throws Exception;
 	
-	protected String fieldToString(Field field)
+	protected String fieldToString(Field field) throws Exception
 	{
+		ensureCreated(field.getType().toString());
 		StringBuffer sb = new StringBuffer();
 
 		// access modifier
@@ -201,10 +202,10 @@ public abstract class StubCreator
 		sb.append(field.getType().toString().replaceAll("\\$", "."));
 		sb.append(" ");
 		sb.append(field.getName());
-		
+
 		// default initialization
 		sb.append(" = ");
-		sb.append(createDummyValue(field.getType()));
+		sb.append(Utilities.createDummyValue(field.getType()));
 		sb.append(";");
 
 		return sb.toString();
@@ -258,25 +259,11 @@ public abstract class StubCreator
 		} else
 		{
 			sb.append(" { return ");
-			sb.append(createDummyValue(method.getReturnType()));
+			sb.append(Utilities.createDummyValue(method.getReturnType()));
 			sb.append("; }");
 		}
 
 		return sb.toString();
-	}
-	
-	protected String createDummyValue(Type type)
-	{
-		if(type.equals(Type.VOID))    return null;
-		if(type.equals(Type.BOOLEAN)) return "true";
-		if(type.equals(Type.BYTE))    return "(byte)23";
-		if(type.equals(Type.CHAR))    return "'2'";
-		if(type.equals(Type.DOUBLE))  return "23";
-		if(type.equals(Type.FLOAT))   return "23";
-		if(type.equals(Type.INT))     return "23";
-		if(type.equals(Type.LONG))    return "23";
-		if(type.equals(Type.SHORT))   return "(short)23";
-		return "(" + type.toString().replaceAll("\\$", ".") + ")null";
 	}
 
 	protected void ensureCreated(String className) throws Exception

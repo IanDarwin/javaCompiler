@@ -24,13 +24,11 @@ import java.io.FileWriter;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
-import java.util.regex.Pattern;
 
 import org.apache.bcel.classfile.ClassParser;
 import org.apache.bcel.classfile.Field;
 import org.apache.bcel.classfile.JavaClass;
 import org.apache.bcel.classfile.Method;
-import org.apache.bcel.generic.Type;
 
 import ch.mtSystems.gcjStubber.model.MissingClass;
 
@@ -62,7 +60,7 @@ public class MinimalWithInheritanceStubCreator extends StubCreator
 		if(jc.isPublic()) fileWriter.write("public ");
 		if(jc.isProtected()) fileWriter.write("protected ");
 		if(jc.isPrivate()) fileWriter.write("private ");
-		if(jc.isStatic() || (isInnerClass && isStatic(jc))) fileWriter.write("static "); 
+		if(jc.isStatic() || (isInnerClass && Utilities.isClassStatic(jc))) fileWriter.write("static "); 
 		if(jc.isAbstract()) fileWriter.write("abstract ");
 		if(jc.isFinal()) fileWriter.write("final ");
 		if(jc.isClass()) fileWriter.write("class ");
@@ -123,8 +121,8 @@ public class MinimalWithInheritanceStubCreator extends StubCreator
 		if(jc.isClass())
 		{
 			// get superclass constructor
-			Method superClassConstructor = getSuperclassConstructor(jc);
-			String superClassConstructorCall = createSuperclassConstructorCall(superClassConstructor);
+			Method superClassConstructor = Utilities.getSuperclassConstructor(jc, missingClasses, libgcjDotJar);
+			String superClassConstructorCall = Utilities.createSuperclassConstructorCall(superClassConstructor);
 
 			// always add the default constructor (otherwise it's not available if there's another)
 			fileWriter.write("  public ");
@@ -135,7 +133,8 @@ public class MinimalWithInheritanceStubCreator extends StubCreator
 			
 			for(Method m : missingClass.getMissingMethods())
 			{
-				if(!m.getName().equals("<init>")) continue;
+				if(!m.getName().equals("<init>") ||
+						m.getArgumentTypes().length == 0) continue;
 
 				// note: bug in bcel, constructors have a "void" return type.
 				String method = methodToString(m, superClassConstructorCall);
@@ -173,7 +172,7 @@ public class MinimalWithInheritanceStubCreator extends StubCreator
 			boolean alreadyAdded = false;
 			for(Method addedMethod : addedMethods)
 			{
-				if(signatureMatches(addedMethod, m))
+				if(Utilities.signatureMatches(addedMethod, m))
 				{
 					alreadyAdded = true;
 					break;
@@ -201,65 +200,6 @@ public class MinimalWithInheritanceStubCreator extends StubCreator
 
 
 	// --------------- private methods ---------------
-
-	private Method getSuperclassConstructor(JavaClass jc) throws Exception
-	{
-		// manual adjustments. bcel returns wrong data
-		if(jc.getClassName().equals("javax.swing.JComponent$AccessibleJComponent")) return null;
-		if(jc.getClassName().equals("javax.swing.text.JTextComponent$AccessibleJTextComponent")) return null;
-
-		String superClassName = jc.getSuperclassName();
-
-		// check if the superclass is part of the stub. if yes, there's always a default constructor
-		for(MissingClass missingClass : missingClasses)
-		{
-			if(superClassName.startsWith(missingClass.getClassName())) return null;
-		}
-		
-		// otherwise, get a constructor from the real class
-		String fileName = superClassName.replaceAll("\\.", "/") + ".class";
-		JavaClass jcSuper = (new ClassParser(libgcjDotJar.toString(), fileName)).parse();
-
-		// search default constructor
-		for(Method m : jcSuper.getMethods())
-		{
-			if(m.isPrivate() || !m.getName().equals("<init>")) continue;
-			if(!jcSuper.getPackageName().equals(jc.getPackageName()) &&
-					!m.isPublic() && !m.isProtected()) continue;
-			if(m.getArgumentTypes().length > 0) continue;
-
-			return null;
-		}
-
-		// otherwise, take a random one
-		for(Method m : jcSuper.getMethods())
-		{
-			if(m.isPrivate() || !m.getName().equals("<init>")) continue;
-			if(!jcSuper.getPackageName().equals(jc.getPackageName()) &&
-					!m.isPublic() && !m.isProtected()) continue;
-
-			return m;
-		}
-
-		throw new Exception("Not possible! Classes always have at least one constructor!");
-	}
-	
-	private String createSuperclassConstructorCall(Method superClassConstructor)
-	{
-		if(superClassConstructor == null) return null;
-
-		StringBuffer sb = new StringBuffer("super(");
-		Type[] ta = superClassConstructor.getArgumentTypes();
-
-		for(int i=0; i<ta.length; i++)
-		{
-			if(i > 0) sb.append(", ");
-			sb.append(createDummyValue(ta[i]));
-		}
-
-		sb.append(");");
-		return sb.toString();
-	}
 	
 	private boolean isImplementedAbstractMethod(JavaClass jc, Method m) throws Exception
 	{
@@ -281,33 +221,10 @@ public class MinimalWithInheritanceStubCreator extends StubCreator
 			
 			for(Method mSuper : jcSuper.getMethods())
 			{
-				if(signatureMatches(m, mSuper)) return true;
+				if(Utilities.signatureMatches(m, mSuper)) return true;
 			}
 		}
 
 		return false;
-	}
-
-	private boolean signatureMatches(Method m1, Method m2)
-	{	
-		if(!m1.getName().equals(m2.getName())) return false;
-
-		Type[] ta1 = m1.getArgumentTypes();
-		Type[] ta2 = m2.getArgumentTypes();
-		if(ta1.length != ta2.length) return false;
-
-		for(int i=0; i<ta1.length; i++)
-		{
-			boolean equalType = ta1[i].toString().equals(ta2[i].toString());
-			if(!equalType) return false;
-		}
-
-		return true;
-	}
-
-	private boolean isStatic(JavaClass jc)
-	{
-		Pattern p = Pattern.compile("InnerClass:.*static.*" + jc.getClassName().replaceAll("\\$", "\\\\\\$"));
-		return p.matcher(jc.toString()).find();
 	}
 }
