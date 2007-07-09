@@ -121,8 +121,7 @@ public class FullPublicInterfaceStubCreator extends StubCreator
 		if(jc.isClass())
 		{
 			// get superclass constructor
-			Method superClassConstructor = Utilities.getSuperclassConstructor(jc, missingClasses, libgcjDotJar);
-			String superClassConstructorCall = Utilities.createSuperclassConstructorCall(superClassConstructor);
+			String superClassConstructorCall = Utilities.createSuperclassConstructor(jc, missingClasses, libgcjDotJar);
 
 			// always add the default constructor (otherwise it's not available if there's another)
 			fileWriter.write("  public ");
@@ -135,10 +134,11 @@ public class FullPublicInterfaceStubCreator extends StubCreator
 			{
 				if((!m.isPublic() && !m.isProtected()) ||
 						!m.getName().equals("<init>") ||
-						m.getArgumentTypes().length == 0) continue;
+						m.getArgumentTypes().length == 0 ||
+						(Utilities.removeFirstArgument(jc, m) && m.getArgumentTypes().length == 1)) continue;
 
 				// note: bug in bcel, constructors have a "void" return type.
-				String method = methodToString(m, superClassConstructorCall);
+				String method = methodToString(jc, m, superClassConstructorCall);
 				method = method.replace("void <init>", missingClass.getSimpleClassName());
 
 				fileWriter.write("  ");
@@ -167,7 +167,7 @@ public class FullPublicInterfaceStubCreator extends StubCreator
 			if(alreadyAdded) continue;
 
 			fileWriter.write("  ");
-			fileWriter.write(methodToString(m, null));
+			fileWriter.write(methodToString(jc, m, null));
 			fileWriter.write("\n");
 
 			addedMethods.add(m);

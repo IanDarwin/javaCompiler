@@ -52,12 +52,8 @@ public class Utilities
 		return "(" + type.toString().replaceAll("\\$", ".") + ")null";
 	}
 
-	public static Method getSuperclassConstructor(JavaClass jc, MissingClass[] missingClasses, File libgcjDotJar) throws Exception
+	public static String createSuperclassConstructor(JavaClass jc, MissingClass[] missingClasses, File libgcjDotJar) throws Exception
 	{
-		// manual adjustments. bcel returns wrong data
-		if(jc.getClassName().equals("javax.swing.JComponent$AccessibleJComponent")) return null;
-		if(jc.getClassName().equals("javax.swing.text.JTextComponent$AccessibleJTextComponent")) return null;
-
 		String superClassName = jc.getSuperclassName();
 
 		// check if the superclass is part of the stub. if yes, there's always a default constructor
@@ -76,9 +72,12 @@ public class Utilities
 			if(m.isPrivate() || !m.getName().equals("<init>")) continue;
 			if(!jcSuper.getPackageName().equals(jc.getPackageName()) &&
 					!m.isPublic() && !m.isProtected()) continue;
-			if(m.getArgumentTypes().length > 0) continue;
 
-			return null;
+			if(m.getArgumentTypes().length == 0 ||
+					(m.getArgumentTypes().length == 1 && Utilities.removeFirstArgument(jcSuper, m)))
+			{
+				return null;
+			}
 		}
 
 		// otherwise, take a random one
@@ -88,27 +87,20 @@ public class Utilities
 			if(!jcSuper.getPackageName().equals(jc.getPackageName()) &&
 					!m.isPublic() && !m.isProtected()) continue;
 
-			return m;
+			StringBuffer sb = new StringBuffer("super(");
+			Type[] ta = m.getArgumentTypes();
+
+			for(int i=0; i<ta.length; i++)
+			{
+				if(i > 0) sb.append(", ");
+				sb.append(createDummyValue(ta[i]));
+			}
+
+			sb.append(");");
+			return sb.toString();
 		}
 
 		throw new Exception("Not possible! Classes always have at least one constructor!");
-	}
-	
-	public static String createSuperclassConstructorCall(Method superClassConstructor)
-	{
-		if(superClassConstructor == null) return null;
-
-		StringBuffer sb = new StringBuffer("super(");
-		Type[] ta = superClassConstructor.getArgumentTypes();
-
-		for(int i=0; i<ta.length; i++)
-		{
-			if(i > 0) sb.append(", ");
-			sb.append(createDummyValue(ta[i]));
-		}
-
-		sb.append(");");
-		return sb.toString();
 	}
 
 	public static boolean signatureMatches(Method m1, Method m2)
@@ -126,5 +118,15 @@ public class Utilities
 		}
 
 		return true;
+	}
+	
+	public static boolean removeFirstArgument(JavaClass jc, Method m)
+	{
+		Type[] argTypes = m.getArgumentTypes();
+
+		return (m.getName().equals("<init>") &&
+				jc.getClassName().indexOf('$') > -1 &&
+				argTypes.length > 0 &&
+				jc.getClassName().startsWith(argTypes[0].toString())); 
 	}
 }

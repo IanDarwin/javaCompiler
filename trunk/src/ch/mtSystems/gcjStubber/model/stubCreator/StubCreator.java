@@ -32,6 +32,7 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
 import org.apache.bcel.classfile.Field;
+import org.apache.bcel.classfile.JavaClass;
 import org.apache.bcel.classfile.Method;
 import org.apache.bcel.generic.Type;
 
@@ -211,7 +212,7 @@ public abstract class StubCreator
 		return sb.toString();
 	}
 	
-	protected String methodToString(Method method, String body) throws Exception
+	protected String methodToString(JavaClass jc, Method method, String body) throws Exception
 	{
 		StringBuffer sb = new StringBuffer();
 
@@ -233,11 +234,13 @@ public abstract class StubCreator
 		// name and arguments
 		sb.append("(");
 		Type[] argumentTypes = method.getArgumentTypes();
-		for(int i=0; i<argumentTypes.length; i++)
+		int start = Utilities.removeFirstArgument(jc, method) ? 1 : 0;
+
+		for(int i=start; i<argumentTypes.length; i++)
 		{
 			ensureCreated(argumentTypes[i].toString());
 
-			if(i > 0) sb.append(", ");
+			if(i > start) sb.append(", ");
 			sb.append(argumentTypes[i].toString().replaceAll("\\$", "."));
 			sb.append(" arg");
 			sb.append(i);
