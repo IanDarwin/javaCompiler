@@ -57,7 +57,7 @@ public class MinimalStubCreator extends StubCreator
 		if(jc.isPublic()) fileWriter.write("public ");
 		if(jc.isProtected()) fileWriter.write("protected ");
 		if(jc.isPrivate()) fileWriter.write("private ");
-		if(jc.isStatic() || isInnerClass) fileWriter.write("static "); // bcel bug: isStatic (inner classes) wrong! 
+		if(jc.isStatic() || (isInnerClass && Utilities.isClassStatic(jc))) fileWriter.write("static "); 
 		if(jc.isAbstract()) fileWriter.write("abstract ");
 		if(jc.isFinal()) fileWriter.write("final ");
 		if(jc.isClass()) fileWriter.write("class ");
@@ -85,14 +85,19 @@ public class MinimalStubCreator extends StubCreator
 			fileWriter.write("  public ");
 			fileWriter.write(missingClass.getSimpleClassName());
 			fileWriter.write("() { }\n");
-			
+
 			for(Method m : missingClass.getMissingMethods())
 			{
-				if(!m.getName().equals("<init>")) continue;
+				if(!m.getName().equals("<init>") ||
+						m.getArgumentTypes().length == 0 ||
+						(Utilities.removeFirstArgument(jc, m) && m.getArgumentTypes().length == 1)) continue;
 
 				// note: bug in bcel, constructors have a "void" return type.
+				String method = methodToString(jc, m, null);
+				method = method.replace("void <init>", missingClass.getSimpleClassName());
+
 				fileWriter.write("  ");
-				fileWriter.write(methodToString(m, null).replace("void <init>", missingClass.getSimpleClassName()));
+				fileWriter.write(method);
 				fileWriter.write("\n");
 			}
 
@@ -105,7 +110,7 @@ public class MinimalStubCreator extends StubCreator
 			if(m.getName().equals("<init>")) continue;
 
 			fileWriter.write("  ");
-			fileWriter.write(methodToString(m, null));
+			fileWriter.write(methodToString(jc, m, null));
 			fileWriter.write("\n");
 		}
 
