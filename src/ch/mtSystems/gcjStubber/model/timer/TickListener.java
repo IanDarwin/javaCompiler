@@ -19,7 +19,14 @@
 
 package ch.mtSystems.gcjStubber.model.timer;
 
+
+/**
+ * Listener for the tick.
+ */
 public interface TickListener
 {
+	/**
+	 * Will be called in the requested interval.
+	 */
 	public void tick();
 }

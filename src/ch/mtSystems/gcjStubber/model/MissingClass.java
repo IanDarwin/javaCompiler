@@ -30,8 +30,14 @@ import org.apache.bcel.classfile.Method;
 import org.apache.bcel.generic.Type;
 
 
+/**
+ * MissingClass represents a missing class from compilation with excluded object
+ * (undefined reference) and contains all missed fields, constructors, methods
+ * and inner classes.
+ */
 public class MissingClass
 {
+	private File libgcjDotJar;
 	private String simpleClassName;
 	private JavaClass jc;
 	
@@ -40,8 +46,17 @@ public class MissingClass
 	private Set<Method> methodSet = new HashSet<Method>(); // constructors and methods
 
 
+	/**
+	 * Create a new instance.
+	 * 
+	 * @param className The name of the class.
+	 * @param libgcjDotJar libgcj.jar. It will be used to gather complete information about the class.
+	 * @throws Exception Thrown if reading from libgcj.jar fails.
+	 */
 	public MissingClass(String className, File libgcjDotJar) throws Exception
 	{
+		this.libgcjDotJar = libgcjDotJar;
+
 		String fileName = className.replaceAll("\\.", "/") + ".class";
 		//System.err.println("loading " + fileName);
 		jc = (new ClassParser(libgcjDotJar.toString(), fileName)).parse();
@@ -54,22 +69,46 @@ public class MissingClass
 
 	// --------------- public methods ---------------
 
+	/**
+	 * Returns the bcel JavaClass of this missing class.
+	 * 
+	 * @return The bcel JavaClass of this missing class.
+	 */
 	public JavaClass getJavaClass()
 	{
 		return jc;
 	}
 
+	/**
+	 * Returns the full name of the class. E.g. foo.bar.Test$InnerClass.
+	 * 
+	 * @return The full name of the class.
+	 */
 	public String getClassName()
 	{
 		return jc.getClassName();
 	}
 	
+	/**
+	 * Returns the simple name of the class. E.g. foo.bar.Test$InnerClass
+	 * will return InnerClass.
+	 * 
+	 * @return The simple name of the class.
+	 */
 	public String getSimpleClassName()
 	{
 		return simpleClassName;
 	}
 
-	public MissingClass addMissingInnerClass(String innerClassName, File libgcjDotJar) throws Exception
+	/**
+	 * Add a missing inner class to this minimal class. If the class is nested into more
+	 * inner classes, all levels will be created. The final inner class is returned.
+	 * 
+	 * @param innerClassName The name of the inner class.
+	 * @return The most inner created MissingClass.
+	 * @throws Exception Thrown if creating a MissingClass fails.
+	 */
+	public MissingClass addMissingInnerClass(String innerClassName) throws Exception
 	{
 		int endIndex = innerClassName.indexOf('$', getClassName().length()+1);
 		if(endIndex == -1)
@@ -84,21 +123,34 @@ public class MissingClass
 			{
 				if(innerClass.getClassName().equals(myInnerClassName))
 				{
-					return innerClass.addMissingInnerClass(innerClassName, libgcjDotJar);
+					return innerClass.addMissingInnerClass(innerClassName);
 				}
 			}
 
 			MissingClass innerClass = new MissingClass(innerClassName.substring(0, endIndex), libgcjDotJar);
 			innerClassSet.add(innerClass);
-			return innerClass.addMissingInnerClass(innerClassName, libgcjDotJar);
+			return innerClass.addMissingInnerClass(innerClassName);
 		} 
 	}
 	
+	/**
+	 * Returns all missing inner classes. Please note that this will not flatten
+	 * the inner classes. Only the direct inner classes are returned.
+	 * 
+	 * @return All missing inner classes.
+	 */
 	public Set<MissingClass> getInnerClasses()
 	{
 		return innerClassSet;
 	}
 	
+	/**
+	 * Returns the inner class with the giving name or null, if it doesn't exist.
+	 * Please note that this method will search through the complete hirarchy.
+	 * 
+	 * @param innerClassName The name of the inner class.
+	 * @return The inner class with the giving name or null, if it doesn't exist.
+	 */
 	public MissingClass getInnerClass(String innerClassName)
 	{
 		int endIndex = innerClassName.indexOf('$', getClassName().length()+1);
@@ -123,11 +175,24 @@ public class MissingClass
 		return null;
 	}
 	
+	/**
+	 * Adds a missing constructor with the given argument types.
+	 * 
+	 * @param argTypes The argument types.
+	 * @throws Exception Thrown if the constructor doesn't exist in the real class.
+	 */
 	public void addMissingConstructor(String[] argTypes) throws Exception
 	{
 		addMissingMethod("<init>", argTypes);
 	}
-	
+
+	/**
+	 * Adds a missing method with the given name and argument types.
+	 * 
+	 * @param methodName The name of the method.
+	 * @param argTypes The argument types of the method.
+	 * @throws Exception Thrown if the method doesn't exist in the real class.
+	 */
 	public void addMissingMethod(String methodName, String[] argTypes) throws Exception
 	{
 		// fix some namings first
@@ -229,11 +294,22 @@ public class MissingClass
 		throw new Exception(sb.toString());
 	}
 	
+	/**
+	 * Returns all missing methods.
+	 * 
+	 * @return All missing methods.
+	 */
 	public Set<Method> getMissingMethods()
 	{
 		return methodSet;
 	}
 	
+	/**
+	 * Adds a missing field with the given name.
+	 * 
+	 * @param fieldName The name of the field.
+	 * @throws Exception Thrown if the field doesn't exist in the real class.
+	 */
 	public void addMissingField(String fieldName) throws Exception
 	{
 		for(Field f : jc.getFields())
@@ -260,6 +336,11 @@ public class MissingClass
 		throw new Exception(sb.toString());
 	}
 	
+	/**
+	 * Returns all missing fields.
+	 * 
+	 * @return All missing fields.
+	 */
 	public Set<Field> getMissingFields()
 	{
 		return fieldSet;

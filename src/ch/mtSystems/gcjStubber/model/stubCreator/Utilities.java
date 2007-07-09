@@ -30,14 +30,29 @@ import org.apache.bcel.generic.Type;
 import ch.mtSystems.gcjStubber.model.MissingClass;
 
 
+/**
+ * Additional useful utilities for the stub creators.
+ */
 public class Utilities
 {
+	/**
+	 * Checks if a class is static. Only applies to inner classes.
+	 * 
+	 * @param jc The class to check wether it is static or not.
+	 * @return true if it is static, false otherwise.
+	 */
 	public static boolean isClassStatic(JavaClass jc)
 	{
 		Pattern p = Pattern.compile("InnerClass:.*static.*" + jc.getClassName().replaceAll("\\$", "\\\\\\$"));
 		return p.matcher(jc.toString()).find();
 	}
 	
+	/**
+	 * Creates a dummy value for the given type.
+	 * 
+	 * @param type The type to create a dummy value for.
+	 * @return The created dummy value.
+	 */
 	public static String createDummyValue(Type type)
 	{
 		if(type.equals(Type.VOID))    return null;
@@ -52,6 +67,15 @@ public class Utilities
 		return "(" + type.toString().replaceAll("\\$", ".") + ")null";
 	}
 
+	/**
+	 * Creates a constructor call (e.g. super(true);) for the parent of given class.
+	 * 
+	 * @param jc The class that needs a constructor call for it's superclass.
+	 * @param missingClasses The missing classes to check if the parent class is in the created stub.
+	 * @param libgcjDotJar libgcj.jar to load the parent class.
+	 * @return A superclass constructor call or null, if there's a default constructor.
+	 * @throws Exception Thrown if no constructor can be found or the parent class can't be loaded.
+	 */
 	public static String createSuperclassConstructor(JavaClass jc, MissingClass[] missingClasses, File libgcjDotJar) throws Exception
 	{
 		String superClassName = jc.getSuperclassName();
@@ -103,6 +127,13 @@ public class Utilities
 		throw new Exception("Not possible! Classes always have at least one constructor!");
 	}
 
+	/**
+	 * Tests if the signature (name and argument types) of two methods match.
+	 * 
+	 * @param m1 One method.
+	 * @param m2 Another method.
+	 * @return true if the signature matches, false otherwise.
+	 */
 	public static boolean signatureMatches(Method m1, Method m2)
 	{	
 		if(!m1.getName().equals(m2.getName())) return false;
@@ -120,11 +151,21 @@ public class Utilities
 		return true;
 	}
 	
-	public static boolean removeFirstArgument(JavaClass jc, Method m)
+	/**
+	 * Checks if the first argument from the given constructor should be removed
+	 * because it's a inner class. There the first argument will be the reference
+	 * to the outher class.
+	 *  
+	 * @param jc The class of the constructor.
+	 * @param constructor The constructor to check.
+	 * @return true if the given method is a constructor and the first argument
+	 *              has to be removed. false otherwise.
+	 */
+	public static boolean removeFirstArgument(JavaClass jc, Method constructor)
 	{
-		Type[] argTypes = m.getArgumentTypes();
+		Type[] argTypes = constructor.getArgumentTypes();
 
-		return (m.getName().equals("<init>") &&
+		return (constructor.getName().equals("<init>") &&
 				jc.getClassName().indexOf('$') > -1 &&
 				argTypes.length > 0 &&
 				jc.getClassName().startsWith(argTypes[0].toString())); 

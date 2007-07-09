@@ -28,6 +28,9 @@ import ch.mtSystems.gcjStubber.model.StubsGeneratorListener;
 import ch.mtSystems.jnc.view.utilities.LayoutUtilities;
 
 
+/**
+ * The phase statistics tab from the GUI.
+ */
 public class PhaseStatisticsTab implements StubsGeneratorListener
 {
 	private Label phaseStatsNoJavaClasses, phaseStatsNotPulledIn;

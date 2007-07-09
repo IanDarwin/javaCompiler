@@ -19,9 +19,23 @@
 
 package ch.mtSystems.gcjStubber.model;
 
+
+/**
+ * The interface to keep track of the stubbing process.
+ */
 public interface StubsGeneratorListener
 {
+	/**
+	 * Notifies that stubbing has been started.
+	 */
 	public void started();
+	
+	/**
+	 * Notifies about all important actions that have been done.
+	 * Newlines are handled by the messages.
+	 * 
+	 * @param msg The message.
+	 */
 	public void actionDone(String msg);
 
 	/**
@@ -49,5 +63,8 @@ public interface StubsGeneratorListener
 	public void processed(String objectName, int phaseProcessed, int phaseResult,
 			String phaseResultMsg, int savings, int objectIndex, int totalCount);
 	
+	/**
+	 * Notifies that stubbing has finished (or aborted by the user).
+	 */
 	public void done();
 }

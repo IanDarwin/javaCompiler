@@ -33,8 +33,23 @@ import org.apache.bcel.classfile.Method;
 import ch.mtSystems.gcjStubber.model.MissingClass;
 
 
+/**
+ * MinimalStubCreator creates dummy java classes with the missing
+ * references solved and additionally keeping the inheritance structure.
+ */
 public class MinimalWithInheritanceStubCreator extends StubCreator
 {
+	/**
+	 * Create a new stubcreator.
+	 * 
+	 * @param missingClasses The missing classes to create stubs for.
+	 * @param jar The jar file where to save the created bytecode.
+	 * @param object The file where to save the created stub object.
+	 * @param cmdGcj GCJ to compile java source to bytecode and to an object.
+	 * @param tmpDir The temporary directory that can be used as wished.
+	 * @param libgcjDotJar libgcj.jar to get additional informations about the real classes.
+	 * @param excludedClasses The excluded classes from the compilation.
+	 */
 	public MinimalWithInheritanceStubCreator(MissingClass[] missingClasses,
 			File jar, File object, File cmdGcj, File tmpDir, File libgcjDotJar, Set<String> excludedClasses)
 	{

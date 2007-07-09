@@ -37,6 +37,9 @@ import ch.mtSystems.gcjStubber.model.timer.Timer;
 import ch.mtSystems.jnc.view.utilities.LayoutUtilities;
 
 
+/**
+ * The GUI of GcjStubber. Starts the Window.
+ */
 public class GcjStubber implements SelectionListener, TickListener, StubsGeneratorListener
 {
 	public static final String VERSION = "0.1";

@@ -28,6 +28,10 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 
+/**
+ * UnresolvedReferenceParser parses the output from compilation with an excluded object
+ * (undefined references) and creates the corresponging MissingClasses.
+ */
 public class UnresolvedReferenceParser
 {
 	private static final boolean DEBUG = false;
@@ -43,6 +47,13 @@ public class UnresolvedReferenceParser
 	private Map<String, MissingClass> missingClasses = new HashMap<String, MissingClass>();
 
 
+	/**
+	 * Create a new instance with all needed data.
+	 * 
+	 * @param errorMsg The error message of the compilation.
+	 * @param excludedClasses The classes that have been excluded from compilation.
+	 * @param libgcjDotJar libgcj.jar, used to load the real excluded classes.
+	 */
 	public UnresolvedReferenceParser(String[] errorMsg, Set<String> excludedClasses, File libgcjDotJar)
 	{
 		this.errorMsg = errorMsg;
@@ -53,6 +64,11 @@ public class UnresolvedReferenceParser
 
 	// --------------- public methods ---------------
 
+	/**
+	 * Parse the error message and create all corresponding MissingClasses.
+	 * 
+	 * @return The referenced missing classes in the error output.
+	 */
 	public MissingClass[] parse() throws Exception
 	{
 		Set<String> duplicateSet = new HashSet<String>();
@@ -151,7 +167,7 @@ public class UnresolvedReferenceParser
 		{
 			MissingClass parentClass = getMissingClass(className.substring(0, index));
 			MissingClass innerClass = parentClass.getInnerClass(className);
-			if(innerClass == null) innerClass = parentClass.addMissingInnerClass(className, libgcjDotJar);
+			if(innerClass == null) innerClass = parentClass.addMissingInnerClass(className);
 			return innerClass;
 		}
 

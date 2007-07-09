@@ -31,6 +31,9 @@ import ch.mtSystems.gcjStubber.view.utilities.FixedSash;
 import ch.mtSystems.jnc.view.utilities.LayoutUtilities;
 
 
+/**
+ * The object statistics tab from the GUI.
+ */
 public class ObjectStatisticsTab implements SelectionListener, StubsGeneratorListener
 {
 	private Table objectsTable;
