@@ -204,8 +204,12 @@ public class MinimalWithInheritanceStubCreator extends StubCreator
 
 	private Method getSuperclassConstructor(JavaClass jc) throws Exception
 	{
+		// manual adjustments. bcel returns wrong data
+		if(jc.getClassName().equals("javax.swing.JComponent$AccessibleJComponent")) return null;
+		if(jc.getClassName().equals("javax.swing.text.JTextComponent$AccessibleJTextComponent")) return null;
+
 		String superClassName = jc.getSuperclassName();
-		
+
 		// check if the superclass is part of the stub. if yes, there's always a default constructor
 		for(MissingClass missingClass : missingClasses)
 		{

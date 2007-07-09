@@ -216,14 +216,19 @@ public class GcjStubber implements SelectionListener, TickListener, StubsGenerat
 				});
 	}
 
-	public void processed(String objectName, int phaseProcessed, int phaseResult,
+	public void processed(String objectName, final int phaseProcessed, final int phaseResult,
 			String phaseResultMsg, int savings, final int objectIndex, final int totalCount)
 	{
 		Display.getDefault().syncExec(new Runnable()
 		{
 			public void run()
 			{
-				progressBar.setSelection(progressBar.getMaximum() * objectIndex / totalCount);				
+				// show progress if skipped, last phase or stub created
+				if((phaseProcessed == 0 || phaseProcessed == 1 || phaseProcessed == 4) ||
+					phaseResult == 0)
+				{
+					progressBar.setSelection(progressBar.getMaximum() * objectIndex / totalCount);
+				}
 			}
 		});
 	}
