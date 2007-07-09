@@ -23,6 +23,10 @@ import java.util.LinkedList;
 import java.util.List;
 
 
+/**
+ * A self adjusting (lag preventing) timer that allows to be notified in
+ * requested intervals.  
+ */
 public class Timer
 {
 	private List<TickListener> listeners = new LinkedList<TickListener>();
@@ -31,17 +35,32 @@ public class Timer
 	private Thread thread;
 
 
+	/**
+	 * Create a new timer.
+	 * 
+	 * @param sleep The time to sleep between the ticks in milliseconds.
+	 */
 	public Timer(int sleep)
 	{
 		this.sleep = sleep;
 	}
 
 
+	// --------------- public methods ---------------
+
+	/**
+	 * Add a tick listener.
+	 * 
+	 * @param tickListener The tick listener.
+	 */
 	public void addTickListener(TickListener tickListener)
 	{
 		listeners.add(tickListener);
 	}
 
+	/**
+	 * Start the timer.
+	 */
 	public void start()
 	{
 		thread = new Thread()
@@ -66,6 +85,10 @@ public class Timer
 		thread.start();
 	}
 	
+	/**
+	 * Stop the timer. Please note that this method does not block.
+	 * It's possible that one more tick will be sent after issuing a stop.
+	 */
 	public void stop()
 	{
 		stop = true;

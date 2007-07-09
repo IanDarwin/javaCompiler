@@ -35,6 +35,10 @@ import ch.mtSystems.gcjStubber.model.stubCreator.MinimalWithInheritanceStubCreat
 import ch.mtSystems.gcjStubber.model.stubCreator.StubCreator;
 
 
+/**
+ * StubsGenerator runs through all objects of libgcj.a and tries, with the StubCreators,
+ * to create the smallest possible stub for each object.
+ */
 public class StubsGenerator
 {
 	private List<StubsGeneratorListener> listeners = new LinkedList<StubsGeneratorListener>(); 
@@ -51,16 +55,34 @@ public class StubsGenerator
 
 	// --------------- public methods ---------------
 	
+	/**
+	 * Add a listener.
+	 * 
+	 * @param listener The listener to add.
+	 */
 	public void addListener(StubsGeneratorListener listener)
 	{
 		listeners.add(listener);
 	}
-	
+
+	/**
+	 * Remove a listener.
+	 * 
+	 * @param listener The listener to remove.
+	 */
 	public void removeListener(StubsGeneratorListener listener)
 	{
 		listeners.remove(listener);
 	}
 
+	/**
+	 * Tries to create stubs for all objects in libgcj.a (from gcjDir).
+	 * Informs about the progress through StubsGeneratorListeners.
+	 * 
+	 * @param gcjDir The directory of the GCJ to stub.
+	 * @param stubsDir The output directory; where to place the stubs.
+	 * @param compilationArguments Custom arguments for compilation with GCJ.
+	 */
 	public void createStubs(File gcjDir, File stubsDir, String[] compilationArguments)
 	{
 		this.gcjDir = gcjDir;
@@ -88,7 +110,7 @@ public class StubsGenerator
 			log("Ok\n");
 
 			log("Creating \"HelloWorld.java\" (used for stubbing)... ");
-			if(!writeHelloWorld(helloWorldDotJava)) return;
+			if(!writeHelloWorld()) return;
 			log("Ok\n");
 			
 			log("Adapting libgcj.spec for stubbing... ");
@@ -125,6 +147,11 @@ public class StubsGenerator
 		}
 	}
 	
+	/**
+	 * Stops stub-creating at the next possible save state.
+	 * Please note that this can need up to one minute. So the
+	 * GUI should be adjusted.
+	 */
 	public void stopCreatingStubs()
 	{
 		stop = true;
@@ -134,7 +161,7 @@ public class StubsGenerator
 	// --------------- private methods --------------
 
 	/**
-	 * Sends the line to all registered listeners.
+	 * Sends the message to all registered listeners.
 	 */
 	private void log(String line)
 	{
@@ -225,6 +252,11 @@ public class StubsGenerator
 		return true;
 	}
 	
+	/**
+	 * Extracts libgcj.a into the stubs directory.
+	 * 
+	 * @return true if extracting was successfully. false otherwise.
+	 */
 	private boolean extractLibgcjDotA()
 	{
 		try
@@ -249,11 +281,16 @@ public class StubsGenerator
 		}
 	}
 	
-	private boolean writeHelloWorld(File helloWorldSource)
+	/**
+	 * Writes a simple HelloWorld java file.
+	 * 
+	 * @return true if it worked. false otherwise.
+	 */
+	private boolean writeHelloWorld()
 	{
 		try
 		{
-			FileWriter fw = new FileWriter(helloWorldSource);
+			FileWriter fw = new FileWriter(helloWorldDotJava);
 			fw.write("public class HelloWorld\n");
 			fw.write("{\n");
 			fw.write("  public static void main(String[] args)\n");
@@ -272,6 +309,11 @@ public class StubsGenerator
 		}
 	}
 	
+	/**
+	 * Compiles the helloWorld file and gets it's size for the statistics.
+	 *  
+	 * @return true if it worked. false otherwise.
+	 */
 	private boolean compileHelloWorld()
 	{
 		try
@@ -318,6 +360,12 @@ public class StubsGenerator
 		}
 	}
 
+	/**
+	 * Updates libgcj.spec to exclude/include libgcj.a (-lgcj).
+	 * 
+	 * @param removeGcjArchive Wether to exclude or restore again the usage of libgcj.a.
+	 * @return true if it worked. false otherwise.
+	 */
 	private boolean updateLibgcjDotSpec(boolean removeGcjArchive)
 	{
 		try
@@ -381,6 +429,14 @@ public class StubsGenerator
 		}
 	}
 	
+	/**
+	 * Creates a stub for the given object.
+	 * 
+	 * @param fObj The object to create a stub for.
+	 * @param objectIndex The index of the object (1 .. totalCount).
+	 * @param totalCount The total number of objects to stub.
+	 * @return false if stubbing should be aborted, true otherwise.
+	 */
 	private boolean createStubForObject(File fObj, int objectIndex, int totalCount)
 	{
 		File fObjTmp = new File(fObj.getParentFile(), fObj.getName()+".bak");
@@ -549,6 +605,12 @@ public class StubsGenerator
 		}
 	}
 	
+	/**
+	 * Deletes all files that have been generated during stubbing and are no
+	 * longer needed.
+	 * 
+	 * @return true if it worked. false otherwise.
+	 */
 	private boolean cleanup()
 	{
 		if(helloWorldDotJava.exists() && !helloWorldDotJava.delete())

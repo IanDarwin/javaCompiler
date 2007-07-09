@@ -31,6 +31,10 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 
+/**
+ * ClassesInObjectLister takes an object (*.o) created from gcc/gcj and
+ * reports all contained Java classes. 
+ */
 public class ClassesInObjectLister
 {
 	private final static Pattern pattern = Pattern.compile("^.* (.+)\\.class\\$$");
@@ -42,6 +46,10 @@ public class ClassesInObjectLister
 	private List<String> errorList = new LinkedList<String>();
 
 
+	/**
+	 * Creates a new instance.
+	 * @param cmdNm The nm application. It will be used to analyze the given objects.
+	 */
 	public ClassesInObjectLister(File cmdNm)
 	{
 		this.cmdNm = cmdNm;
@@ -50,6 +58,11 @@ public class ClassesInObjectLister
 
 	// --------------- public methods ---------------
 
+	/**
+	 * Analyzes the given object and returns all contained Java classes.
+	 * @param fObject The object to analyze.
+	 * @return A set with all contained Java classes.
+	 */
 	public Set<String> getClassesInObject(File fObject) throws Exception
 	{
 		classesInObject.clear();

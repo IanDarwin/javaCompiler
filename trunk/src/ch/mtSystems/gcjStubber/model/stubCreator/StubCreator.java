@@ -41,6 +41,9 @@ import ch.mtSystems.gcjStubber.model.MissingClass;
 import ch.mtSystems.jnc.model.utilities.FileUtilities;
 
 
+/**
+ * StubCreator creates dummy java classes to solve missing references.
+ */
 public abstract class StubCreator
 {
 	private File jar;
@@ -55,6 +58,17 @@ public abstract class StubCreator
 	protected File libgcjDotJar;
 
 
+	/**
+	 * Create a new stubcreator.
+	 * 
+	 * @param missingClasses The missing classes to create stubs for.
+	 * @param jar The jar file where to save the created bytecode.
+	 * @param object The file where to save the created stub object.
+	 * @param cmdGcj GCJ to compile java source to bytecode and to an object.
+	 * @param tmpDir The temporary directory that can be used as wished.
+	 * @param libgcjDotJar libgcj.jar to get additional informations about the real classes.
+	 * @param excludedClasses The excluded classes from the compilation.
+	 */
 	public StubCreator(MissingClass[] missingClasses, File jar, File object,
 			File cmdGcj, File tmpDir, File libgcjDotJar, Set<String> excludedClasses)
 	{
@@ -70,6 +84,9 @@ public abstract class StubCreator
 
 	// --------------- public methods ---------------
 
+	/**
+	 * Creates the requested jar and object from the given missing classes. 
+	 */
 	public final void create() throws Exception
 	{
 		try
@@ -184,8 +201,14 @@ public abstract class StubCreator
 
 	// --------------- protected methods ---------------
 
+	/**
+	 * Write the dummy class for the given missing class to the given file writer.
+	 */
 	protected abstract void dumpClass(MissingClass missingClass, FileWriter fileWriter, boolean isInnerClass) throws Exception;
 	
+	/**
+	 * Creates a string representation of the given field.
+	 */
 	protected String fieldToString(Field field) throws Exception
 	{
 		ensureCreated(field.getType().toString());
@@ -212,6 +235,9 @@ public abstract class StubCreator
 		return sb.toString();
 	}
 	
+	/**
+	 * Creates a string representation of the given method.
+	 */
 	protected String methodToString(JavaClass jc, Method method, String body) throws Exception
 	{
 		StringBuffer sb = new StringBuffer();
@@ -269,6 +295,9 @@ public abstract class StubCreator
 		return sb.toString();
 	}
 
+	/**
+	 * Ensures that the given class will be created.
+	 */
 	protected void ensureCreated(String className) throws Exception
 	{
 		// convert array types to standard classes
@@ -310,7 +339,7 @@ public abstract class StubCreator
 				if(missingClass.getClassName().equals(parentClassName))
 				{
 					MissingClass innerClass = missingClass.getInnerClass(className);
-					if(innerClass == null) missingClass.addMissingInnerClass(className, libgcjDotJar);
+					if(innerClass == null) missingClass.addMissingInnerClass(className);
 					return;
 				}
 			}
@@ -320,14 +349,14 @@ public abstract class StubCreator
 				if(missingClass.getClassName().equals(parentClassName))
 				{
 					MissingClass innerClass = missingClass.getInnerClass(className);
-					if(innerClass == null) missingClass.addMissingInnerClass(className, libgcjDotJar);
+					if(innerClass == null) missingClass.addMissingInnerClass(className);
 					hiddenMissingClasses.add(missingClass);
 					return;
 				}
 			}
 			
 			MissingClass parentClass = new MissingClass(parentClassName, libgcjDotJar);
-			parentClass.addMissingInnerClass(className, libgcjDotJar);
+			parentClass.addMissingInnerClass(className);
 			hiddenMissingClasses.add(parentClass);
 		}
 	}

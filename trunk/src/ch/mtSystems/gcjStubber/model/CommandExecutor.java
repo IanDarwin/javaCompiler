@@ -27,6 +27,10 @@ import java.util.LinkedList;
 import java.util.List;
 
 
+/**
+ * CommandExecuter executes commands and gives convenient access
+ * to the output (stdout and stderr).
+ */
 public class CommandExecutor
 {
 	private String[] cmd;
@@ -37,13 +41,22 @@ public class CommandExecutor
 	private List<String> errorList = new LinkedList<String>();
 
 
+	/**
+	 * Create a new instance.
+	 * @param cmd The command to execute.
+	 * @param workingDir The working directory. Can be null.
+	 */
 	public CommandExecutor(String[] cmd, File workingDir)
 	{
 		this.cmd = cmd;
 		this.workingDir = workingDir;
 	}
 
-
+	/**
+	 * Create a new instance.
+	 * @param cmd The command to execute.
+	 * @param workingDir The working directory. Can be null.
+	 */
 	public CommandExecutor(String cmd, File workingDir)
 	{
 		this(new String[] { cmd }, workingDir);
@@ -52,6 +65,11 @@ public class CommandExecutor
 
 	// --------------- public methods ---------------
 
+	/**
+	 * Executes the command and blocks until it is finished.
+	 * If an exception occured while reading the output, it is thrown
+	 * (I think this is not possible).
+	 */
 	public void execute() throws Exception
 	{
 		Process p = Runtime.getRuntime().exec(cmd, null, workingDir);
@@ -64,11 +82,19 @@ public class CommandExecutor
 		if(ex != null) throw ex;
 	}
 
+	/**
+	 * Returns the standard output of the executed command.
+	 * @return The standard output of the executed command.
+	 */
 	public String[] getOutput()
 	{
 		return outputList.toArray(new String[0]);
 	}
 
+	/**
+	 * Returns the error output of the executed command.
+	 * @return The error output of the executed command.
+	 */
 	public String[] getError()
 	{
 		return errorList.toArray(new String[0]);

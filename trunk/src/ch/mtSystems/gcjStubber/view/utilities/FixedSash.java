@@ -189,6 +189,23 @@ public class FixedSash implements Listener, MouseListener
 		parent.layout();
 	}
 	
-	public void addControlListener(ControlListener listener) { vListeners.add(listener); }
-	public void removeControlListener(ControlListener listener) { vListeners.remove(listener); }
+	/**
+	 * Add a listener.
+	 * 
+	 * @param listener The listener to add.
+	 */
+	public void addControlListener(ControlListener listener)
+	{
+		vListeners.add(listener);
+	}
+	
+	/**
+	 * Remove a listener.
+	 * 
+	 * @param listener The listener to remove.
+	 */
+	public void removeControlListener(ControlListener listener)
+	{
+		vListeners.remove(listener);
+	}
 }
