@@ -152,8 +152,7 @@ public class MinimalWithInheritanceStubCreator extends StubCreator
 		List<Method> addedMethods = new LinkedList<Method>();
 		
 		// missing methods
-		Set<Method> missingMethods = missingClass.getMissingMethods();
-		for(Method m : missingMethods)
+		for(Method m : missingClass.getMissingMethods())
 		{
 			if(m.getName().equals("<init>")) continue;
 
@@ -168,7 +167,6 @@ public class MinimalWithInheritanceStubCreator extends StubCreator
 		for(Method m : jc.getMethods())
 		{
 			if(m.getName().equals("<init>")) continue; // omit constructor
-			if(missingMethods.contains(m)) continue;   // omit missing method, already added
 			if(!m.isPublic() && !m.isProtected()) continue;   // only handle public and protected methods
 			if(!isImplementedAbstractMethod(jc, m)) continue; // is implemented abstract method?
 
