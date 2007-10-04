@@ -7,8 +7,6 @@ static
 
 To your code with an entry for each class that is not defined. The problem is that the object containing the code is not automatically pulled into the binary. I will add that to the faq and to the manual.
 
-- google advertising
-
 - Was Du auf den c't-Seiten gesehen hast, ist nur die manuelle Anmeldung dort im
 Archiv von meinem Programm. Wovon ich vorher sprach, war eine redaktionelle
 Veröffentlichung. Wenn Du so etwas machen willst erstellst Du am besten 10
@@ -21,8 +19,7 @@ CD an die "PC-Welt" versenden, da das so was wie die Deutsche PC-Bildzeitung ist
 Die c't ist da eher der deutsche PC-Spiegel - Deine Zielgruppe. "Der
 Entwickler" wäre auch ein Magazin für den JNC!
 
-- JNC on Vista: space problems?
-  PATH=...\gcc-122233-win\bin:...\gcc-122233-win\libexec\gcc\i686-pc-mingw32\4.3.0;%PATH% 
+- JNC on Vista: space problems? PATH=path_to\gcc-122233-win\libexec\gcc\i686-pc-mingw32\4.3.0;%PATH% 
 - indirect dispatch broken on target=Linux. Set use_libgcj_bc=no in configure.host.
 - Win32 Threads broken (thread race)
 - Readd gcjh (gjavah?). Needed for CNI...
